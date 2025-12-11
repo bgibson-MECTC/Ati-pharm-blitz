@@ -671,6 +671,17 @@
       </div>
     </header>
 
+    <!-- Group Messages Panel -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">📨</span>
+        <h2 class="section-title">Messages from Groups</h2>
+      </div>
+      <div id="chargeNurseMessages" style="max-height:300px;overflow-y:auto;background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;">
+        <div style="color:#888;text-align:center;padding:20px;">No messages yet</div>
+      </div>
+    </section>
+
     <!-- All Groups Stability Monitor -->
     <section class="section">
       <div class="section-header">
@@ -1040,26 +1051,18 @@
     <!-- TEAM COMMUNICATION -->
     <section class="section">
       <div class="section-header">
-        <span class="section-icon">💬</span>
-        <h2 class="section-title">Team Chat</h2>
+        <span class="section-icon">�</span>
+        <h2 class="section-title">Contact Charge Nurse</h2>
       </div>
 
-      <div id="chatMessages" style="background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;max-height:250px;overflow-y:auto;margin-bottom:15px;font-size:13px;">
-        <div style="color:#888;text-align:center;padding:20px;">No messages yet. Start the conversation!</div>
-      </div>
-
-      <div style="display:flex;gap:10px;">
-        <input type="text" id="chatInput" placeholder="Type your message..." style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;" />
-        <button onclick="sendChatMessage()" class="assign-btn" style="background:#00d4ff;min-width:100px;">Send</button>
-      </div>
-
-      <div style="margin-top:15px;padding:12px;background:rgba(138,43,226,0.08);border-radius:10px;border-left:4px solid #8a2be2;">
-        <p style="margin:0;font-size:12px;color:#ccecff;"><strong>📞 Quick Message to Charge Nurse:</strong></p>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-          <button onclick="quickMessage('Need help with patient stability')" class="assign-btn" style="font-size:11px;padding:6px 12px;background:#8a2be2;">🆘 Help Needed</button>
-          <button onclick="quickMessage('Ready for next phase')" class="assign-btn" style="font-size:11px;padding:6px 12px;background:#00ffb3;">✅ Ready</button>
-          <button onclick="quickMessage('Question about medication')" class="assign-btn" style="font-size:11px;padding:6px 12px;background:#ffb300;">❓ Question</button>
+      <div style="padding:12px;background:rgba(138,43,226,0.08);border-radius:10px;border-left:4px solid #8a2be2;">
+        <p style="margin:0 0 12px 0;font-size:14px;color:#ccecff;"><strong>📞 Send Message to Your Charge Nurse:</strong></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="quickMessage('Need help with patient stability')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#8a2be2;">🆘 Help Needed</button>
+          <button onclick="quickMessage('Ready for next phase')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#00ffb3;">✅ Ready</button>
+          <button onclick="quickMessage('Question about medication')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#ffb300;">❓ Question</button>
         </div>
+        <p style="margin:10px 0 0 0;font-size:12px;color:#888;">Groups 1-3 → Charge Nurse 1 | Groups 4-6 → Charge Nurse 2</p>
       </div>
     </section>
 
@@ -2108,6 +2111,7 @@
 
       // Initialize dashboards
       setupAllGroupsMonitor(role);
+      setupChargeNurseMessages(role); // Add message listener
       if (role !== 'rrt') {
         setupErrorLog(role);
         setupGroupCasesMonitor(role);
@@ -2183,8 +2187,7 @@
         setupJigsawCheckboxes();
       }
       
-      // Setup chat listener
-      setupChatListener();
+      // Chat listener disabled (feature removed)
     }
     
     console.log('selectLeadership and selectGroup functions defined');
@@ -2386,27 +2389,13 @@
       });
     }
 
-    // Team Chat Functions
-    function sendChatMessage() {
-      const input = document.getElementById('chatInput');
-      const message = input?.value?.trim();
-      
-      if (!message || !currentGroupId) return;
-      
-      database.ref('chat/group' + currentGroupId).push({
-        message: message,
-        timestamp: Date.now(),
-        sender: 'Team Member'
-      });
-      
-      input.value = '';
-    }
-    
+    // Quick Message to Charge Nurse
     function quickMessage(msg) {
       if (!currentGroupId) return;
       
       database.ref('messages/toChargeNurse').push({
         from: 'Group ' + currentGroupId,
+        groupNumber: currentGroupId,
         message: msg,
         timestamp: Date.now(),
         read: false
@@ -2415,45 +2404,56 @@
       alert('📨 Message sent to Charge Nurse: "' + msg + '"');
     }
     
-    function setupChatListener() {
-      if (!currentGroupId) return;
+    // Setup message listener for Charge Nurses
+    function setupChargeNurseMessages(role) {
+      const container = document.getElementById('chargeNurseMessages');
+      if (!container) return;
       
-      const chatRef = database.ref('chat/group' + currentGroupId);
-      const container = document.getElementById('chatMessages');
+      // Determine which groups this charge nurse monitors
+      const myGroups = role === 'charge1' ? [1, 2, 3] : [4, 5, 6];
       
-      chatRef.on('child_added', snap => {
+      database.ref('messages/toChargeNurse').on('child_added', snap => {
         const msg = snap.val();
-        const msgDiv = document.createElement('div');
-        const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         
-        msgDiv.style.cssText = 'padding:10px;margin-bottom:8px;background:rgba(0,212,255,0.1);border-radius:8px;border-left:3px solid #00d4ff;';
+        // Only show messages from my groups
+        if (!myGroups.includes(msg.groupNumber)) return;
+        
+        const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const msgDiv = document.createElement('div');
+        
+        msgDiv.style.cssText = 'padding:12px;margin-bottom:10px;background:rgba(138,43,226,0.15);border-radius:8px;border-left:4px solid #8a2be2;';
         msgDiv.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <strong style="color:#00ffb3;font-size:12px;">${msg.sender}</strong>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <strong style="color:#00ffb3;font-size:14px;">${msg.from}</strong>
             <span style="color:#888;font-size:11px;">${time}</span>
           </div>
-          <div style="color:#fff;font-size:13px;">${msg.message}</div>
+          <div style="color:#fff;font-size:14px;margin-bottom:8px;">${msg.message}</div>
+          <button onclick="markMessageRead('${snap.key}')" class="assign-btn" style="font-size:11px;padding:4px 12px;background:rgba(0,212,255,0.3);">✓ Mark as Read</button>
         `;
         
-        container.appendChild(msgDiv);
-        container.scrollTop = container.scrollHeight;
-        
-        // Remove "no messages" placeholder
+        // Insert at top (newest first)
         const placeholder = container.querySelector('[style*="text-align:center"]');
         if (placeholder) placeholder.remove();
+        
+        container.insertBefore(msgDiv, container.firstChild);
       });
     }
     
-    // Chat input - send on Enter key
+    function markMessageRead(messageKey) {
+      database.ref('messages/toChargeNurse/' + messageKey).update({ read: true });
+      event.target.closest('div').style.opacity = '0.5';
+      event.target.remove();
+    }
+    
+    
+    // Remove old chat listener (no longer used)
+    function setupChatListener() {
+      // Disabled - chat feature removed
+    }
+    
+    // Chat input - send on Enter key (disabled)
     document.addEventListener('DOMContentLoaded', () => {
-      const chatInput = document.getElementById('chatInput');
-      if (chatInput) {
-        chatInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            sendChatMessage();
-          }
-        });
-      }
+      // Chat feature removed
     });
 
     function setupRRTListener() {
