@@ -1074,20 +1074,7 @@
     let selectedGroupNumber = null;
     let selectedRole = null;
     
-    console.log('Defining selectLeadership and selectGroup on window object...');
-    
-    // These must be on window for HTML onclick to find them
-    window.selectLeadership = function(role) {
-      console.log('==> selectLeadership clicked! Role:', role);
-      alert('Leadership role clicked: ' + role);
-    };
-    
-    window.selectGroup = function(groupNumber) {
-      console.log('==> selectGroup clicked! Group:', groupNumber);
-      alert('Group clicked: ' + groupNumber);
-    };
-    
-    console.log('Selection functions defined:', typeof window.selectLeadership, typeof window.selectGroup);
+    console.log('Functions will be defined later in script...');
 
     // Map group number -> system name + instructions
     const groupConfig = {
@@ -2789,55 +2776,57 @@
       }
     });
     
-    // DISABLED FOR DEBUGGING - Always show selection screen
-    /*
+    // Handle URL parameters and localStorage
     (function checkExistingGroup() {
+      console.log('checkExistingGroup running...');
       try {
         const urlParams = new URLSearchParams(window.location.search);
         
-        // If ?select=1 parameter OR no parameters at all, clear saved roles and show selection screen
-        if (urlParams.get('select') === '1' || window.location.search === '') {
-          localStorage.removeItem('pharmBlitzGroupId');
-          localStorage.removeItem('pharmBlitzRole');
-          // Show selection screen (do nothing else)
+        // Check if URL has ?role parameter (from select.html)
+        const roleParam = urlParams.get('role');
+        if (roleParam && ['charge1', 'charge2', 'rrt'].includes(roleParam)) {
+          console.log('Found role parameter:', roleParam);
+          window.selectLeadership(roleParam);
           return;
         }
         
-        // Check if URL has ?group parameter (old direct links)
+        // Check if URL has ?group parameter (from select.html)
         const groupParam = urlParams.get('group');
         if (groupParam) {
           const groupNum = parseInt(groupParam, 10);
           if (groupNum >= 1 && groupNum <= 6) {
-            selectGroup(groupNum);
+            console.log('Found group parameter:', groupNum);
+            window.selectGroup(groupNum);
             return;
           }
         }
         
-        // Check for saved leadership role first
+        // No URL params - check localStorage
         const savedRole = localStorage.getItem('pharmBlitzRole');
         if (savedRole && ['charge1', 'charge2', 'rrt'].includes(savedRole)) {
-          selectLeadership(savedRole);
+          console.log('Found saved role in localStorage:', savedRole);
+          window.selectLeadership(savedRole);
           return;
         }
         
-        // Otherwise, auto-load saved group if exists
-        const saved = localStorage.getItem('pharmBlitzGroupId');
-        if (saved) {
-          const groupNum = parseInt(saved, 10);
+        const savedGroup = localStorage.getItem('pharmBlitzGroupId');
+        if (savedGroup) {
+          const groupNum = parseInt(savedGroup, 10);
           if (groupNum >= 1 && groupNum <= 6) {
-            selectGroup(groupNum);
+            console.log('Found saved group in localStorage:', groupNum);
+            window.selectGroup(groupNum);
+            return;
           }
         }
+        
+        // Nothing found - redirect to select.html
+        console.log('No role/group found - redirecting to select.html');
+        window.location.href = 'select.html';
+        
       } catch (e) {
         console.error('Error in checkExistingGroup:', e);
       }
     })();
-    */
-    
-    // Clear localStorage to ensure fresh start
-    localStorage.removeItem('pharmBlitzGroupId');
-    localStorage.removeItem('pharmBlitzRole');
-    console.log('localStorage cleared - selection screen should be visible');
     
     console.log('Script loading completed - all functions should be ready');
   </script>
