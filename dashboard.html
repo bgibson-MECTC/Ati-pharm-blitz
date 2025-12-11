@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATI Pharm Blitz – Live Instructor Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a1128 0%, #1e3a5f 100%);
+      color: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+    }
+
+    h1 {
+      font-size: 32px;
+      background: linear-gradient(90deg, #00d4ff, #00ffb3);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #00ffb3;
+      font-weight: 300;
+    }
+
+    section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    h2 {
+      color: #00ffb3;
+      font-size: 20px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    .stability-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .groupBox {
+      border: 2px solid #00d4ff;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(0, 212, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .groupBox:hover {
+      background: rgba(0, 212, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .groupBox.critical {
+      border-color: #ff006e;
+      background: rgba(255, 0, 110, 0.08);
+    }
+
+    .groupBox.warning {
+      border-color: #ffb300;
+      background: rgba(255, 179, 0, 0.08);
+    }
+
+    .groupBox.stable {
+      border-color: #00ffb3;
+      background: rgba(0, 255, 179, 0.08);
+    }
+
+    .group-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #00d4ff;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stability-score {
+      font-size: 24px;
+      font-weight: 900;
+      font-family: 'Courier New', monospace;
+    }
+
+    .groupBox.critical .stability-score {
+      color: #ff006e;
+    }
+
+    .groupBox.warning .stability-score {
+      color: #ffb300;
+    }
+
+    .groupBox.stable .stability-score {
+      color: #00ffb3;
+    }
+
+    .stability-bar {
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      margin-top: 8px;
+      position: relative;
+    }
+
+    .stability-fill {
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.5s ease;
+      background: linear-gradient(90deg, #00ffb3, #00d4ff);
+    }
+
+    .groupBox.warning .stability-fill {
+      background: linear-gradient(90deg, #ffb300, #ff8c00);
+    }
+
+    .groupBox.critical .stability-fill {
+      background: linear-gradient(90deg, #ff006e, #cc0058);
+    }
+
+    .alerts-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .alerts-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .alerts-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .alerts-container::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.5);
+      border-radius: 10px;
+    }
+
+    .alert-item {
+      border-left: 4px solid #00d4ff;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.2s ease;
+    }
+
+    .alert-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .alert-item.critical {
+      border-left-color: #ff006e;
+      color: #ff99c2;
+    }
+
+    .alert-item.moderate {
+      border-left-color: #ffb300;
+      color: #ffd27f;
+    }
+
+    .alert-item.minor {
+      border-left-color: #00ffb3;
+      color: #ccecff;
+    }
+
+    .alert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .alert-time {
+      font-size: 11px;
+      color: #888;
+    }
+
+    .alert-details {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .alert-meta {
+      font-size: 11px;
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+
+    .huddle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .huddle-card {
+      background: rgba(0, 212, 255, 0.08);
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .huddle-card h3 {
+      color: #00ffb3;
+      margin-bottom: 10px;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .huddle-data {
+      font-size: 12px;
+      color: #ccecff;
+      line-height: 1.6;
+    }
+
+    .huddle-data div {
+      margin-bottom: 6px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .huddle-data div:last-child {
+      border-bottom: none;
+    }
+
+    .huddle-data strong {
+      color: #00d4ff;
+      display: inline-block;
+      min-width: 80px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      font-style: italic;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(0, 212, 255, 0.2);
+      color: #00d4ff;
+      margin-left: 8px;
+    }
+
+    .refresh-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ffb3;
+      margin-right: 8px;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    @media (max-width: 768px) {
+      .stability-grid,
+      .huddle-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .alerts-container {
+        max-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎯 ATI Pharm Blitz – Live Dashboard</h1>
+      <p class="subtitle">
+        <span class="refresh-indicator"></span>
+        Real-time monitoring • Auto-updates via Firebase
+      </p>
+    </header>
+
+    <section>
+      <h2>Patient Stability by Group<span class="badge">Live</span></h2>
+      <div id="stabilityPanel" class="stability-grid">
+        <div class="empty-state">Waiting for student data...</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recent Alerts<span class="badge">Last 25</span></h2>
+      <div id="alertsPanel" class="alerts-container">
+        <div class="empty-state">No alerts yet</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Expert Huddle Submissions<span class="badge">Sync</span></h2>
+      <div id="dashboard" class="huddle-grid">
+        <div class="empty-state">Waiting for group submissions...</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Firebase SDK v10 (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfJ4KBqpbP4tbtikAgMEdbT5P1rb3yhHo",
+      authDomain: "ati-pharm-blitz.firebaseapp.com",
+      databaseURL: "https://ati-pharm-blitz-default-rtdb.firebaseio.com",
+      projectId: "ati-pharm-blitz",
+      storageBucket: "ati-pharm-blitz.firebasestorage.app",
+      messagingSenderId: "236104923394",
+      appId: "1:236104923394:web:201f51f9ba162438b2aa1b"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const stabilityPanel = document.getElementById('stabilityPanel');
+    const alertsPanel = document.getElementById('alertsPanel');
+    const dashboardPanel = document.getElementById('dashboard');
+
+    // System names for display
+    const systemNames = {
+      1: 'Neurological 🧠',
+      2: 'Psychopharmacology 💊',
+      3: 'Pain Management 😣',
+      4: 'Inflammation 🔥',
+      5: 'Endocrine 🩺',
+      6: 'Infection 🦠'
+    };
+
+    // Live stability bars
+    database.ref('groups').on('value', snapshot => {
+      const data = snapshot.val() || {};
+      stabilityPanel.innerHTML = '';
+
+      // Ensure all 6 groups are shown
+      for (let groupId = 1; groupId <= 6; groupId++) {
+        const g = data[groupId] || {};
+        const stability = typeof g.stability === 'number' ? g.stability : 100;
+
+        const box = document.createElement('div');
+        box.className = 'groupBox';
+
+        // Apply status classes
+        if (stability >= 80) {
+          box.classList.add('stable');
+        } else if (stability >= 50) {
+          box.classList.add('warning');
+        } else {
+          box.classList.add('critical');
+        }
+
+        const title = document.createElement('div');
+        title.className = 'group-title';
+        title.innerHTML = `
+          <span>Group ${groupId}</span>
+          <span class="stability-score">${Math.round(stability)}</span>
+        `;
+
+        const systemLabel = document.createElement('div');
+        systemLabel.style.cssText = 'font-size:12px;color:#888;margin-bottom:6px;';
+        systemLabel.textContent = systemNames[groupId] || 'Unknown System';
+
+        const bar = document.createElement('div');
+        bar.className = 'stability-bar';
+
+        const fill = document.createElement('div');
+        fill.className = 'stability-fill';
+        fill.style.width = stability + '%';
+
+        bar.appendChild(fill);
+        box.appendChild(title);
+        box.appendChild(systemLabel);
+        box.appendChild(bar);
+
+        stabilityPanel.appendChild(box);
+      }
+    });
+
+    // Recent alerts feed
+    database.ref('events').limitToLast(25).on('value', snapshot => {
+      const data = snapshot.val() || {};
+      const entries = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
+
+      if (entries.length === 0) {
+        alertsPanel.innerHTML = '<div class="empty-state">No alerts yet</div>';
+        return;
+      }
+
+      alertsPanel.innerHTML = '';
+
+      entries.forEach(ev => {
+        const div = document.createElement('div');
+        div.className = 'alert-item ' + (ev.severity || 'minor');
+
+        const time = new Date(ev.timestamp).toLocaleTimeString();
+        const correctness = ev.isCorrect ? '✅' : '⚠️';
+        const delta = ev.delta || 0;
+        const deltaText = delta > 0 ? `+${delta}` : delta;
+
+        div.innerHTML = `
+          <div class="alert-header">
+            <span>${correctness} Group ${ev.groupId} – ${ev.phase || 'unknown'}</span>
+            <span class="alert-time">${time}</span>
+          </div>
+          <div class="alert-details">${ev.explanation || 'No details provided'}</div>
+          <div class="alert-meta">Severity: ${ev.severity || 'minor'} | Stability: ${deltaText}</div>
+        `;
+
+        alertsPanel.appendChild(div);
+      });
+    });
+
+    // Expert Huddle submissions
+    function setupHuddleDashboard() {
+      for (let groupNum = 1; groupNum <= 6; groupNum++) {
+        const groupRef = database.ref('groups/' + groupNum);
+        
+        const card = document.createElement('div');
+        card.className = 'huddle-card';
+        card.id = `huddle-dash-${groupNum}`;
+        card.innerHTML = `
+          <h3>
+            <span>Group ${groupNum}</span>
+            <span style="font-size:12px;font-weight:normal;color:#888;">${systemNames[groupNum] || ''}</span>
+          </h3>
+          <div class="huddle-data"></div>
+        `;
+        dashboardPanel.appendChild(card);
+
+        groupRef.on('value', (snapshot) => {
+          const data = snapshot.val();
+          const dataEl = card.querySelector('.huddle-data');
+          
+          if (data && (data.safetyRisk || data.priorityLab || data.doNotMix || data.highYieldMed)) {
+            let html = '';
+            if (data.systemName) html += `<div><strong>System:</strong> ${data.systemName}</div>`;
+            if (data.safetyRisk) html += `<div><strong>#1 Risk:</strong> ${data.safetyRisk}</div>`;
+            if (data.priorityLab) html += `<div><strong>Lab:</strong> ${data.priorityLab}</div>`;
+            if (data.doNotMix) html += `<div><strong>Do Not Mix:</strong> ${data.doNotMix}</div>`;
+            if (data.highYieldMed) html += `<div><strong>Med:</strong> ${data.highYieldMed}</div>`;
+            
+            dataEl.innerHTML = html;
+          } else {
+            dataEl.innerHTML = '<em style="color:#888;">No data yet</em>';
+          }
+        });
+      }
+    }
+
+    // Initialize huddle dashboard
+    setupHuddleDashboard();
+
+    // Clear empty state after first load
+    setTimeout(() => {
+      const emptyStates = document.querySelectorAll('.empty-state');
+      emptyStates.forEach(el => {
+        if (el.parentElement.children.length > 1) {
+          el.remove();
+        }
+      });
+    }, 2000);
+  </script>
+</body>
+</html>
