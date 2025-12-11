@@ -2025,6 +2025,13 @@
       currentGroupId = groupNumber;
       selectedGroupNumber = groupNumber;
       
+      // Get config for this group
+      const config = groupConfig[groupNumber];
+      if (!config) {
+        console.error('No config found for group:', groupNumber);
+        return;
+      }
+      
       // Store group in localStorage
       try {
         localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
@@ -2034,6 +2041,12 @@
       // Hide selection screen, show group activity content
       document.getElementById('groupSelectionScreen').classList.add('hidden');
       document.getElementById('groupActivityContent').style.display = 'block';
+
+      // Update UI labels
+      const systemLabel = document.getElementById('systemLabel');
+      const groupLabel = document.getElementById('groupLabel');
+      if (systemLabel) systemLabel.textContent = 'System Focus: ' + config.name;
+      if (groupLabel) groupLabel.textContent = 'Group: ' + groupNumber;
 
       // Update mission instructions
       const instructionList = document.getElementById('instructionList');
