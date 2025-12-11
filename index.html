@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATI Pharm Blitz Review</title>
+
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a1128 0%, #1e3a5f 100%);
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 40px 20px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .main-title {
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00d4ff, #00ffb3, #00d4ff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #00ffb3;
+      font-weight: 300;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Section */
+    .section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 40px;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #00d4ff;
+    }
+
+    .section-icon {
+      font-size: 36px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #00ffb3;
+      margin: 0;
+    }
+
+    /* Flashcards */
+    .flashcard-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .flashcard {
+      background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+      border-radius: 15px;
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .flashcard:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.5);
+    }
+
+    .flashcard.flipped {
+      background: linear-gradient(135deg, #00ffb3 0%, #00cc88 100%);
+    }
+
+    .flashcard-front {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .flashcard-back {
+      display: none;
+      font-size: 22px;
+      font-weight: 700;
+      color: #0a1128;
+    }
+
+    .flashcard.flipped .flashcard-front {
+      display: none;
+    }
+
+    .flashcard.flipped .flashcard-back {
+      display: block;
+    }
+
+    /* Huddle Grid */
+    .huddle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .huddle-box {
+      background: rgba(0, 212, 255, 0.1);
+      border: 2px solid #00d4ff;
+      border-radius: 15px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .huddle-box:hover {
+      background: rgba(0, 212, 255, 0.2);
+      transform: scale(1.02);
+    }
+
+    .huddle-box h3 {
+      color: #00ffb3;
+      font-size: 20px;
+      margin-top: 0;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .huddle-field {
+      margin-bottom: 15px;
+    }
+
+    .huddle-field label {
+      display: block;
+      color: #00d4ff;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .huddle-field input,
+    .huddle-field textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      padding: 10px;
+      color: #ffffff;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .huddle-field textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .huddle-field input:focus,
+    .huddle-field textarea:focus {
+      outline: none;
+      border-color: #00ffb3;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Red Flags */
+    .red-flag-btn {
+      background: #ff006e;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .red-flag-content {
+      display: none;
+      margin-top: 10px;
+      background: rgba(255, 0, 110, 0.2);
+      border-left: 4px solid #ff006e;
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    .red-flag-content.show {
+      display: block;
+    }
+
+    /* Lightning Tiles */
+    .question-tile {
+      background: linear-gradient(135deg, #8338ec 0%, #3a86ff 100%);
+      border-radius: 12px;
+      padding: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .question-tile:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(131, 56, 236, 0.5);
+    }
+
+    .tile-answer {
+      display: none;
+    }
+
+    .question-tile.revealed {
+      background: linear-gradient(135deg, #00ffb3 0%, #00d4ff 100%);
+    }
+
+    .question-tile.revealed .tile-question {
+      display: none;
+    }
+
+    .question-tile.revealed .tile-answer {
+      display: block;
+      font-weight: bold;
+      color: #0a1128;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-wrapper">
+
+    <!-- HEADER -->
+    <header>
+      <h1 class="main-title">ATI Pharm Blitz: 1-Hour High-Yield Review</h1>
+      <p class="subtitle">Interactive NCLEX-Style Pharmacology Simulation</p>
+    </header>
+
+    <!-- WARM UP -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🔥</span>
+        <h2 class="section-title">Warm-Up Activation Round</h2>
+      </div>
+
+      <div class="flashcard-container">
+        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Neurological</div></div>
+        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Psychopharmacology</div></div>
+        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Pain</div></div>
+        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Inflammation</div></div>
+        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Endocrine</div></div>
+        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Infection</div></div>
+      </div>
+    </section>
+
+    <!-- HUDDLE SECTION -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">👥</span>
+        <h2 class="section-title">Expert Huddle</h2>
+      </div>
+
+      <div class="huddle-grid">
+
+        <div class="huddle-box">
+          <h3>Neurological</h3>
+          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text"></div>
+          <div class="huddle-field"><label>#1 Lab</label><input type="text"></div>
+          <div class="huddle-field"><label>Do Not Mix</label><input type="text"></div>
+          <div class="huddle-field"><label>High-Yield Med</label><input type="text"></div>
+          <div class="huddle-field"><label>Scenarios</label><textarea></textarea></div>
+        </div>
+
+        <div class="huddle-box">
+          <h3>Psychopharmacology</h3>
+          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text"></div>
+          <div class="huddle-field"><label>#1 Lab</label><input type="text"></div>
+          <div class="huddle-field"><label>Do Not Mix</label><input type="text"></div>
+          <div class="huddle-field"><label>High-Yield Med</label><input type="text"></div>
+          <div class="huddle-field"><label>Scenarios</label><textarea></textarea></div>
+        </div>
+
+        <div class="huddle-box">
+          <h3>Pain Management</h3>
+          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text"></div>
+          <div class="huddle-field"><label>#1 Lab</label><input type="text"></div>
+          <div class="huddle-field"><label>Do Not Mix</label><input type="text"></div>
+          <div class="huddle-field"><label>High-Yield Med</label><input type="text"></div>
+          <div class="huddle-field"><label>Scenarios</label><textarea></textarea></div>
+        </div>
+
+        <div class="huddle-box">
+          <h3>Inflammation</h3>
+          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text"></div>
+          <div class="huddle-field"><label>#1 Lab</label><input type="text"></div>
+          <div class="huddle-field"><label>Do Not Mix</label><input type="text"></div>
+          <div class="huddle-field"><label>High-Yield Med</label><input type="text"></div>
+          <div class="huddle-field"><label>Scenarios</label><textarea></textarea></div>
+        </div>
+
+        <div class="huddle-box">
+          <h3>Endocrine</h3>
+          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text"></div>
+          <div class="huddle-field"><label>#1 Lab</label><input type="text"></div>
+          <div class="huddle-field"><label>Do Not Mix</label><input type="text"></div>
+          <div class="huddle-field"><label>High-Yield Med</label><input type="text"></div>
+          <div class="huddle-field"><label>Scenarios</label><textarea></textarea></div>
+        </div>
+
+        <div class="huddle-box">
+          <h3>Infection</h3>
+          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text"></div>
+          <div class="huddle-field"><label>#1 Lab</label><input type="text"></div>
+          <div class="huddle-field"><label>Do Not Mix</label><input type="text"></div>
+          <div class="huddle-field"><label>High-Yield Med</label><input type="text"></div>
+          <div class="huddle-field"><label>Scenarios</label><textarea></textarea></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- LIGHTNING ROUND -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">⚡</span>
+        <h2 class="section-title">Lightning Round</h2>
+      </div>
+
+      <div class="question-tiles">
+
+        <div class="question-tile">
+          <div class="tile-question">Name a photosensitivity medication.</div>
+          <div class="tile-answer">Tetracycline</div>
+        </div>
+
+        <div class="question-tile">
+          <div class="tile-question">What is the antidote for opioids?</div>
+          <div class="tile-answer">Naloxone</div>
+        </div>
+
+        <div class="question-tile">
+          <div class="tile-question">Which lab must be monitored for Lithium?</div>
+          <div class="tile-answer">Lithium level (0.6-1.2)</div>
+        </div>
+
+        <div class="question-tile">
+          <div class="tile-question">What drug class risks tendon rupture?</div>
+          <div class="tile-answer">Fluoroquinolones</div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- INTERACTIVITY JS -->
+  <script>
+    // Flashcards flip
+    document.querySelectorAll('.flashcard').forEach(card => {
+      card.addEventListener('click', () => card.classList.toggle('flipped'));
+    });
+
+    // Lightning reveal
+    document.querySelectorAll('.question-tile').forEach(tile => {
+      tile.addEventListener('click', () => tile.classList.toggle('revealed'));
+    });
+
+    // Red flag reveal
+    document.querySelectorAll('.red-flag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const content = btn.nextElementSibling;
+        content.classList.toggle('show');
+      });
+    });
+  </script>
+</body>
+</html>
