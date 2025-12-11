@@ -349,6 +349,30 @@
         </div>
       </div>
     </section>
+
+    <!-- JIGSAW LEARNING TRACKER -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🔄</span>
+        <h2 class="section-title">Jigsaw Learning – Track Your Progress</h2>
+      </div>
+
+      <p style="color:#ccecff;font-size:14px;margin-bottom:15px;">
+        As you rotate through each system station, check off what you've learned. 
+        When you complete a system's teaching, click the checkbox below to mark it complete.
+      </p>
+
+      <div id="jigsawCheckboxes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:15px;">
+        <!-- Filled by JS -->
+      </div>
+
+      <div style="margin-top:15px;padding:12px;background:rgba(0,212,255,0.08);border-radius:10px;border-left:4px solid #00d4ff;">
+        <p style="margin:0;font-size:13px;color:#ccecff;line-height:1.5;">
+          <strong>📝 Pro Tip:</strong> Take notes on each system's #1 safety risk, critical lab, and do-not-mix rule. 
+          You'll use this knowledge in the Lightning Round!
+        </p>
+      </div>
+    </section>
   </div>
 
   <!-- Firebase SDK -->
@@ -754,6 +778,108 @@
     const fgBtn = document.getElementById('fgSubmit');
     if (fgBtn) {
       fgBtn.addEventListener('click', submitFlashcardGuess);
+    }
+
+    // -----------------------------
+    // JIGSAW LEARNING CHECKBOXES
+    // -----------------------------
+
+    const systemNames = {
+      1: 'Neurological 🧠',
+      2: 'Psychopharmacology 💊',
+      3: 'Pain Management 😣',
+      4: 'Inflammation 🔥',
+      5: 'Endocrine 🩺',
+      6: 'Infection 🦠'
+    };
+
+    function setupJigsawCheckboxes() {
+      const container = document.getElementById('jigsawCheckboxes');
+      if (!container || !currentGroupId) return;
+
+      const jigsawRef = database.ref('jigsaw/group' + currentGroupId);
+
+      // Load existing progress
+      jigsawRef.once('value', (snapshot) => {
+        const data = snapshot.val() || {};
+
+        for (let sysNum = 1; sysNum <= 6; sysNum++) {
+          const systemKey = 'system' + sysNum;
+          const isCompleted = data[systemKey] === true;
+
+          const box = document.createElement('div');
+          box.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;border:1px solid rgba(0,212,255,0.3);display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s ease;';
+          
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = 'jigsaw-sys-' + sysNum;
+          checkbox.checked = isCompleted;
+          checkbox.style.cssText = 'width:18px;height:18px;cursor:pointer;';
+
+          const label = document.createElement('label');
+          label.htmlFor = 'jigsaw-sys-' + sysNum;
+          label.textContent = systemNames[sysNum];
+          label.style.cssText = 'flex:1;cursor:pointer;font-size:14px;color:#ccecff;';
+
+          box.appendChild(checkbox);
+          box.appendChild(label);
+          container.appendChild(box);
+
+          // Save to Firebase when checked/unchecked
+          checkbox.addEventListener('change', () => {
+            jigsawRef.update({
+              [systemKey]: checkbox.checked
+            });
+
+            // Optional: log a decision event
+            if (checkbox.checked) {
+              recordDecision({
+                phase: 'jigsaw',
+                itemId: systemKey,
+                isCorrect: true,
+                severity: 'minor',
+                explanation: `Group ${currentGroupId} completed learning ${systemNames[sysNum]}`
+              });
+            }
+          });
+
+          // Visual feedback on hover
+          box.addEventListener('mouseenter', () => {
+            box.style.background = 'rgba(0,212,255,0.1)';
+          });
+          box.addEventListener('mouseleave', () => {
+            box.style.background = 'rgba(255,255,255,0.05)';
+          });
+        }
+      });
+
+      // Listen for changes from instructor or other devices
+      jigsawRef.on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        for (let sysNum = 1; sysNum <= 6; sysNum++) {
+          const checkbox = document.getElementById('jigsaw-sys-' + sysNum);
+          if (checkbox) {
+            checkbox.checked = data['system' + sysNum] === true;
+          }
+        }
+      });
+    }
+
+    // Initialize jigsaw when group ID is set
+    const saveGroupBtn = document.getElementById('saveGroupIdBtn');
+    if (saveGroupBtn) {
+      saveGroupBtn.addEventListener('click', () => {
+        setTimeout(() => {
+          if (currentGroupId) {
+            setupJigsawCheckboxes();
+          }
+        }, 500);
+      });
+    }
+
+    // Also initialize on page load if group ID already exists
+    if (currentGroupId) {
+      setupJigsawCheckboxes();
     }
   </script>
 </body>

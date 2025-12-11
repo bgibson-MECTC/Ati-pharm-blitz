@@ -1069,6 +1069,27 @@ Student 3
       </div>
     </section>
 
+    <!-- JIGSAW TEACHING ROUNDS -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🔄</span>
+        <h2 class="section-title">Jigsaw Teaching Rounds</h2>
+      </div>
+
+      <p style="color:#ccecff;font-size:14px;margin-bottom:15px;">
+        <strong>Objective:</strong> Each group teaches the other 5 systems their Top 3 priorities using the Expert Huddle framework.
+        Track which systems each group has completed below.
+      </p>
+
+      <div class="teaching-notes" style="margin-bottom:15px;">
+        <p><strong>💡 How to Run Jigsaw:</strong> Send one "expert" from each group to rotate through all 6 stations. At each station, the home group teaches their system's #1 safety risk, critical lab, and do-not-mix rule. Visitors take notes and ask questions. Rotate every 3-5 minutes until all groups have learned all 6 systems.</p>
+      </div>
+
+      <div id="jigsawTracker" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
     <!-- LIGHTNING ROUND -->
     <section class="section">
       <div class="section-header">
@@ -1812,6 +1833,54 @@ Student 3
 
     // Initialize dashboard
     setupHuddleDashboard();
+
+    // -----------------------------
+    // JIGSAW TRACKER
+    // -----------------------------
+
+    function setupJigsawTracker() {
+      const tracker = document.getElementById('jigsawTracker');
+      if (!tracker) return;
+
+      const systemNames = [
+        'Neurological 🧠',
+        'Psychopharmacology 💊',
+        'Pain Management 😣',
+        'Inflammation 🔥',
+        'Endocrine 🩺',
+        'Infection 🦠'
+      ];
+
+      for (let groupNum = 1; groupNum <= 6; groupNum++) {
+        const card = document.createElement('div');
+        card.style.cssText = 'background:rgba(255,255,255,0.04);border-radius:12px;padding:15px;border:1px solid rgba(0,212,255,0.3);';
+        
+        card.innerHTML = `
+          <h4 style="color:#00ffb3;margin:0 0 10px;font-size:15px;">Group ${groupNum}</h4>
+          <div id="jigsaw-checklist-${groupNum}" style="font-size:13px;"></div>
+        `;
+        tracker.appendChild(card);
+
+        // Listen to jigsaw progress
+        database.ref('jigsaw/group' + groupNum).on('value', (snapshot) => {
+          const data = snapshot.val() || {};
+          const checklist = document.getElementById(`jigsaw-checklist-${groupNum}`);
+          
+          let html = '';
+          for (let sysNum = 1; sysNum <= 6; sysNum++) {
+            const completed = data['system' + sysNum] === true;
+            const icon = completed ? '✅' : '⬜';
+            const style = completed ? 'color:#00ffb3;' : 'color:#888;opacity:0.6;';
+            html += `<div style="${style}margin-bottom:4px;">${icon} ${systemNames[sysNum - 1]}</div>`;
+          }
+          
+          checklist.innerHTML = html;
+        });
+      }
+    }
+
+    // Initialize jigsaw tracker
+    setupJigsawTracker();
   </script>
 </body>
 </html>
