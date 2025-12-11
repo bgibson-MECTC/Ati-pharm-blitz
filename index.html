@@ -86,6 +86,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
     .section-header {
       display: flex;
       align-items: center;
@@ -127,6 +132,20 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+    }
+
+    .flashcard.locked {
+      cursor: not-allowed;
+      opacity: 0.7;
+      background: linear-gradient(135deg, #555 0%, #333 100%);
+    }
+
+    .flashcard.locked::after {
+      content: '🔒';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
     }
 
     .flashcard:hover {
@@ -898,12 +917,89 @@ Student 3
       </div>
 
       <div class="flashcard-container">
-        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Neurological</div></div>
-        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Psychopharmacology</div></div>
-        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Pain</div></div>
-        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Inflammation</div></div>
-        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Endocrine</div></div>
-        <div class="flashcard"><div class="flashcard-front">Which System Am I?</div><div class="flashcard-back">Infection</div></div>
+        <!-- Card 1: Psychopharmacology -->
+        <div class="flashcard" data-card-id="card1" data-system="psychopharmacology">
+          <div class="flashcard-front">
+            <strong>Clinical Case:</strong> A patient on Haloperidol is showing muscle rigidity and tremors. What serious adverse effect requires immediate intervention? <em>(Psycho or Neuro?)</em>
+          </div>
+          <div class="flashcard-back">
+            <strong>System:</strong> Psychopharmacology<br>
+            <strong>Answer:</strong> Extrapyramidal symptoms (EPS) - requires immediate benztropine or dose adjustment<br>
+            <strong>Priority:</strong> Watch for tardive dyskinesia (irreversible)<br>
+            <strong>Safety Tip:</strong> Avoid combining with anticholinergics unless treating EPS<br>
+            <strong>High-Yield Med:</strong> Fluoxetine - risk of serotonin syndrome with MAOIs
+          </div>
+        </div>
+
+        <!-- Card 2: Neurological -->
+        <div class="flashcard" data-card-id="card2" data-system="neurological">
+          <div class="flashcard-front">
+            <strong>Clinical Case:</strong> A patient on Levodopa/Carbidopa experiences sudden "on-off" phenomenon. What lab value is critical to monitor? <em>(Neuro or Endocrine?)</em>
+          </div>
+          <div class="flashcard-back">
+            <strong>System:</strong> Neurological<br>
+            <strong>Answer:</strong> Vitamin B6 (pyridoxine) levels - can decrease Levodopa effectiveness<br>
+            <strong>Priority:</strong> Monitor for dyskinesias and orthostatic hypotension<br>
+            <strong>Safety Tip:</strong> Avoid high-protein meals (competes with absorption)<br>
+            <strong>High-Yield Med:</strong> Phenobarbital - monitor therapeutic levels (10-40 mcg/mL)
+          </div>
+        </div>
+
+        <!-- Card 3: Pain -->
+        <div class="flashcard" data-card-id="card3" data-system="pain">
+          <div class="flashcard-front">
+            <strong>Clinical Case:</strong> A post-op patient on IV Fentanyl has a respiratory rate of 8. What is your FIRST action? <em>(Pain or Neuro?)</em>
+          </div>
+          <div class="flashcard-back">
+            <strong>System:</strong> Pain<br>
+            <strong>Answer:</strong> Administer Naloxone (Narcan) immediately - opioid reversal agent<br>
+            <strong>Priority:</strong> Monitor respiratory rate &lt;12 = critical<br>
+            <strong>Do NOT Mix:</strong> Fentanyl + benzodiazepines (respiratory depression)<br>
+            <strong>High-Yield Med:</strong> Butorphanol - mixed agonist-antagonist, can precipitate withdrawal
+          </div>
+        </div>
+
+        <!-- Card 4: Endocrine -->
+        <div class="flashcard" data-card-id="card4" data-system="endocrine">
+          <div class="flashcard-front">
+            <strong>Clinical Case:</strong> A patient on PTU (Propylthiouracil) develops a sore throat and fever. What life-threatening complication must you suspect? <em>(Endocrine or Infection?)</em>
+          </div>
+          <div class="flashcard-back">
+            <strong>System:</strong> Endocrine<br>
+            <strong>Answer:</strong> Agranulocytosis - obtain STAT CBC with differential<br>
+            <strong>Priority:</strong> Monitor WBC &lt;3,000 = hold medication<br>
+            <strong>Safety Tip:</strong> Teach patient to report signs of infection immediately<br>
+            <strong>High-Yield Med:</strong> Somatropin - monitor blood glucose (causes hyperglycemia)
+          </div>
+        </div>
+
+        <!-- Card 5: Infection -->
+        <div class="flashcard" data-card-id="card5" data-system="infection">
+          <div class="flashcard-front">
+            <strong>Clinical Case:</strong> A patient on Erythromycin is also taking Warfarin. What dangerous interaction must you monitor? <em>(Infection or Inflammation?)</em>
+          </div>
+          <div class="flashcard-back">
+            <strong>System:</strong> Infection<br>
+            <strong>Answer:</strong> Increased bleeding risk - Erythromycin inhibits Warfarin metabolism (elevated INR)<br>
+            <strong>Priority:</strong> Monitor INR closely, target 2-3 for most indications<br>
+            <strong>Do NOT Mix:</strong> Rifampin + oral contraceptives (decreases effectiveness)<br>
+            <strong>High-Yield Med:</strong> Amphotericin B - monitor potassium (causes severe hypokalemia)
+          </div>
+        </div>
+
+        <!-- Card 6: Inflammation -->
+        <div class="flashcard" data-card-id="card6" data-system="inflammation">
+          <div class="flashcard-front">
+            <strong>Clinical Case:</strong> A patient on Belimumab (lupus treatment) is scheduled for a live vaccine. What is your nursing action? <em>(Inflammation or Infection?)</em>
+          </div>
+          <div class="flashcard-back">
+            <strong>System:</strong> Inflammation<br>
+            <strong>Answer:</strong> HOLD vaccine - immunosuppressed patients cannot receive live vaccines<br>
+            <strong>Priority:</strong> Screen for infections before each dose<br>
+            <strong>Safety Tip:</strong> Avoid NSAIDs with immunosuppressants (GI bleeding risk)<br>
+            <strong>High-Yield Meds:</strong> Allopurinol (monitor uric acid), Hydrocortisone (taper slowly - adrenal crisis)
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1098,10 +1194,44 @@ Student 3
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Flashcards flip
-    document.querySelectorAll('.flashcard').forEach(card => {
-      card.addEventListener('click', () => card.classList.toggle('flipped'));
-    });
+    // Flashcards - Firebase-driven flip (students unlock via correct guesses)
+    function setupFlashcardSync() {
+      const flashcards = document.querySelectorAll('.flashcard[data-card-id]');
+      
+      flashcards.forEach(card => {
+        const cardId = card.dataset.cardId;
+        if (!cardId) return;
+        
+        // Initially lock all cards
+        card.classList.add('locked');
+        
+        // Listen to Firebase for flip state
+        database.ref('flashcards/' + cardId).on('value', (snapshot) => {
+          const data = snapshot.val();
+          if (data && data.flipped) {
+            // Unlock and flip the card
+            card.classList.remove('locked');
+            card.classList.add('flipped');
+            
+            // Add visual feedback
+            card.style.animation = 'pulse 0.5s ease';
+            setTimeout(() => {
+              card.style.animation = '';
+            }, 500);
+          }
+        });
+        
+        // Allow manual toggle only if unlocked
+        card.addEventListener('click', () => {
+          if (!card.classList.contains('locked')) {
+            card.classList.toggle('flipped');
+          }
+        });
+      });
+    }
+    
+    // Initialize flashcard sync
+    setupFlashcardSync();
 
     // Lightning reveal
     document.querySelectorAll('.question-tile').forEach(tile => {

@@ -676,12 +676,12 @@
 
     // Map each card to the correct system
     const flashcardKey = {
-      card1: 'Neurological',
-      card2: 'Psychopharmacology',
-      card3: 'Pain',
-      card4: 'Inflammation',
-      card5: 'Endocrine',
-      card6: 'Infection'
+      card1: 'Psychopharmacology',  // Haloperidol/Fluoxetine - EPS, serotonin syndrome
+      card2: 'Neurological',        // Levodopa/Phenobarbital - on-off phenomenon
+      card3: 'Pain',                // Fentanyl/Butorphanol - respiratory depression
+      card4: 'Endocrine',           // PTU/Somatropin - agranulocytosis
+      card5: 'Infection',           // Erythromycin/Rifampin/Amphotericin B - drug interactions
+      card6: 'Inflammation'         // Belimumab/Allopurinol/Hydrocortisone - live vaccines
     };
 
     function submitFlashcardGuess() {
@@ -716,7 +716,15 @@
 
       if (isCorrect) {
         statusEl.style.color = '#00ffb3';
-        statusEl.textContent = '✓ Correct – nice call.';
+        statusEl.textContent = '✓ Correct – nice call. Card will now flip on the instructor view!';
+        
+        // Mark card as flipped in Firebase so instructor view auto-flips it
+        database.ref('flashcards/' + cardId).set({
+          groupId: currentGroupId,
+          flipped: true,
+          timestamp: Date.now()
+        });
+        
         recordDecision({
           phase: 'flashcard',
           itemId: cardId,
