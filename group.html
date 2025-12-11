@@ -2037,8 +2037,7 @@
     // -----------------------------
     // GROUP & LEADERSHIP SELECTION (Define immediately for onclick handlers)
     // -----------------------------
-    let selectedGroupNumber = null;
-    let selectedRole = null;
+    // selectedGroupNumber and selectedRole already declared at top of script
 
     // Define functions IMMEDIATELY on window object
     window.selectLeadership = function(role) {
@@ -2684,7 +2683,6 @@
       if (overlay) {
         overlay.remove();
       }
-    }
     }
 
     function approveAnswer(groupId) {
