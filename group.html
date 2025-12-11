@@ -559,6 +559,17 @@
     <small>Script initializing</small>
   </div>
   
+  <script>
+    // IMMEDIATE TEST - Update banner as soon as possible
+    (function() {
+      const banner = document.getElementById('debugBanner');
+      if (banner) {
+        banner.innerHTML = '<span class="status-warn">⏳ HTML loaded | Waiting for Firebase SDK...</span>';
+        console.log('Banner test: HTML and inline script working');
+      }
+    })();
+  </script>
+  
   <!-- GROUP SELECTION LANDING -->
   <div class="group-selection-screen" id="groupSelectionScreen">
     <h1 class="selection-title">Select Your Role</h1>
