@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Role Selection - Pharm Blitz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #0a1128 0%, #1e3a5f 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      font-size: 42px;
+      margin-bottom: 20px;
+      color: #00ffb3;
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+      margin: 40px auto;
+    }
+    .btn {
+      padding: 30px 20px;
+      font-size: 18px;
+      background: linear-gradient(135deg, #00d4ff, #00b3cc);
+      border: 2px solid #00ffb3;
+      border-radius: 15px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,212,255,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Select Your Role</h1>
+    <p>Choose a student group or leadership role</p>
+    
+    <div class="button-grid">
+      <button class="btn" onclick="goToRole('charge1')">Charge Nurse 1</button>
+      <button class="btn" onclick="goToRole('charge2')">Charge Nurse 2</button>
+      <button class="btn" onclick="goToRole('rrt')">RRT Nurse</button>
+      <button class="btn" onclick="goToGroup(1)">Group 1 - Neuro</button>
+      <button class="btn" onclick="goToGroup(2)">Group 2 - Psych</button>
+      <button class="btn" onclick="goToGroup(3)">Group 3 - Pain</button>
+      <button class="btn" onclick="goToGroup(4)">Group 4 - Inflammation</button>
+      <button class="btn" onclick="goToGroup(5)">Group 5 - Endocrine</button>
+      <button class="btn" onclick="goToGroup(6)">Group 6 - Infection</button>
+    </div>
+  </div>
+  
+  <script>
+    function goToRole(role) {
+      localStorage.setItem('pharmBlitzRole', role);
+      window.location.href = 'group.html?role=' + role;
+    }
+    
+    function goToGroup(groupNum) {
+      localStorage.setItem('pharmBlitzGroupId', groupNum);
+      window.location.href = 'group.html?group=' + groupNum;
+    }
+  </script>
+</body>
+</html>
