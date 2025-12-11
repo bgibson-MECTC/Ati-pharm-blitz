@@ -402,6 +402,76 @@
     .group-activity-content.active {
       display: block;
     }
+
+    /* Role Selection Screen */
+    .role-selection-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .role-selection-screen.active {
+      display: flex;
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .role-option {
+      background: linear-gradient(135deg, rgba(255,179,0,0.1), rgba(255,107,0,0.05));
+      border: 2px solid rgba(255,179,0,0.3);
+      border-radius: 16px;
+      padding: 30px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .role-option:hover {
+      transform: translateY(-8px);
+      border-color: #ffb300;
+      box-shadow: 0 15px 35px rgba(255,179,0,0.3);
+      background: linear-gradient(135deg, rgba(255,179,0,0.15), rgba(255,107,0,0.1));
+    }
+
+    .role-option.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .role-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffb300;
+      margin-bottom: 8px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(0,212,255,0.2);
+      color: #00d4ff;
+      margin-top: 10px;
+    }
+
+    .role-description {
+      font-size: 13px;
+      color: #b8e0ff;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -445,6 +515,35 @@
         <div class="group-icon">🦠</div>
         <div class="group-number">6</div>
         <div class="group-system">Infection</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLE SELECTION SCREEN -->
+  <div class="role-selection-screen" id="roleSelectionScreen">
+    <h1 class="selection-title">Select Your Role</h1>
+    <p class="selection-subtitle" id="roleSubtitle">Choose your leadership role for this activity</p>
+    
+    <div class="role-grid">
+      <div class="role-option" onclick="selectRole('charge1')" id="charge1Option">
+        <div class="role-icon" style="font-size: 48px;">👨‍⚕️</div>
+        <div class="role-name">Charge Nurse</div>
+        <div class="role-badge">Role 1 of 2</div>
+        <div class="role-description">Lead delegation and prioritization decisions</div>
+      </div>
+      
+      <div class="role-option" onclick="selectRole('charge2')" id="charge2Option">
+        <div class="role-icon" style="font-size: 48px;">👩‍⚕️</div>
+        <div class="role-name">Charge Nurse</div>
+        <div class="role-badge">Role 2 of 2</div>
+        <div class="role-description">Lead delegation and prioritization decisions</div>
+      </div>
+      
+      <div class="role-option" onclick="selectRole('rrt')" id="rrtOption">
+        <div class="role-icon" style="font-size: 48px;">🚨</div>
+        <div class="role-name">Rapid Response RN</div>
+        <div class="role-badge">Critical Care</div>
+        <div class="role-description">Respond to patient emergencies and instability</div>
       </div>
     </div>
   </div>
@@ -1520,26 +1619,82 @@
     }
 
     // -----------------------------
-    // GROUP SELECTION HANDLER
+    // GROUP & ROLE SELECTION HANDLERS
     // -----------------------------
+    let selectedGroupNumber = null;
+    let selectedRole = null;
+
     function selectGroup(groupNumber) {
-      currentGroupId = groupNumber;
+      selectedGroupNumber = groupNumber;
       
-      // Store in localStorage
+      // Store group in localStorage
       try {
-        localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
+        localStorage.setItem('pharmBlitzGroupId', String(selectedGroupNumber));
       } catch (e) {}
 
-      // Hide selection screen, show activity content
+      // Hide group selection, show role selection
       document.getElementById('groupSelectionScreen').classList.add('hidden');
+      document.getElementById('roleSelectionScreen').classList.add('active');
+
+      // Update role screen subtitle with group info
+      const config = groupConfig[groupNumber];
+      document.getElementById('roleSubtitle').textContent = 
+        'Group ' + groupNumber + ': ' + config.name + ' – Choose your leadership role';
+
+      // Check which roles are already taken in Firebase
+      checkAvailableRoles(groupNumber);
+    }
+
+    function checkAvailableRoles(groupNumber) {
+      const rolesRef = database.ref('groups/' + groupNumber + '/roles');
+      rolesRef.once('value').then(snapshot => {
+        const roles = snapshot.val() || {};
+        
+        // Disable role options that are already taken
+        if (roles.charge1) {
+          document.getElementById('charge1Option').classList.add('disabled');
+        }
+        if (roles.charge2) {
+          document.getElementById('charge2Option').classList.add('disabled');
+        }
+        if (roles.rrt) {
+          document.getElementById('rrtOption').classList.add('disabled');
+        }
+      });
+    }
+
+    function selectRole(role) {
+      selectedRole = role;
+      
+      // Store role in localStorage
+      try {
+        localStorage.setItem('pharmBlitzRole', role);
+      } catch (e) {}
+
+      // Claim this role in Firebase
+      const rolesRef = database.ref('groups/' + selectedGroupNumber + '/roles/' + role);
+      rolesRef.set({
+        claimed: true,
+        timestamp: Date.now()
+      });
+
+      // Now show the activity content
+      currentGroupId = selectedGroupNumber;
+      document.getElementById('roleSelectionScreen').classList.remove('active');
       document.getElementById('groupActivityContent').classList.add('active');
 
       // Get group configuration
-      const config = groupConfig[groupNumber];
+      const config = groupConfig[selectedGroupNumber];
 
-      // Update header labels
+      // Update header labels with role
+      const roleNames = {
+        charge1: 'Charge Nurse 1',
+        charge2: 'Charge Nurse 2',
+        rrt: 'Rapid Response RN'
+      };
+      
       document.getElementById('systemLabel').textContent = 'Group System: ' + config.name;
-      document.getElementById('groupLabel').textContent = config.label;
+      document.getElementById('groupLabel').textContent = config.label + ' – ' + roleNames[role];
 
       // Update mission instructions
       const instructionList = document.getElementById('instructionList');
