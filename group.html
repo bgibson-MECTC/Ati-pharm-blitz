@@ -558,7 +558,7 @@
       </p>
 
       <div id="jigsawCheckboxes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:15px;">
-        <!-- Filled by JS -->
+        <p style="color:#ffb300;font-size:13px;margin:0;">⚠️ Set your Group # above first to see the tracking checkboxes.</p>
       </div>
 
       <div style="margin-top:15px;padding:12px;background:rgba(0,212,255,0.08);border-radius:10px;border-left:4px solid #00d4ff;">
@@ -1154,6 +1154,13 @@
     if (currentGroupId) {
       setupJigsawCheckboxes();
     }
+
+    // Try again after a short delay in case group ID loads from localStorage
+    setTimeout(() => {
+      if (currentGroupId && document.getElementById('jigsawCheckboxes').children.length <= 1) {
+        setupJigsawCheckboxes();
+      }
+    }, 1000);
 
     // -----------------------------
     // JIGSAW SPEED ROUND – CASE ASSIGNMENT
