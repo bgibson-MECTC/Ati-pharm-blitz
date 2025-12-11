@@ -188,6 +188,45 @@
         font-size: 19px;
       }
     }
+
+    /* Flashcard Guess */
+    .flashguess-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .fg-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #00d4ff;
+      margin-bottom: 5px;
+    }
+
+    .fg-input {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      border: 1px solid rgba(0,212,255,0.4);
+      color: #ffffff;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .fg-input:focus {
+      outline: none;
+      border-color: #00ffb3;
+      background: rgba(255,255,255,0.12);
+    }
+
+    @media (max-width: 600px) {
+      .flashguess-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -208,6 +247,63 @@
       <ul class="instructions-list" id="instructionList">
         <!-- Filled dynamically based on system -->
       </ul>
+    </section>
+
+    <!-- GROUP IDENTIFIER -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🏷️</span>
+        <h2 class="section-title">Group Identity</h2>
+      </div>
+      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">
+        One device per table: enter your Group # exactly as assigned (1–6). The site will track your patient's stability based on your decisions.
+      </p>
+      <input id="groupIdInput" type="number" min="1" max="6"
+             placeholder="Enter your Group #"
+             style="background:rgba(255,255,255,0.08);border-radius:8px;border:1px solid rgba(0,212,255,0.4);color:#ffffff;padding:8px 10px;font-size:14px;">
+      <button id="saveGroupIdBtn" class="assign-btn" style="margin-left:8px;">Set Group</button>
+      <p id="groupIdStatus" class="assign-error"></p>
+    </section>
+
+    <!-- FLASHCARD GUESS SUBMISSION -->
+    <section class="section" id="flashcardGuessSection">
+      <div class="section-header">
+        <span class="section-icon">🧠</span>
+        <h2 class="section-title">Flashcard Guess – Before You Flip</h2>
+      </div>
+      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">
+        Before you flip a flashcard, submit your group's best guess for which system it belongs to.
+        This affects your patient's stability later in the lab.
+      </p>
+
+      <div class="flashguess-grid">
+        <div>
+          <label class="fg-label">Card ID</label>
+          <select id="fgCard" class="fg-input">
+            <option value="">Choose card…</option>
+            <option value="card1">Card 1</option>
+            <option value="card2">Card 2</option>
+            <option value="card3">Card 3</option>
+            <option value="card4">Card 4</option>
+            <option value="card5">Card 5</option>
+            <option value="card6">Card 6</option>
+          </select>
+        </div>
+        <div>
+          <label class="fg-label">System Guess</label>
+          <select id="fgSystem" class="fg-input">
+            <option value="">Select system…</option>
+            <option value="Neurological">Neurological</option>
+            <option value="Psychopharmacology">Psychopharmacology</option>
+            <option value="Pain">Pain</option>
+            <option value="Inflammation">Inflammation</option>
+            <option value="Endocrine">Endocrine</option>
+            <option value="Infection">Infection</option>
+          </select>
+        </div>
+      </div>
+      <button id="fgSubmit" class="assign-btn" style="margin-top:12px;">Submit Guess</button>
+      <p id="fgStatus" class="assign-error"></p>
     </section>
 
     <!-- Expert Huddle Box (single system) -->
@@ -454,6 +550,203 @@
     }
 
     document.addEventListener('DOMContentLoaded', initGroupView);
+
+    // -----------------------------
+    // GROUP ID HANDLING
+    // -----------------------------
+
+    let currentGroupId = null;
+
+    function saveGroupId() {
+      const input = document.getElementById('groupIdInput');
+      const status = document.getElementById('groupIdStatus');
+      const value = parseInt(input.value, 10);
+
+      if (!value || value < 1 || value > 6) {
+        status.style.color = '#ff99c2';
+        status.textContent = 'Enter a valid Group # between 1 and 6.';
+        return;
+      }
+
+      currentGroupId = value;
+      status.style.color = '#00ffb3';
+      status.textContent = 'Group set to #' + currentGroupId;
+
+      // store locally so they don't retype
+      try {
+        localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
+      } catch (e) {}
+
+      // initialize stability in Firebase if not present
+      const groupRef = database.ref('groups/' + currentGroupId);
+      groupRef.child('stability').once('value').then(snap => {
+        if (snap.val() == null) {
+          groupRef.update({ stability: 100 });
+        }
+      });
+    }
+
+    const saveGroupBtn = document.getElementById('saveGroupIdBtn');
+    if (saveGroupBtn) {
+      saveGroupBtn.addEventListener('click', saveGroupId);
+    }
+
+    // Load saved groupId on page load
+    (function loadSavedGroupId() {
+      try {
+        const saved = localStorage.getItem('pharmBlitzGroupId');
+        if (saved) {
+          currentGroupId = parseInt(saved, 10);
+          const input = document.getElementById('groupIdInput');
+          const status = document.getElementById('groupIdStatus');
+          if (input) input.value = currentGroupId;
+          if (status) {
+            status.style.color = '#00ffb3';
+            status.textContent = 'Group set to #' + currentGroupId;
+          }
+        }
+      } catch (e) {}
+    })();
+
+    // -----------------------------
+    // DECISION ENGINE + STABILITY
+    // -----------------------------
+
+    /**
+     * recordDecision({
+     *   phase: 'flashcard' | 'jigsaw' | 'lightning' | ...,
+     *   itemId: 'card1' or 'scenarioA',
+     *   isCorrect: true/false,
+     *   severity: 'minor' | 'moderate' | 'critical',
+     *   explanation: 'text shown to instructor'
+     * })
+     */
+    function recordDecision(config) {
+      if (!currentGroupId) {
+        const status = document.getElementById('fgStatus') || document.getElementById('groupIdStatus');
+        if (status) {
+          status.style.color = '#ff99c2';
+          status.textContent = 'Set your Group # first.';
+        }
+        return;
+      }
+
+      const { phase, itemId, isCorrect, severity, explanation } = config;
+      const groupRef = database.ref('groups/' + currentGroupId);
+      const eventsRef = database.ref('events');
+
+      // Stability deltas
+      let delta = 0;
+      if (!isCorrect) {
+        if (severity === 'critical') delta = -25;
+        else if (severity === 'moderate') delta = -15;
+        else delta = -5;
+      } else {
+        // small positive bump for correct decisions if you want
+        delta = +2;
+      }
+
+      // Update stability atomically
+      groupRef.child('stability').transaction(current => {
+        if (typeof current !== 'number') current = 100;
+        let next = current + delta;
+        if (next > 100) next = 100;
+        if (next < 0) next = 0;
+        return next;
+      });
+
+      // Log event (for instructor alerts/consequence mapping)
+      const payload = {
+        groupId: currentGroupId,
+        phase: phase,
+        itemId: itemId,
+        isCorrect: !!isCorrect,
+        severity: severity,
+        explanation: explanation,
+        delta: delta,
+        timestamp: Date.now()
+      };
+
+      eventsRef.push(payload);
+    }
+
+    // -----------------------------
+    // FLASHCARD GUESS – AUTO CHECK
+    // -----------------------------
+
+    // Map each card to the correct system
+    const flashcardKey = {
+      card1: 'Neurological',
+      card2: 'Psychopharmacology',
+      card3: 'Pain',
+      card4: 'Inflammation',
+      card5: 'Endocrine',
+      card6: 'Infection'
+    };
+
+    function submitFlashcardGuess() {
+      const cardInput = document.getElementById('fgCard');
+      const systemInput = document.getElementById('fgSystem');
+      const statusEl = document.getElementById('fgStatus');
+
+      statusEl.textContent = '';
+
+      if (!currentGroupId) {
+        statusEl.style.color = '#ff99c2';
+        statusEl.textContent = 'Set your Group # first.';
+        return;
+      }
+
+      const cardId = cardInput.value;
+      const systemGuess = systemInput.value;
+
+      if (!cardId) {
+        statusEl.style.color = '#ff99c2';
+        statusEl.textContent = 'Choose which card you are answering for.';
+        return;
+      }
+      if (!systemGuess) {
+        statusEl.style.color = '#ff99c2';
+        statusEl.textContent = 'Select your system guess.';
+        return;
+      }
+
+      const correctSystem = flashcardKey[cardId];
+      const isCorrect = (systemGuess === correctSystem);
+
+      if (isCorrect) {
+        statusEl.style.color = '#00ffb3';
+        statusEl.textContent = '✓ Correct – nice call.';
+        recordDecision({
+          phase: 'flashcard',
+          itemId: cardId,
+          isCorrect: true,
+          severity: 'minor',
+          explanation: `Correctly identified ${cardId} as ${correctSystem}.`
+        });
+      } else {
+        statusEl.style.color = '#ffb300';
+        statusEl.textContent = `Not quite – you picked ${systemGuess}, but you'll see how that choice affects your patient later.`;
+        recordDecision({
+          phase: 'flashcard',
+          itemId: cardId,
+          isCorrect: false,
+          severity: 'moderate',
+          explanation: `Misclassified ${cardId}: guessed ${systemGuess}, correct was ${correctSystem}.`
+        });
+      }
+
+      // Reset form after brief delay
+      setTimeout(() => {
+        cardInput.value = '';
+        systemInput.value = '';
+      }, 2000);
+    }
+
+    const fgBtn = document.getElementById('fgSubmit');
+    if (fgBtn) {
+      fgBtn.addEventListener('click', submitFlashcardGuess);
+    }
   </script>
 </body>
 </html>
