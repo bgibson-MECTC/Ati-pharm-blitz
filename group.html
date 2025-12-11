@@ -843,6 +843,11 @@
           groupRef.update({ stability: 100 });
         }
       });
+
+      // Initialize jigsaw checkboxes now that group is set
+      if (typeof setupJigsawCheckboxes === 'function') {
+        setupJigsawCheckboxes();
+      }
     }
 
     const saveGroupBtn = document.getElementById('saveGroupIdBtn');
@@ -1135,18 +1140,6 @@
             checkbox.checked = data['system' + sysNum] === true;
           }
         }
-      });
-    }
-
-    // Initialize jigsaw when group ID is set
-    const saveGroupBtn = document.getElementById('saveGroupIdBtn');
-    if (saveGroupBtn) {
-      saveGroupBtn.addEventListener('click', () => {
-        setTimeout(() => {
-          if (currentGroupId) {
-            setupJigsawCheckboxes();
-          }
-        }, 500);
       });
     }
 
