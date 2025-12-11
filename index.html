@@ -2000,8 +2000,8 @@ Student 3
         document.getElementById('landingScreen').classList.add('hidden');
         document.getElementById('instructorContent').classList.add('active');
       } else if (role === 'student') {
-        // Redirect to group selection
-        window.location.href = 'group.html';
+        // Redirect to group selection with parameter to force selection screen
+        window.location.href = 'group.html?select=1';
       }
     }
   </script>
