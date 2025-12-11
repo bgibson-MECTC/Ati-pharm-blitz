@@ -16,6 +16,92 @@
       overflow-x: hidden;
     }
 
+    /* Role Selection Landing Screen */
+    .landing-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .landing-screen.hidden {
+      display: none;
+    }
+
+    .landing-title {
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00d4ff, #00ffb3, #00d4ff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
+    }
+
+    .landing-subtitle {
+      font-size: 20px;
+      color: #b8e0ff;
+      margin-bottom: 60px;
+      font-weight: 300;
+    }
+
+    .role-selection {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .role-card {
+      background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,255,179,0.05));
+      border: 2px solid rgba(0,212,255,0.3);
+      border-radius: 20px;
+      padding: 50px 60px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 280px;
+    }
+
+    .role-card:hover {
+      transform: translateY(-10px);
+      border-color: #00d4ff;
+      box-shadow: 0 20px 40px rgba(0,212,255,0.3);
+      background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,255,179,0.1));
+    }
+
+    .role-icon {
+      font-size: 72px;
+      margin-bottom: 20px;
+    }
+
+    .role-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #00ffb3;
+      margin-bottom: 10px;
+    }
+
+    .role-description {
+      font-size: 14px;
+      color: #b8e0ff;
+      line-height: 1.6;
+    }
+
+    .instructor-content {
+      display: none;
+    }
+
+    .instructor-content.active {
+      display: block;
+    }
+
     *, *::before, *::after {
       box-sizing: border-box;
     }
@@ -752,7 +838,28 @@
 </head>
 
 <body>
-  <div class="main-wrapper">
+  <!-- LANDING SCREEN -->
+  <div class="landing-screen" id="landingScreen">
+    <h1 class="landing-title">ATI Pharm Blitz</h1>
+    <p class="landing-subtitle">1-Hour High-Yield NCLEX Pharmacology Review</p>
+    
+    <div class="role-selection">
+      <div class="role-card" onclick="selectRole('instructor')">
+        <div class="role-icon">🎓</div>
+        <div class="role-title">Instructor</div>
+        <div class="role-description">Access command center, timer controls, and live monitoring dashboard</div>
+      </div>
+      
+      <div class="role-card" onclick="selectRole('student')">
+        <div class="role-icon">👥</div>
+        <div class="role-title">Student</div>
+        <div class="role-description">Join your group for interactive pharmacology challenges</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTRUCTOR CONTENT -->
+  <div class="main-wrapper instructor-content" id="instructorContent">
 
     <!-- HEADER -->
     <header>
@@ -1881,6 +1988,22 @@ Student 3
 
     // Initialize jigsaw tracker
     setupJigsawTracker();
+  </script>
+
+  </div>
+  <!-- END INSTRUCTOR CONTENT -->
+
+  <script>
+    function selectRole(role) {
+      if (role === 'instructor') {
+        // Show instructor content
+        document.getElementById('landingScreen').classList.add('hidden');
+        document.getElementById('instructorContent').classList.add('active');
+      } else if (role === 'student') {
+        // Redirect to group selection
+        window.location.href = 'group.html';
+      }
+    }
   </script>
 </body>
 </html>
