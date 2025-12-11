@@ -665,7 +665,10 @@
     <header>
       <h1 class="main-title">Leadership Command Center</h1>
       <p class="subtitle" id="leadershipRoleLabel">Role: …</p>
-      <a href="index.html?select=1" class="back-link">⬅ Change Role</a>
+      <div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;">
+        <button onclick="returnToHome()" class="back-link" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #fff; font-size: 14px; text-decoration: none; display: inline-block;">🏠 Home Screen</button>
+        <button onclick="resetGame()" class="back-link" style="background: rgba(255,69,0,0.2); border: 1px solid rgba(255,69,0,0.5); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #ff6b6b; font-size: 14px; font-weight: 600;">🔄 Reset Game</button>
+      </div>
     </header>
 
     <!-- All Groups Stability Monitor -->
@@ -806,7 +809,10 @@
         <div style="font-size:12px;color:#ccecff;margin-top:5px;">Time Remaining</div>
       </div>
       
-      <a href="index.html" class="back-link">⬅ Back to Instructor View</a>
+      <div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;">
+        <button onclick="returnToHome()" class="back-link" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #fff; font-size: 14px; text-decoration: none; display: inline-block;">🏠 Home Screen</button>
+        <button onclick="resetGame()" class="back-link" style="background: rgba(255,69,0,0.2); border: 1px solid rgba(255,69,0,0.5); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #ff6b6b; font-size: 14px; font-weight: 600;">🔄 Reset Game</button>
+      </div>
     </header>
 
     <!-- Instructions -->
@@ -2747,6 +2753,55 @@
       document.getElementById('roleSelectionOptions').style.display = 'block';
       pendingRole = null;
       pendingGroup = null;
+    };
+    
+    window.returnToHome = function() {
+      console.log('returnToHome called');
+      // Clear saved data
+      try {
+        localStorage.removeItem('pharmBlitzRole');
+        localStorage.removeItem('pharmBlitzGroupId');
+      } catch (e) {}
+      // Reload page to show role selection
+      window.location.href = 'group.html';
+    };
+    
+    window.resetGame = function() {
+      if (!confirm('⚠️ Reset all game data? This will clear all groups, events, flashcards, and progress. This action cannot be undone!')) {
+        return;
+      }
+      
+      console.log('resetGame called - clearing all Firebase data');
+      
+      // Clear all Firebase data
+      const resetPromises = [
+        database.ref('groups').remove(),
+        database.ref('events').remove(),
+        database.ref('flashcards').remove(),
+        database.ref('jigsaw').remove(),
+        database.ref('debrief').remove(),
+        database.ref('leadership').remove(),
+        database.ref('rrt/calls').remove(),
+        database.ref('timer').remove(),
+        database.ref('chat').remove(),
+        database.ref('messages').remove(),
+        database.ref('reflections').remove(),
+        database.ref('rrt/metrics').remove()
+      ];
+      
+      Promise.all(resetPromises).then(() => {
+        console.log('All Firebase data cleared');
+        alert('✅ Game reset complete! Returning to home screen...');
+        // Clear localStorage and return to home
+        try {
+          localStorage.removeItem('pharmBlitzRole');
+          localStorage.removeItem('pharmBlitzGroupId');
+        } catch (e) {}
+        window.location.href = 'group.html';
+      }).catch(err => {
+        console.error('Error resetting game:', err);
+        alert('❌ Error resetting game. Please try again.');
+      });
     };
     
     // Check which leadership roles are already claimed
