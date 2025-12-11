@@ -216,6 +216,11 @@
       font-family: inherit;
     }
 
+    .fg-input option {
+      background: #1e3a5f;
+      color: #ffffff;
+    }
+
     .fg-input:focus {
       outline: none;
       border-color: #00ffb3;
@@ -298,6 +303,18 @@
       display: block;
     }
 
+    .card-number {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      color: #00ffb3;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
@@ -354,6 +371,7 @@
       <div class="flashcard-container">
         <!-- Card 1: Psychopharmacology -->
         <div class="flashcard locked" data-card-id="card1" data-system="psychopharmacology">
+          <span class="card-number">Card 1</span>
           <div class="flashcard-front">
             <strong>Clinical Case:</strong> A patient on Haloperidol is showing muscle rigidity and tremors. What serious adverse effect requires immediate intervention? <em>(Psycho or Neuro?)</em>
           </div>
@@ -368,6 +386,7 @@
 
         <!-- Card 2: Neurological -->
         <div class="flashcard locked" data-card-id="card2" data-system="neurological">
+          <span class="card-number">Card 2</span>
           <div class="flashcard-front">
             <strong>Clinical Case:</strong> A patient on Levodopa/Carbidopa experiences sudden "on-off" phenomenon. What lab value is critical to monitor? <em>(Neuro or Endocrine?)</em>
           </div>
@@ -382,6 +401,7 @@
 
         <!-- Card 3: Pain -->
         <div class="flashcard locked" data-card-id="card3" data-system="pain">
+          <span class="card-number">Card 3</span>
           <div class="flashcard-front">
             <strong>Clinical Case:</strong> A post-op patient on IV Fentanyl has a respiratory rate of 8. What is your FIRST action? <em>(Pain or Neuro?)</em>
           </div>
@@ -396,6 +416,7 @@
 
         <!-- Card 4: Endocrine -->
         <div class="flashcard locked" data-card-id="card4" data-system="endocrine">
+          <span class="card-number">Card 4</span>
           <div class="flashcard-front">
             <strong>Clinical Case:</strong> A patient on PTU (Propylthiouracil) develops a sore throat and fever. What life-threatening complication must you suspect? <em>(Endocrine or Infection?)</em>
           </div>
@@ -410,6 +431,7 @@
 
         <!-- Card 5: Infection -->
         <div class="flashcard locked" data-card-id="card5" data-system="infection">
+          <span class="card-number">Card 5</span>
           <div class="flashcard-front">
             <strong>Clinical Case:</strong> A patient on Erythromycin is also taking Warfarin. What dangerous interaction must you monitor? <em>(Infection or Inflammation?)</em>
           </div>
@@ -424,6 +446,7 @@
 
         <!-- Card 6: Inflammation -->
         <div class="flashcard locked" data-card-id="card6" data-system="inflammation">
+          <span class="card-number">Card 6</span>
           <div class="flashcard-front">
             <strong>Clinical Case:</strong> A patient on Belimumab (lupus treatment) is scheduled for a live vaccine. What is your nursing action? <em>(Inflammation or Infection?)</em>
           </div>
