@@ -1094,17 +1094,19 @@
           icon = '❌';
         }
         banner.innerHTML = `<span class="${statusClass}">${icon} ${message}</span>`;
+        console.log('Banner updated:', status, message);
       }
     }
     
-    // Check if Firebase loaded
-    if (typeof firebase === 'undefined') {
-      updateDebugBanner('error', 'Firebase SDK failed to load');
-      throw new Error('Firebase SDK not loaded');
-    }
-    
     try {
+      // Check if Firebase loaded
+      if (typeof firebase === 'undefined') {
+        updateDebugBanner('error', 'Firebase SDK failed to load - check internet connection');
+        throw new Error('Firebase SDK not loaded');
+      }
+    
       updateDebugBanner('warn', 'Firebase initializing...');
+      console.log('Firebase object found, initializing...');
       
       // Firebase configuration
       const firebaseConfig = {
