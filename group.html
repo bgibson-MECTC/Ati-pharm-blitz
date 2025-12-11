@@ -1682,9 +1682,23 @@
       6: 'Infection 🦠'
     };
 
+    let jigsawCheckboxesInitialized = false;
+
     function setupJigsawCheckboxes() {
       const container = document.getElementById('jigsawCheckboxes');
       if (!container || !currentGroupId) return;
+      
+      // Prevent duplicate initialization
+      if (jigsawCheckboxesInitialized) {
+        console.log('⚠️ Jigsaw checkboxes already initialized, skipping...');
+        return;
+      }
+      
+      console.log('🔄 Initializing jigsaw checkboxes for group', currentGroupId);
+      jigsawCheckboxesInitialized = true;
+
+      // Clear any existing content
+      container.innerHTML = '';
 
       const jigsawRef = database.ref('jigsaw/group' + currentGroupId);
 
@@ -2157,6 +2171,9 @@
       console.log('selectGroup called with groupNumber:', groupNumber);
       currentGroupId = groupNumber;
       selectedGroupNumber = groupNumber;
+      
+      // Reset jigsaw checkboxes flag when switching groups
+      jigsawCheckboxesInitialized = false;
       
       // Get config for this group
       const config = groupConfig[groupNumber];
