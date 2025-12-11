@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATI Pharm Blitz – Group View</title>
+
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a1128 0%, #1e3a5f 100%);
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      min-height: 100vh;
+      overflow-y: auto;
+      padding: 40px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .main-title {
+      font-size: 36px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00d4ff, #00ffb3, #00d4ff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #00ffb3;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .group-label {
+      font-size: 14px;
+      color: #ccecff;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #00d4ff;
+    }
+
+    .section-icon {
+      font-size: 28px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #00ffb3;
+      margin: 0;
+    }
+
+    .huddle-box {
+      background: rgba(0, 212, 255, 0.1);
+      border: 2px solid #00d4ff;
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 10px;
+    }
+
+    .huddle-box h3 {
+      color: #00ffb3;
+      font-size: 20px;
+      margin-top: 0;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .huddle-field {
+      margin-bottom: 15px;
+    }
+
+    .huddle-field label {
+      display: block;
+      color: #00d4ff;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .huddle-field input,
+    .huddle-field textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      padding: 9px;
+      color: #ffffff;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .huddle-field textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    .huddle-field input:focus,
+    .huddle-field textarea:focus {
+      outline: none;
+      border-color: #00ffb3;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .instructions-list {
+      color: #ccecff;
+      font-size: 14px;
+      padding-left: 18px;
+    }
+
+    .instructions-list li {
+      margin-bottom: 6px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #00ffb3;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,212,255,0.5);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #ccecff;
+      margin-left: 6px;
+    }
+
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 26px;
+      }
+      .section-title {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <header>
+      <h1 class="main-title">ATI Pharm Blitz</h1>
+      <p class="subtitle" id="systemLabel">Group System: …</p>
+      <p class="group-label" id="groupLabel">Group: …</p>
+      <a href="index.html" class="back-link">⬅ Back to Instructor View</a>
+    </header>
+
+    <!-- Instructions -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">📋</span>
+        <h2 class="section-title">Your Mission<span class="pill">Group View</span></h2>
+      </div>
+      <ul class="instructions-list" id="instructionList">
+        <!-- Filled dynamically based on system -->
+      </ul>
+    </section>
+
+    <!-- Expert Huddle Box (single system) -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">👩‍⚕️</span>
+        <h2 class="section-title">Expert Huddle – <span id="systemNameInline">System</span></h2>
+      </div>
+
+      <div class="huddle-box" id="huddleBox">
+        <h3 id="huddleTitle">System Experts</h3>
+
+        <div class="huddle-field">
+          <label>#1 Safety Risk (What kills the patient first?)</label>
+          <input type="text" id="safetyRisk" placeholder="e.g., Respiratory depression, Lithium toxicity, GI bleed">
+        </div>
+
+        <div class="huddle-field">
+          <label>#1 Lab / Assessment to Monitor</label>
+          <input type="text" id="priorityLab" placeholder="e.g., Lithium level, INR, Blood glucose, WBC">
+        </div>
+
+        <div class="huddle-field">
+          <label>"Do Not Mix" Rule</label>
+          <input type="text" id="doNotMix" placeholder="e.g., MAOIs + SSRIs, opioids + benzos, NSAIDs + anticoagulants">
+        </div>
+
+        <div class="huddle-field">
+          <label>High-Yield Medication(s)</label>
+          <input type="text" id="highYieldMed" placeholder="e.g., Lithium, Vancomycin, Morphine, Insulin">
+        </div>
+
+        <div class="huddle-field">
+          <label>Scenario Prompts (at least 2)</label>
+          <textarea id="scenarioPrompts" placeholder="Example:
+1) Your patient on ___ develops ___. What is your first action?
+2) Teaching point the patient MUST remember about this med."></textarea>
+        </div>
+
+        <div class="huddle-field">
+          <label>Rationale: Why are these your Top 3 priorities?</label>
+          <textarea id="rationale" placeholder="Connect back to ATI, safety, and NCLEX-style thinking."></textarea>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Map group number -> system name + instructions
+    const groupConfig = {
+      1: {
+        name: 'Neurological',
+        label: 'Group 1 – Neurological Experts',
+        instructions: [
+          'Focus on seizure meds, antiepileptics, and CNS depressants.',
+          'Identify the biggest safety risk (airway, LOC, respiratory depression, etc.).',
+          'Pick at least one high-yield drug (e.g., Phenytoin, Levetiracetam).',
+          'Create two scenarios where neuro meds could rapidly become unsafe.',
+          'Be ready to teach your Top 3 priorities to a mixed group.'
+        ]
+      },
+      2: {
+        name: 'Psychopharmacology',
+        label: 'Group 2 – Psychopharm Experts',
+        instructions: [
+          'Focus on antidepressants, antipsychotics, mood stabilizers, and anxiolytics.',
+          'Think about suicide risk, serotonin syndrome, NMS, EPS, and sedation.',
+          'Choose high-yield meds (e.g., Lithium, SSRIs, Clozapine).',
+          'Create scenarios that force the group to choose the safest FIRST action.',
+          'Prepare to explain why your rules prevent harm to the patient.'
+        ]
+      },
+      3: {
+        name: 'Pain Management',
+        label: 'Group 3 – Pain Management Experts',
+        instructions: [
+          'Focus on opioids, non-opioids, and adjunct pain meds.',
+          'Zero in on respiratory depression, oversedation, and uncontrolled pain.',
+          'Include at least one opioid and one non-opioid (e.g., Morphine + Ketorolac).',
+          'Build scenarios where the wrong choice could tank breathing or perfusion.',
+          'Be ready to explain how to safely combine or stagger pain meds.'
+        ]
+      },
+      4: {
+        name: 'Inflammation',
+        label: 'Group 4 – Inflammation / NSAID Experts',
+        instructions: [
+          'Focus on NSAIDs, steroids, and anti-inflammatory meds.',
+          'Key risks: GI bleed, renal injury, immunosuppression.',
+          'Pick common meds (e.g., Ibuprofen, Ketorolac, Prednisone).',
+          'Create at least one scenario involving a patient on anticoagulants or with ulcers.',
+          'Highlight labs and assessments that would make you HOLD the drug.'
+        ]
+      },
+      5: {
+        name: 'Endocrine',
+        label: 'Group 5 – Endocrine Experts',
+        instructions: [
+          'Focus on insulin, oral hypoglycemics, thyroid meds, and steroids.',
+          'Watch for hypoglycemia, DKA/HHS, and thyroid storm/myxedema coma.',
+          'Include at least one insulin and one oral agent or thyroid med.',
+          'Create scenarios where timing of meds and meals matters.',
+          'Be ready to explain which lab change is most deadly, the fastest.'
+        ]
+      },
+      6: {
+        name: 'Infection',
+        label: 'Group 6 – Infection / Antibiotic Experts',
+        instructions: [
+          'Focus on antibiotics, antivirals, and antifungals.',
+          'Key risks: anaphylaxis, nephrotoxicity, C. diff, resistance.',
+          'Choose high-yield meds (e.g., Vancomycin, Piperacillin-tazobactam).',
+          'Write scenarios where cultures, trough levels, or allergies matter.',
+          'Be ready to explain when you would STOP an antibiotic immediately.'
+        ]
+      }
+    };
+
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function initGroupView() {
+      let groupNum = parseInt(getQueryParam('group'), 10);
+      if (isNaN(groupNum) || groupNum < 1 || groupNum > 6) {
+        groupNum = 1; // default to Group 1 if invalid
+      }
+
+      const config = groupConfig[groupNum];
+
+      // Update header
+      const systemLabel = document.getElementById('systemLabel');
+      const groupLabel = document.getElementById('groupLabel');
+      const systemNameInline = document.getElementById('systemNameInline');
+      const huddleTitle = document.getElementById('huddleTitle');
+
+      if (systemLabel) systemLabel.textContent = `System Focus: ${config.name}`;
+      if (groupLabel) groupLabel.textContent = config.label;
+      if (systemNameInline) systemNameInline.textContent = config.name;
+      if (huddleTitle) huddleTitle.textContent = `${config.name} – Top 3 Priorities`;
+
+      // Instructions list
+      const list = document.getElementById('instructionList');
+      if (list) {
+        list.innerHTML = '';
+        config.instructions.forEach(text => {
+          const li = document.createElement('li');
+          li.textContent = text;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initGroupView);
+  </script>
+</body>
+</html>
