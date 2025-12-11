@@ -2128,23 +2128,31 @@
     
     // Check which leadership roles are already claimed
     (function checkLeadershipAvailability() {
-      const leadershipRef = database.ref('leadership');
-      leadershipRef.once('value').then(snapshot => {
-        const leadership = snapshot.val() || {};
-        
-        if (leadership.charge1 && leadership.charge1.claimed) {
-          const el = document.getElementById('charge1Option');
-          if (el) el.classList.add('disabled');
-        }
-        if (leadership.charge2 && leadership.charge2.claimed) {
-          const el = document.getElementById('charge2Option');
-          if (el) el.classList.add('disabled');
-        }
-        if (leadership.rrt && leadership.rrt.claimed) {
-          const el = document.getElementById('rrtOption');
-          if (el) el.classList.add('disabled');
-        }
-      });
+      // Wait a moment for Firebase to be ready
+      setTimeout(() => {
+        const leadershipRef = database.ref('leadership');
+        leadershipRef.once('value').then(snapshot => {
+          const leadership = snapshot.val() || {};
+          
+          // Only disable if explicitly claimed with timestamp in last hour
+          const oneHourAgo = Date.now() - (60 * 60 * 1000);
+          
+          if (leadership.charge1 && leadership.charge1.claimed && leadership.charge1.timestamp > oneHourAgo) {
+            const el = document.getElementById('charge1Option');
+            if (el) el.classList.add('disabled');
+          }
+          if (leadership.charge2 && leadership.charge2.claimed && leadership.charge2.timestamp > oneHourAgo) {
+            const el = document.getElementById('charge2Option');
+            if (el) el.classList.add('disabled');
+          }
+          if (leadership.rrt && leadership.rrt.claimed && leadership.rrt.timestamp > oneHourAgo) {
+            const el = document.getElementById('rrtOption');
+            if (el) el.classList.add('disabled');
+          }
+        }).catch(err => {
+          console.log('Leadership check failed:', err);
+        });
+      }, 500);
     })();
     
     (function checkExistingGroup() {
