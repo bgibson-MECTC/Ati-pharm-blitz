@@ -600,6 +600,101 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Lab flow + timer */
+    .timer-panel {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.6fr) minmax(180px, 1.1fr);
+      gap: 20px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .timer-info {
+      background: rgba(0, 212, 255, 0.08);
+      border-radius: 14px;
+      border: 1px solid rgba(0,212,255,0.4);
+      padding: 14px 16px;
+    }
+
+    .timer-phase-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: #00ffb3;
+      margin-bottom: 8px;
+    }
+
+    .timer-instructions {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: #ccecff;
+    }
+
+    .timer-instructions li {
+      margin-bottom: 4px;
+    }
+
+    .timer-controls {
+      text-align: center;
+    }
+
+    .timer-display {
+      font-size: 40px;
+      font-weight: 900;
+      padding: 10px 0;
+      border-radius: 16px;
+      border: 2px solid rgba(0,212,255,0.8);
+      background: radial-gradient(circle at top, rgba(0,212,255,0.3), rgba(10,17,40,0.9));
+      margin-bottom: 10px;
+    }
+
+    .timer-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+
+    .timer-buttons button {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(0,212,255,0.15);
+      color: #ffffff;
+      border: 1px solid rgba(0,212,255,0.6);
+      transition: all 0.2s ease;
+    }
+
+    .timer-buttons button:hover {
+      background: rgba(0,212,255,0.35);
+      transform: translateY(-1px);
+    }
+
+    #nextPhaseBtn {
+      background: #00ffb3;
+      color: #0a1128;
+      border-color: #00ffb3;
+    }
+
+    #nextPhaseBtn:hover {
+      background: #4dffd0;
+    }
+
+    .timer-phase-count {
+      font-size: 12px;
+      color: #ccecff;
+    }
+
+    @media (max-width: 800px) {
+      .timer-panel {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 
@@ -727,6 +822,36 @@ Student 3
           <div id="groupResults" class="group-results">
             <!-- Filled by JS -->
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB FLOW + TIMER -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">⏱️</span>
+        <h2 class="section-title">Lab Flow Timer</h2>
+      </div>
+
+      <div class="timer-panel">
+        <div class="timer-info">
+          <div class="timer-phase-label" id="phaseLabel">Phase 1: Warm-Up (5 min)</div>
+          <ul class="timer-instructions" id="phaseInstructions">
+            <li>Activate prior knowledge with flashcards</li>
+            <li>Students identify systems quickly</li>
+            <li>Build energy and engagement</li>
+          </ul>
+        </div>
+
+        <div class="timer-controls">
+          <div class="timer-display" id="phaseTimer">05:00</div>
+          <div class="timer-buttons">
+            <button id="startPhaseBtn">Start</button>
+            <button id="pausePhaseBtn">Pause</button>
+            <button id="resetPhaseBtn">Reset</button>
+            <button id="nextPhaseBtn">Next Phase ➜</button>
+          </div>
+          <div class="timer-phase-count" id="phaseCount">Phase 1 of 3</div>
         </div>
       </div>
     </section>
@@ -959,6 +1084,41 @@ Student 3
       return shuffled;
     }
 
+    // Auto-save student names
+    const studentNamesTextarea = document.getElementById('studentNames');
+    const groupCountInput = document.getElementById('groupCount');
+    const specialCountInput = document.getElementById('specialCount');
+    const resultsEl = document.getElementById('groupResults');
+
+    // Load saved data on page load
+    function loadSavedData() {
+      const savedNames = localStorage.getItem('studentNames');
+      const savedGroupCount = localStorage.getItem('groupCount');
+      const savedSpecialCount = localStorage.getItem('specialCount');
+      const savedResults = localStorage.getItem('groupResults');
+
+      if (savedNames) studentNamesTextarea.value = savedNames;
+      if (savedGroupCount) groupCountInput.value = savedGroupCount;
+      if (savedSpecialCount) specialCountInput.value = savedSpecialCount;
+      if (savedResults) resultsEl.innerHTML = savedResults;
+    }
+
+    // Auto-save as user types
+    studentNamesTextarea.addEventListener('input', () => {
+      localStorage.setItem('studentNames', studentNamesTextarea.value);
+    });
+
+    groupCountInput.addEventListener('change', () => {
+      localStorage.setItem('groupCount', groupCountInput.value);
+    });
+
+    specialCountInput.addEventListener('change', () => {
+      localStorage.setItem('specialCount', specialCountInput.value);
+    });
+
+    // Load saved data
+    loadSavedData();
+
     document.getElementById('assignButton').addEventListener('click', () => {
       const textarea = document.getElementById('studentNames');
       const errorEl = document.getElementById('assignError');
@@ -1033,7 +1193,138 @@ Student 3
       });
 
       resultsEl.innerHTML = html;
+      
+      // Save results to localStorage
+      localStorage.setItem('groupResults', html);
     });
+
+    // Lab Flow Phase Timer
+    const phases = [
+      {
+        name: 'Phase 1: Warm-Up (5 min)',
+        duration: 5 * 60,
+        instructions: [
+          'Activate prior knowledge with flashcards',
+          'Students identify systems quickly',
+          'Build energy and engagement'
+        ]
+      },
+      {
+        name: 'Phase 2: Expert Huddle (30 min)',
+        duration: 30 * 60,
+        instructions: [
+          'Groups fill out their system priorities',
+          'Identify #1 safety risk, lab, do-not-mix rule',
+          'Create 2+ scenarios for teaching'
+        ]
+      },
+      {
+        name: 'Phase 3: Lightning Round (25 min)',
+        duration: 25 * 60,
+        instructions: [
+          'Groups present their Top 3 priorities',
+          'Rapid-fire Q&A across all systems',
+          'Reinforce safety-first thinking'
+        ]
+      }
+    ];
+
+    let currentPhase = 0;
+    let phaseSeconds = phases[0].duration;
+    let phaseInterval = null;
+    let phaseRunning = false;
+
+    const phaseLabel = document.getElementById('phaseLabel');
+    const phaseInstructions = document.getElementById('phaseInstructions');
+    const phaseTimer = document.getElementById('phaseTimer');
+    const phaseCount = document.getElementById('phaseCount');
+    const startPhaseBtn = document.getElementById('startPhaseBtn');
+    const pausePhaseBtn = document.getElementById('pausePhaseBtn');
+    const resetPhaseBtn = document.getElementById('resetPhaseBtn');
+    const nextPhaseBtn = document.getElementById('nextPhaseBtn');
+
+    function updatePhaseDisplay() {
+      const minutes = Math.floor(phaseSeconds / 60);
+      const seconds = phaseSeconds % 60;
+      phaseTimer.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+      
+      // Color coding
+      if (phaseSeconds <= 60) {
+        phaseTimer.style.color = '#ff006e';
+      } else if (phaseSeconds <= 300) {
+        phaseTimer.style.color = '#ffb300';
+      } else {
+        phaseTimer.style.color = '#00ffb3';
+      }
+    }
+
+    function loadPhase(index) {
+      currentPhase = index;
+      const phase = phases[currentPhase];
+      phaseSeconds = phase.duration;
+      
+      phaseLabel.textContent = phase.name;
+      phaseInstructions.innerHTML = '';
+      phase.instructions.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        phaseInstructions.appendChild(li);
+      });
+      
+      phaseCount.textContent = `Phase ${currentPhase + 1} of ${phases.length}`;
+      updatePhaseDisplay();
+      
+      if (phaseRunning) {
+        pausePhaseTimer();
+      }
+    }
+
+    function startPhaseTimer() {
+      if (!phaseRunning) {
+        phaseRunning = true;
+        phaseInterval = setInterval(() => {
+          if (phaseSeconds > 0) {
+            phaseSeconds--;
+            updatePhaseDisplay();
+          } else {
+            pausePhaseTimer();
+            alert(`⏰ ${phases[currentPhase].name} complete!`);
+          }
+        }, 1000);
+        startPhaseBtn.textContent = 'Running...';
+        startPhaseBtn.disabled = true;
+      }
+    }
+
+    function pausePhaseTimer() {
+      phaseRunning = false;
+      clearInterval(phaseInterval);
+      startPhaseBtn.textContent = 'Resume';
+      startPhaseBtn.disabled = false;
+    }
+
+    function resetPhaseTimer() {
+      pausePhaseTimer();
+      phaseSeconds = phases[currentPhase].duration;
+      updatePhaseDisplay();
+      startPhaseBtn.textContent = 'Start';
+    }
+
+    function nextPhase() {
+      if (currentPhase < phases.length - 1) {
+        loadPhase(currentPhase + 1);
+      } else {
+        alert('✅ All phases complete! Great job.');
+      }
+    }
+
+    startPhaseBtn.addEventListener('click', startPhaseTimer);
+    pausePhaseBtn.addEventListener('click', pausePhaseTimer);
+    resetPhaseBtn.addEventListener('click', resetPhaseTimer);
+    nextPhaseBtn.addEventListener('click', nextPhase);
+
+    // Initialize
+    loadPhase(0);
   </script>
 </body>
 </html>
