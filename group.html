@@ -1052,6 +1052,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
   <script>
+    console.log('Script loading started...');
+    
     // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBfJ4KBqpbP4tbtikAgMEdbT5P1rb3yhHo",
@@ -2069,6 +2071,10 @@
       // Setup chat listener
       setupChatListener();
     }
+    
+    console.log('selectLeadership and selectGroup functions defined');
+    console.log('window.selectLeadership:', typeof window.selectLeadership);
+    console.log('window.selectGroup:', typeof window.selectGroup);
 
     // -----------------------------
     // LEADERSHIP DASHBOARD FUNCTIONS
@@ -2799,8 +2805,12 @@
             selectGroup(groupNum);
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Error in checkExistingGroup:', e);
+      }
     })();
+    
+    console.log('Script loading completed - all functions should be ready');
   </script>
 </body>
 </html>
