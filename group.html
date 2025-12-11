@@ -678,11 +678,23 @@
         <h2 class="section-title">Messages & Conversations</h2>
       </div>
       
-      <p style="color:#ccecff;font-size:13px;margin-bottom:15px;">
-        <strong>Your Role:</strong> Guide groups through clinical reasoning. Ask clarifying questions. Require <strong>condition + first action + monitoring</strong> before approval.
-      </p>
+      <div style="background:rgba(255,140,0,0.1);border:2px solid rgba(255,140,0,0.4);border-radius:10px;padding:15px;margin-bottom:15px;">
+        <h4 style="color:#ffb300;margin:0 0 10px 0;font-size:14px;">⭐ YOUR ROLE: Clinical Judgment Gatekeeper</h4>
+        <div style="font-size:12px;color:#ccecff;line-height:1.6;">
+          <strong>🔥 NEVER give direct answers.</strong> Guide with questions:<br>
+          • "What kills the patient FIRST?"<br>
+          • "What medication triggered this?"<br>
+          • "What's your FIRST nursing action — no fluff?"<br>
+          • "Which vital sign trend supports your suspicion?"<br>
+          • "What lab would you expect to see?"<br>
+          <br>
+          <strong>✅ Approval Criteria:</strong> Condition + First Action + Monitoring<br>
+          <strong>⚠️ Escalate if:</strong> Missing components, unsafe assumptions, contradictory reasoning<br>
+          <strong>🚨 Call RRT if:</strong> Dangerous judgment, repeated errors, unstable vitals ignored
+        </div>
+      </div>
       
-      <div id="chargeNurseMessages" style="max-height:500px;overflow-y:auto;background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;">
+      <div id="chargeNurseMessages" style="max-height:600px;overflow-y:auto;background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;">
         <div style="color:#888;text-align:center;padding:20px;">No messages yet</div>
       </div>
     </section>
@@ -2497,14 +2509,31 @@
               const respTime = new Date(response.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               const respDiv = document.createElement('div');
               respDiv.style.cssText = 'padding:10px;margin:8px 0 8px 20px;background:rgba(138,43,226,0.15);border-radius:8px;border-left:3px solid #8a2be2;';
+              
+              const actionColors = {
+                'approved_excellent': '#00ff88',
+                'approved': '#00ffb3',
+                'approved_caution': '#88d400',
+                'escalated': '#ff8c00',
+                'rrt': '#ff4444'
+              };
+              
+              const actionLabels = {
+                'approved_excellent': '⭐ APPROVED - EXCELLENT (+15)',
+                'approved': '✅ APPROVED - ADEQUATE (+10)',
+                'approved_caution': '⚠️ APPROVED WITH CAUTION (+5)',
+                'escalated': '⚠️ ESCALATED - RETRY (-15)',
+                'rrt': '🚨 ESCALATED + RRT CALLED (-25)'
+              };
+              
               respDiv.innerHTML = `
                 <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
                   <strong style="color:#ba55d3;font-size:12px;">Charge Nurse</strong>
                   <span style="color:#888;font-size:11px;">${respTime}</span>
                 </div>
                 <div style="color:#fff;font-size:13px;">${response.message}</div>
-                ${response.action ? `<div style="margin-top:6px;padding:6px 10px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:11px;color:${response.action === 'approved' ? '#00ffb3' : '#ff6b6b'};">
-                  ${response.action === 'approved' ? '✅ APPROVED' : response.action === 'escalated' ? '⚠️ ESCALATED' : '🚨 ESCALATED + RRT CALLED'}
+                ${response.action ? `<div style="margin-top:6px;padding:6px 10px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:11px;font-weight:600;color:${actionColors[response.action] || '#ccc'};">
+                  ${actionLabels[response.action] || response.action.toUpperCase()}
                 </div>` : ''}
               `;
               messagesContainer.appendChild(respDiv);
@@ -2580,16 +2609,37 @@
           // Response input
           conversationHTML += `
             <div style="margin-top:12px;">
-              <input type="text" id="response_${msg.key}" placeholder="Ask clarifying questions or provide guidance..." 
+              <div style="margin-bottom:10px;padding:10px;background:rgba(255,140,0,0.08);border-radius:6px;border-left:3px solid #ffb300;">
+                <div style="font-size:11px;color:#ffb300;font-weight:600;margin-bottom:6px;">💡 SUGGESTED GUIDING QUESTIONS (Don't give direct answers!):</div>
+                <div style="font-size:11px;color:#ddd;line-height:1.5;">
+                  • "What will kill this patient FIRST?"<br>
+                  • "What medication/condition triggered this?"<br>
+                  • "What vital sign trend tells you this is urgent?"<br>
+                  • "What's your FIRST nursing action?"<br>
+                  • "Who do you call? Provider? RRT? No one?"<br>
+                  • "What lab would confirm your suspicion?"<br>
+                  • "Which order would you question?"
+                </div>
+              </div>
+              
+              <input type="text" id="response_${msg.key}" placeholder="Ask Socratic questions or provide cryptic guidance..." 
                 style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;font-size:13px;margin-bottom:10px;" />
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              
+              <div style="margin-bottom:8px;font-size:12px;color:#00ffb3;font-weight:600;">Actions:</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
                 <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'question')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#ffb300;">❓ Ask Question</button>
-                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'approved')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#00ffb3;">✅ Approve</button>
-                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'escalated')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#ff8c00;">⚠️ Escalate</button>
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'approved_excellent')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#00ff88;">⭐ Approve - Excellent</button>
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'approved')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#00d4a0;">✅ Approve - Adequate</button>
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'approved_caution')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#88d400;">⚠️ Approve w/ Caution</button>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'escalated')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#ff8c00;">⚠️ Escalate - Retry</button>
                 <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'rrt')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#ff4444;">🚨 Escalate + RRT</button>
               </div>
-              <div style="margin-top:8px;font-size:11px;color:#888;line-height:1.4;">
-                💡 Require: <strong>Condition + First Action + Monitoring</strong> before approval
+              <div style="margin-top:8px;font-size:10px;color:#888;line-height:1.4;">
+                <strong>Require all 3:</strong> Condition ID + First Action + Monitoring | 
+                <strong>Excellent:</strong> +15 stability | <strong>Adequate:</strong> +10 | <strong>Caution:</strong> +5 | 
+                <strong>Escalate:</strong> -15 | <strong>RRT:</strong> -25
               </div>
             </div>
           `;
@@ -2605,15 +2655,25 @@
       const response = input?.value?.trim() || '';
       
       if (!response && action === 'question') {
-        alert('Please enter a question to ask the group');
+        alert('Please enter a Socratic question to guide the group (avoid direct answers)');
         return;
       }
       
       const actionMessages = {
         'question': response,
-        'approved': response || 'Good clinical reasoning. Approved to proceed.',
-        'escalated': response || 'Reasoning needs improvement. Review and try again.',
-        'rrt': response || 'Unsafe clinical judgment. RRT has been called.'
+        'approved_excellent': response || '⭐ Exceptional clinical reasoning! All 3 components met. Condition identified, priority action correct, monitoring plan solid. Proceed with confidence.',
+        'approved': response || '✅ Good clinical reasoning. All required components present. Approved to proceed.',
+        'approved_caution': response || '⚠️ Reasoning is acceptable but could be stronger. Review your monitoring plan. Approved with caution.',
+        'escalated': response || '⚠️ Missing critical components or unsafe assumptions. Review and resubmit with: Condition + First Action + Monitoring.',
+        'rrt': response || '🚨 UNSAFE clinical judgment detected. RRT has been called. Review chain of command and clinical priorities.'
+      };
+      
+      const stabilityChanges = {
+        'approved_excellent': 15,
+        'approved': 10,
+        'approved_caution': 5,
+        'escalated': -15,
+        'rrt': -25
       };
       
       // Save response
@@ -2626,46 +2686,48 @@
       });
       
       // Take action based on response
-      if (action === 'approved') {
+      if (action !== 'question') {
+        // Update stability
+        const stabilityChange = stabilityChanges[action] || 0;
         database.ref('groups/' + groupNumber + '/stability').once('value').then(snap => {
           const current = snap.val() || 50;
-          database.ref('groups/' + groupNumber + '/stability').set(Math.min(100, current + 10));
+          const newStability = Math.max(0, Math.min(100, current + stabilityChange));
+          database.ref('groups/' + groupNumber + '/stability').set(newStability);
         });
-        database.ref('events').push({
-          group: groupNumber,
-          type: 'approved',
-          message: 'Charge Nurse approved clinical reasoning',
-          timestamp: Date.now()
-        });
-      } else if (action === 'escalated') {
-        database.ref('groups/' + groupNumber + '/stability').once('value').then(snap => {
-          const current = snap.val() || 50;
-          database.ref('groups/' + groupNumber + '/stability').set(Math.max(0, current - 15));
-        });
-        database.ref('events').push({
-          group: groupNumber,
-          type: 'escalated',
-          message: 'Charge Nurse escalated due to unsafe reasoning',
-          timestamp: Date.now()
-        });
-      } else if (action === 'rrt') {
-        database.ref('groups/' + groupNumber + '/stability').once('value').then(snap => {
-          const current = snap.val() || 50;
-          database.ref('groups/' + groupNumber + '/stability').set(Math.max(0, current - 25));
-        });
-        database.ref('rrt/calls').push({
-          group: groupNumber,
-          reason: 'Unsafe clinical judgment - Charge Nurse escalation',
-          calledBy: selectedRole,
-          timestamp: Date.now(),
-          resolved: false
-        });
-        database.ref('events').push({
-          group: groupNumber,
-          type: 'rrt_called',
-          message: 'RRT called by Charge Nurse due to dangerous reasoning',
-          timestamp: Date.now()
-        });
+        
+        // Log appropriate event
+        if (action.startsWith('approved')) {
+          database.ref('events').push({
+            group: groupNumber,
+            type: action === 'approved_excellent' ? 'approved_excellent' : action === 'approved_caution' ? 'approved_caution' : 'approved',
+            message: action === 'approved_excellent' ? 'Charge Nurse: Exceptional reasoning (+15)' : 
+                     action === 'approved_caution' ? 'Charge Nurse: Approved with caution (+5)' :
+                     'Charge Nurse: Approved clinical reasoning (+10)',
+            timestamp: Date.now()
+          });
+        } else if (action === 'escalated') {
+          database.ref('events').push({
+            group: groupNumber,
+            type: 'escalated',
+            message: 'Charge Nurse: Missing components or unsafe reasoning (-15)',
+            timestamp: Date.now()
+          });
+        } else if (action === 'rrt') {
+          database.ref('groups/' + groupNumber + '/rrtCalled').set(true);
+          database.ref('rrt/calls').push({
+            group: groupNumber,
+            reason: 'Unsafe clinical judgment - Charge Nurse escalation',
+            calledBy: selectedRole,
+            timestamp: Date.now(),
+            resolved: false
+          });
+          database.ref('events').push({
+            group: groupNumber,
+            type: 'rrt_called',
+            message: 'RRT called by Charge Nurse: Dangerous reasoning detected (-25)',
+            timestamp: Date.now()
+          });
+        }
       }
       
       input.value = '';
