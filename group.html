@@ -1338,15 +1338,9 @@
 
       if (isCorrect) {
         statusEl.style.color = '#00ffb3';
-        statusEl.textContent = '✓ Correct – nice call. Card will now flip on the instructor view!';
+        statusEl.textContent = '✓ Correct – nice call! Your patient remains stable.';
         
-        // Mark card as flipped in Firebase so instructor view auto-flips it
-        database.ref('flashcards/' + cardId).set({
-          groupId: currentGroupId,
-          flipped: true,
-          timestamp: Date.now()
-        });
-        
+        // Record correct decision (affects patient stability only)
         recordDecision({
           phase: 'flashcard',
           itemId: cardId,
@@ -1356,7 +1350,7 @@
         });
       } else {
         statusEl.style.color = '#ffb300';
-        statusEl.textContent = `Not quite – you picked ${systemGuess}, but you'll see how that choice affects your patient later.`;
+        statusEl.textContent = `Not quite – you picked ${systemGuess}, but the correct answer is ${correctSystem}. This affects your patient's stability.`;
         recordDecision({
           phase: 'flashcard',
           itemId: cardId,
