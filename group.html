@@ -1080,7 +1080,7 @@
   <script>
     console.log('Script loading started...');
     
-    // Update debug banner
+    // Update debug banner - define FIRST, outside try-catch
     function updateDebugBanner(status, message) {
       const banner = document.getElementById('debugBanner');
       if (banner) {
@@ -1095,6 +1095,12 @@
         }
         banner.innerHTML = `<span class="${statusClass}">${icon} ${message}</span>`;
       }
+    }
+    
+    // Check if Firebase loaded
+    if (typeof firebase === 'undefined') {
+      updateDebugBanner('error', 'Firebase SDK failed to load');
+      throw new Error('Firebase SDK not loaded');
     }
     
     try {
