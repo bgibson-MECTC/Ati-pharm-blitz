@@ -283,11 +283,202 @@
       font-weight: bold;
       color: #0a1128;
     }
+
+    /* Instructor Controls */
+    .instructor-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(10, 17, 40, 0.95);
+      backdrop-filter: blur(10px);
+      border: 2px solid #00d4ff;
+      border-radius: 15px;
+      padding: 20px;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      min-width: 280px;
+    }
+
+    .instructor-panel h3 {
+      margin: 0 0 15px 0;
+      color: #00ffb3;
+      font-size: 18px;
+      text-align: center;
+      border-bottom: 2px solid #00d4ff;
+      padding-bottom: 10px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      display: block;
+      color: #00d4ff;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lock-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #ff006e;
+      color: #ffffff;
+      transition: all 0.2s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+      width: 100%;
+    }
+
+    .lock-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+    }
+
+    .lock-btn.on {
+      background: #00ffb3;
+      color: #0a1128;
+    }
+
+    .control-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 15px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(0, 212, 255, 0.2);
+      color: #00d4ff;
+      border: 1px solid #00d4ff;
+      transition: all 0.2s ease;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .control-btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-btn:hover {
+      background: rgba(0, 212, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .control-btn.danger {
+      background: rgba(255, 0, 110, 0.2);
+      color: #ff006e;
+      border-color: #ff006e;
+    }
+
+    .control-btn.danger:hover {
+      background: rgba(255, 0, 110, 0.3);
+    }
+
+    .timer-display {
+      background: rgba(0, 255, 179, 0.1);
+      border: 2px solid #00ffb3;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      font-size: 32px;
+      font-weight: 900;
+      color: #00ffb3;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 10px;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .timer-controls .control-btn {
+      margin-bottom: 0;
+    }
+
+    /* Locked state for inputs */
+    body.inputs-locked .huddle-field input,
+    body.inputs-locked .huddle-field textarea {
+      pointer-events: none;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Hidden answers state */
+    body.answers-hidden .flashcard.flipped {
+      background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    }
+
+    body.answers-hidden .flashcard.flipped .flashcard-back {
+      display: none;
+    }
+
+    body.answers-hidden .flashcard.flipped .flashcard-front {
+      display: block;
+    }
+
+    body.answers-hidden .question-tile.revealed {
+      background: linear-gradient(135deg, #8338ec 0%, #3a86ff 100%);
+    }
+
+    body.answers-hidden .question-tile.revealed .tile-answer {
+      display: none;
+    }
+
+    body.answers-hidden .question-tile.revealed .tile-question {
+      display: block;
+    }
   </style>
 </head>
 
 <body>
   <div class="main-wrapper">
+
+    <!-- INSTRUCTOR CONTROLS -->
+    <div class="instructor-panel">
+      <h3>🎓 Instructor Controls</h3>
+      
+      <div class="control-group">
+        <span class="control-label">Game Mode</span>
+        <button class="lock-btn" id="toggleInteractivity">Interactivity: OFF (student view only)</button>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Student Input Lock</span>
+        <button class="lock-btn" id="lockBtn">🔓 Unlocked</button>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Activity Timer</span>
+        <div class="timer-display" id="timerDisplay">60:00</div>
+        <div class="timer-controls">
+          <button class="control-btn" id="startTimer">Start</button>
+          <button class="control-btn" id="pauseTimer">Pause</button>
+          <button class="control-btn" id="resetTimer">Reset</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Answer Controls</span>
+        <button class="control-btn" id="toggleAnswers">Hide All Answers</button>
+        <button class="control-btn" id="revealAll">Reveal All Answers</button>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label">Session Reset</span>
+        <button class="control-btn danger" id="resetAll">Reset All Inputs</button>
+      </div>
+    </div>
 
     <!-- HEADER -->
     <header>
@@ -414,23 +605,175 @@
 
   <!-- INTERACTIVITY JS -->
   <script>
-    // Flashcards flip
+    // Global toggle for whether students can interact
+    let interactivityOn = false;
+
+    // Instructor toggle button
+    const toggleBtn = document.getElementById('toggleInteractivity');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        interactivityOn = !interactivityOn;
+        if (interactivityOn) {
+          toggleBtn.textContent = 'Interactivity: ON (live game)';
+          toggleBtn.classList.add('on');
+        } else {
+          toggleBtn.textContent = 'Interactivity: OFF (student view only)';
+          toggleBtn.classList.remove('on');
+        }
+      });
+    }
+
+    // Flashcards flip only when interactivityOn = true
     document.querySelectorAll('.flashcard').forEach(card => {
-      card.addEventListener('click', () => card.classList.toggle('flipped'));
-    });
-
-    // Lightning reveal
-    document.querySelectorAll('.question-tile').forEach(tile => {
-      tile.addEventListener('click', () => tile.classList.toggle('revealed'));
-    });
-
-    // Red flag reveal
-    document.querySelectorAll('.red-flag-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const content = btn.nextElementSibling;
-        content.classList.toggle('show');
+      card.addEventListener('click', () => {
+        if (!interactivityOn) return;
+        card.classList.toggle('flipped');
       });
     });
+
+    // Lightning tiles reveal only when interactivityOn = true
+    document.querySelectorAll('.question-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        if (!interactivityOn) return;
+        tile.classList.toggle('revealed');
+      });
+    });
+
+    // Red flag reveal (if you add any red-flag-btns later)
+    document.querySelectorAll('.red-flag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!interactivityOn) return;
+        const content = btn.nextElementSibling;
+        if (content) {
+          content.classList.toggle('show');
+        }
+      });
+    });
+
+    // ===== INSTRUCTOR CONTROLS =====
+    
+    // Lock/Unlock inputs
+    const lockBtn = document.getElementById('lockBtn');
+    let isLocked = false;
+    
+    lockBtn.addEventListener('click', () => {
+      isLocked = !isLocked;
+      document.body.classList.toggle('inputs-locked', isLocked);
+      lockBtn.classList.toggle('on', isLocked);
+      lockBtn.textContent = isLocked ? '🔒 Locked' : '🔓 Unlocked';
+    });
+
+    // Timer functionality
+    let timerInterval = null;
+    let timeRemaining = 3600; // 60 minutes in seconds
+    const timerDisplay = document.getElementById('timerDisplay');
+    const startTimer = document.getElementById('startTimer');
+    const pauseTimer = document.getElementById('pauseTimer');
+    const resetTimer = document.getElementById('resetTimer');
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      // Change color when time is low
+      if (timeRemaining <= 300) { // 5 minutes
+        timerDisplay.style.color = '#ff006e';
+        timerDisplay.style.borderColor = '#ff006e';
+      } else {
+        timerDisplay.style.color = '#00ffb3';
+        timerDisplay.style.borderColor = '#00ffb3';
+      }
+    }
+
+    startTimer.addEventListener('click', () => {
+      if (!timerInterval) {
+        timerInterval = setInterval(() => {
+          if (timeRemaining > 0) {
+            timeRemaining--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            alert('Time is up!');
+          }
+        }, 1000);
+      }
+    });
+
+    pauseTimer.addEventListener('click', () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    });
+
+    resetTimer.addEventListener('click', () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      timeRemaining = 3600;
+      updateTimerDisplay();
+    });
+
+    // Toggle hide/show answers
+    const toggleAnswers = document.getElementById('toggleAnswers');
+    let answersHidden = false;
+
+    toggleAnswers.addEventListener('click', () => {
+      answersHidden = !answersHidden;
+      document.body.classList.toggle('answers-hidden', answersHidden);
+      toggleAnswers.textContent = answersHidden ? 'Show All Answers' : 'Hide All Answers';
+    });
+
+    // Reveal all answers
+    const revealAll = document.getElementById('revealAll');
+    
+    revealAll.addEventListener('click', () => {
+      // Flip all flashcards
+      document.querySelectorAll('.flashcard').forEach(card => {
+        card.classList.add('flipped');
+      });
+      
+      // Reveal all lightning round answers
+      document.querySelectorAll('.question-tile').forEach(tile => {
+        tile.classList.add('revealed');
+      });
+    });
+
+    // Reset all inputs and answers
+    const resetAll = document.getElementById('resetAll');
+    
+    resetAll.addEventListener('click', () => {
+      if (confirm('Are you sure you want to reset all inputs and answers? This cannot be undone.')) {
+        // Clear all input fields
+        document.querySelectorAll('.huddle-field input, .huddle-field textarea').forEach(input => {
+          input.value = '';
+        });
+        
+        // Unflip all flashcards
+        document.querySelectorAll('.flashcard').forEach(card => {
+          card.classList.remove('flipped');
+        });
+        
+        // Hide all lightning round answers
+        document.querySelectorAll('.question-tile').forEach(tile => {
+          tile.classList.remove('revealed');
+        });
+        
+        // Reset timer
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        timeRemaining = 3600;
+        updateTimerDisplay();
+      }
+    });
+
+    // Initialize timer display
+    updateTimerDisplay();
   </script>
 </body>
 </html>
