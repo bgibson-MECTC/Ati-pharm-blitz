@@ -1115,7 +1115,7 @@
       firebase.initializeApp(firebaseConfig);
       const database = firebase.database();
 
-      updateDebugBanner('ok', 'Firebase connected | Script loaded successfully');
+      updateDebugBanner('warn', 'Firebase connected | Loading functions...');
       
       // CRITICAL: Define selection functions FIRST for onclick handlers
       let currentGroupId = null;
@@ -2896,6 +2896,7 @@
     })();
     
     console.log('Script loading completed - all functions should be ready');
+    updateDebugBanner('ok', '✅ Ready | Firebase connected | All functions loaded');
     
     } catch (error) {
       console.error('CRITICAL SCRIPT ERROR:', error);
