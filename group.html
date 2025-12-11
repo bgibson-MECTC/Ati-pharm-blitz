@@ -373,6 +373,47 @@
         </p>
       </div>
     </section>
+
+    <!-- JIGSAW SPEED ROUND – CASE REVEAL -->
+    <section class="section" id="jigsawSection">
+      <div class="section-header">
+        <span class="section-icon">🧩</span>
+        <h2 class="section-title">Jigsaw Speed Round – Get Your Case</h2>
+      </div>
+
+      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">
+        Each <strong>system expert</strong> will generate one case for their group.
+        Select your expert role below and click <strong>"Get My Case"</strong>.
+        The system will assign either a standard scenario or a consequence scenario based on your group's earlier decisions.
+      </p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px;">
+        <label for="jigsawSystemSelect" style="font-size:14px;color:#00d4ff;font-weight:600;">
+          I am the expert for:
+        </label>
+        <select id="jigsawSystemSelect"
+                style="background:rgba(255,255,255,0.08);border-radius:8px;border:1px solid rgba(0,212,255,0.4);color:#ffffff;padding:6px 8px;font-size:14px;min-width:220px;">
+          <option value="">Select your system…</option>
+          <option value="psych">Psych / Haloperidol–Fluoxetine</option>
+          <option value="neuro">Neuro / Levodopa–Phenobarbital</option>
+          <option value="pain">Pain / Fentanyl–Butorphanol</option>
+          <option value="endocrine">Endocrine / PTU–Somatropin</option>
+          <option value="infection">Infection / Antibiotics–Antifungals</option>
+          <option value="inflammation">Inflammation / Belimumab–Allopurinol–Steroids</option>
+        </select>
+
+        <button id="jigsawCaseBtn" class="assign-btn">
+          Get My Case
+        </button>
+      </div>
+
+      <p id="jigsawStatus" class="assign-error"></p>
+
+      <div id="jigsawCaseDisplay"
+           style="margin-top:16px;padding:16px;border-radius:12px;border:1px solid rgba(0,212,255,0.4);background:rgba(255,255,255,0.04);min-height:80px;">
+        <em style="color:#ccecff;font-size:13px;">Your case will appear here once generated. Do not refresh or you may lose your assigned scenario.</em>
+      </div>
+    </section>
   </div>
 
   <!-- Firebase SDK -->
@@ -880,6 +921,311 @@
     // Also initialize on page load if group ID already exists
     if (currentGroupId) {
       setupJigsawCheckboxes();
+    }
+
+    // -----------------------------
+    // JIGSAW SPEED ROUND – CASE ASSIGNMENT
+    // -----------------------------
+
+    // Map systems → their flashcard card ID
+    const systemToCard = {
+      psych: 'card1',
+      neuro: 'card2',
+      pain: 'card3',
+      endocrine: 'card4',
+      infection: 'card5',
+      inflammation: 'card6'
+    };
+
+    // JIGSAW CASE BANK
+    const jigsawCases = {
+      psych: {
+        standard: {
+          title: 'Psych – Standard Case: Haloperidol (NMS Risk)',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>You receive a new patient with schizophrenia started on <strong>Haloperidol</strong> 48 hours ago.</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Temperature: <strong>100.9°F</strong></li>
+              <li>Increasing <strong>muscle rigidity</strong></li>
+              <li>BP: <strong>168/94</strong>, HR <strong>128</strong></li>
+              <li>Patient looks confused and diaphoretic.</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>priority concern</strong>, and what is your <strong>first action</strong> as the nurse?</p>
+          `
+        },
+        consequence: {
+          title: 'Psych – Consequence Case: Fluoxetine + Tramadol (Serotonin Syndrome)',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>Patient on <strong>fluoxetine</strong> for depression and <strong>tramadol</strong> for chronic pain presents with:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Temperature: <strong>102.6°F</strong></li>
+              <li><strong>Clonus</strong> and hyperreflexia</li>
+              <li>Agitation, flushed skin, heavy sweating</li>
+              <li>BP <strong>154/90</strong>, HR <strong>132</strong></li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is happening, and what is your <strong>first priority action</strong>?</p>
+          `
+        }
+      },
+
+      neuro: {
+        standard: {
+          title: 'Neuro – Standard Case: Levodopa/Carbidopa (Fall Risk)',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>A Parkinson's patient taking <strong>levodopa-carbidopa</strong> reports:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Improved tremors</li>
+              <li><strong>Dizziness</strong> when standing</li>
+              <li>Nausea</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>priority nursing focus</strong> for this patient to prevent harm?</p>
+          `
+        },
+        consequence: {
+          title: 'Neuro – Consequence Case: Phenobarbital Toxicity',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>A seizure patient taking <strong>phenobarbital</strong> is found:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Very lethargic, difficult to arouse</li>
+              <li>RR <strong>8</strong></li>
+              <li>BP <strong>90/60</strong></li>
+              <li>Pupils sluggish</li>
+              <li>Admits: "I took a little extra dose because I felt a seizure coming."</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>priority action</strong>, and what is the likely cause of this decline?</p>
+          `
+        }
+      },
+
+      pain: {
+        standard: {
+          title: 'Pain – Standard Case: Fentanyl Monitoring',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>Post-op patient received IV <strong>fentanyl</strong> 20 minutes ago.</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Pain decreases from 9/10 → 3/10</li>
+              <li>RR <strong>10</strong>, shallow but arousable</li>
+              <li>SpO₂ <strong>92%</strong> on 2 L/min NC</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>next nursing action</strong> and what should you watch closely?</p>
+          `
+        },
+        consequence: {
+          title: 'Pain – Consequence Case: Fentanyl Overdose',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>Same post-op patient now:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>RR <strong>6</strong></li>
+              <li>Unresponsive to voice</li>
+              <li>SpO₂ <strong>84%</strong></li>
+              <li>Pinpoint pupils</li>
+              <li>An empty fentanyl PCA vial is in the bed.</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>first priority action</strong>, and what medication do you anticipate administering?</p>
+          `
+        }
+      },
+
+      endocrine: {
+        standard: {
+          title: 'Endocrine – Standard Case: PTU (Agranulocytosis Risk)',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>A patient on <strong>PTU</strong> for hyperthyroidism reports:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Sore throat</li>
+              <li>Mild fever</li>
+              <li>Fatigue</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What lab value is your <strong>priority</strong>, and why?</p>
+          `
+        },
+        consequence: {
+          title: 'Endocrine – Consequence Case: PTU Agranulocytosis',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>Same PTU patient now presents with:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Temp <strong>101.8°F</strong></li>
+              <li>Severe sore throat</li>
+              <li>WBC <strong>1,200</strong></li>
+              <li>BP <strong>92/54</strong>, HR <strong>130</strong></li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What condition are you most concerned about and what is your <strong>immediate nursing action</strong>?</p>
+          `
+        }
+      },
+
+      infection: {
+        standard: {
+          title: 'Infection – Standard Case: Rifampin (Liver Monitoring)',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>A TB patient on <strong>rifampin</strong> reports:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Orange-colored urine and tears</li>
+              <li>Mild fatigue</li>
+              <li>Mild abdominal discomfort</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            Which lab values are your <strong>priority</strong> to monitor, and why?</p>
+          `
+        },
+        consequence: {
+          title: 'Infection – Consequence Case: Amphotericin B Nephrotoxicity',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>A patient on IV <strong>Amphotericin B</strong> for fungal infection now has:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Creatinine rising from 0.9 → <strong>2.4</strong></li>
+              <li>K⁺ <strong>6.1</strong></li>
+              <li>EKG showing <strong>peaked T waves</strong></li>
+              <li>Rigors and fevers with infusions</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>priority</strong> response, and what earlier monitoring could have prevented this?</p>
+          `
+        }
+      },
+
+      inflammation: {
+        standard: {
+          title: 'Inflammation – Standard Case: Belimumab (Infection Risk)',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>A lupus patient on <strong>belimumab</strong> reports:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>New fatigue</li>
+              <li>Mild sore throat</li>
+              <li>Low-grade temp 99.9°F</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>priority teaching</strong> for this patient?</p>
+          `
+        },
+        consequence: {
+          title: 'Inflammation – Consequence Case: Allopurinol (SJS/TEN)',
+          html: `
+            <p><strong>Scenario:</strong></p>
+            <p>A gout patient on <strong>allopurinol</strong> develops:</p>
+            <ul style="margin-left:20px;color:#ccecff;">
+              <li>Widespread painful rash</li>
+              <li>Blistering lesions</li>
+              <li>Fever</li>
+              <li>Oral and mucosal involvement</li>
+            </ul>
+            <p><strong>Question for your group:</strong><br>
+            What is your <strong>priority concern</strong>, and what should you do immediately?</p>
+          `
+        }
+      }
+    };
+
+    // Decide which variant a group gets: standard vs consequence
+    function decideJigsawVariantForGroup(systemKey) {
+      return new Promise((resolve, reject) => {
+        if (!currentGroupId) {
+          return reject(new Error('Group # not set. Make sure your group has already used the site for Phase 1.'));
+        }
+
+        const cardId = systemToCard[systemKey];
+        if (!cardId) return reject(new Error('Unknown system selection.'));
+
+        const groupRef = database.ref('groups/' + currentGroupId + '/stability');
+        const eventsRef = database.ref('events').orderByChild('groupId').equalTo(currentGroupId);
+
+        // Get stability + events in parallel
+        Promise.all([
+          groupRef.once('value'),
+          eventsRef.once('value')
+        ]).then(([stabilitySnap, eventsSnap]) => {
+          const stability = typeof stabilitySnap.val() === 'number' ? stabilitySnap.val() : 100;
+          let hadFlashcardMiss = false;
+
+          const eventsVal = eventsSnap.val() || {};
+          Object.values(eventsVal).forEach(ev => {
+            if (
+              ev.phase === 'flashcard' &&
+              ev.itemId === cardId &&
+              ev.isCorrect === false
+            ) {
+              hadFlashcardMiss = true;
+            }
+          });
+
+          // RULE:
+          // If they missed the flashcard for this system OR their stability is < 75 → consequence case.
+          // Otherwise → standard case.
+          if (hadFlashcardMiss || stability < 75) {
+            resolve('consequence');
+          } else {
+            resolve('standard');
+          }
+
+        }).catch(err => reject(err));
+      });
+    }
+
+    // Hook up the "Get My Case" button
+    const jigsawCaseBtn = document.getElementById('jigsawCaseBtn');
+    const jigsawSystemSelect = document.getElementById('jigsawSystemSelect');
+    const jigsawCaseDisplay = document.getElementById('jigsawCaseDisplay');
+    const jigsawStatus = document.getElementById('jigsawStatus');
+
+    if (jigsawCaseBtn && jigsawSystemSelect && jigsawCaseDisplay) {
+      jigsawCaseBtn.addEventListener('click', () => {
+        jigsawStatus.textContent = '';
+        jigsawCaseDisplay.innerHTML = '<em style="color:#ccecff;font-size:13px;">Loading case...</em>';
+
+        const systemKey = jigsawSystemSelect.value;
+        if (!systemKey) {
+          jigsawStatus.style.color = '#ff99c2';
+          jigsawStatus.textContent = 'Please select your expert system first.';
+          jigsawCaseDisplay.innerHTML = '<em style="color:#ccecff;font-size:13px;">No case loaded.</em>';
+          return;
+        }
+
+        if (!jigsawCases[systemKey]) {
+          jigsawStatus.style.color = '#ff99c2';
+          jigsawStatus.textContent = 'Case bank not configured for that system.';
+          return;
+        }
+
+        decideJigsawVariantForGroup(systemKey)
+          .then(variant => {
+            const caseData = jigsawCases[systemKey][variant];
+            if (!caseData) {
+              throw new Error('No case configured for that variant.');
+            }
+            jigsawCaseDisplay.innerHTML = `
+              <h3 style="color:#00ffb3;margin-top:0;">${caseData.title}</h3>
+              ${caseData.html}
+              <p style="margin-top:12px;font-size:12px;color:#ccecff;">
+                <em>Note for your group:</em> This scenario was assigned based on your earlier decisions in Phase 1.
+              </p>
+            `;
+          })
+          .catch(err => {
+            console.error(err);
+            jigsawStatus.style.color = '#ff99c2';
+            jigsawStatus.textContent = 'Unable to assign case. Check your group number and Firebase connection.';
+            jigsawCaseDisplay.innerHTML = '<em style="color:#ff9f9f;font-size:13px;">Error loading case.</em>';
+          });
+      });
     }
   </script>
 </body>
