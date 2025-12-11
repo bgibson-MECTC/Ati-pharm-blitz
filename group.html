@@ -255,7 +255,26 @@
     </section>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
   <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfJ4KBqpbP4tbtikAgMEdbT5P1rb3yhHo",
+      authDomain: "ati-pharm-blitz.firebaseapp.com",
+      databaseURL: "https://ati-pharm-blitz-default-rtdb.firebaseio.com",
+      projectId: "ati-pharm-blitz",
+      storageBucket: "ati-pharm-blitz.firebasestorage.app",
+      messagingSenderId: "236104923394",
+      appId: "1:236104923394:web:201f51f9ba162438b2aa1b"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     // Map group number -> system name + instructions
     const groupConfig = {
       1: {
@@ -360,6 +379,78 @@
           list.appendChild(li);
         });
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', initGroupView);
+
+    // Auto-save to Firebase
+    function setupFirebaseSync(groupNum) {
+      const fields = ['safetyRisk', 'priorityLab', 'doNotMix', 'highYieldMed', 'scenarioPrompts', 'rationale'];
+      const groupRef = database.ref('groups/' + groupNum);
+
+      // Load existing data
+      groupRef.once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          fields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && data[field]) {
+              el.value = data[field];
+            }
+          });
+        }
+      });
+
+      // Save on input
+      fields.forEach(fieldId => {
+        const el = document.getElementById(fieldId);
+        if (el) {
+          el.addEventListener('input', () => {
+            const updates = {};
+            fields.forEach(field => {
+              const input = document.getElementById(field);
+              updates[field] = input ? input.value : '';
+            });
+            updates.systemName = groupConfig[groupNum].name;
+            updates.timestamp = Date.now();
+            groupRef.set(updates);
+          });
+        }
+      });
+    }
+
+    function initGroupView() {
+      let groupNum = parseInt(getQueryParam('group'), 10);
+      if (isNaN(groupNum) || groupNum < 1 || groupNum > 6) {
+        groupNum = 1; // default to Group 1 if invalid
+      }
+
+      const config = groupConfig[groupNum];
+
+      // Update header
+      const systemLabel = document.getElementById('systemLabel');
+      const groupLabel = document.getElementById('groupLabel');
+      const systemNameInline = document.getElementById('systemNameInline');
+      const huddleTitle = document.getElementById('huddleTitle');
+
+      if (systemLabel) systemLabel.textContent = `System Focus: ${config.name}`;
+      if (groupLabel) groupLabel.textContent = config.label;
+      if (systemNameInline) systemNameInline.textContent = config.name;
+      if (huddleTitle) huddleTitle.textContent = `${config.name} – Top 3 Priorities`;
+
+      // Instructions list
+      const list = document.getElementById('instructionList');
+      if (list) {
+        list.innerHTML = '';
+        config.instructions.forEach(text => {
+          const li = document.createElement('li');
+          li.textContent = text;
+          list.appendChild(li);
+        });
+      }
+
+      // Setup Firebase sync
+      setupFirebaseSync(groupNum);
     }
 
     document.addEventListener('DOMContentLoaded', initGroupView);
