@@ -477,46 +477,149 @@
 <body>
   <!-- GROUP SELECTION LANDING -->
   <div class="group-selection-screen" id="groupSelectionScreen">
-    <h1 class="selection-title">Select Your Group</h1>
-    <p class="selection-subtitle">Choose your assigned pharmacology system</p>
+    <h1 class="selection-title">Select Your Role</h1>
+    <p class="selection-subtitle">Choose to join a student group or take a leadership role</p>
     
-    <div class="group-grid">
-      <div class="group-option" onclick="selectGroup(1)">
-        <div class="group-icon">🧠</div>
-        <div class="group-number">1</div>
-        <div class="group-system">Neurological</div>
-      </div>
-      
-      <div class="group-option" onclick="selectGroup(2)">
-        <div class="group-icon">💊</div>
-        <div class="group-number">2</div>
-        <div class="group-system">Psychopharmacology</div>
-      </div>
-      
-      <div class="group-option" onclick="selectGroup(3)">
-        <div class="group-icon">😣</div>
-        <div class="group-number">3</div>
-        <div class="group-system">Pain Management</div>
-      </div>
-      
-      <div class="group-option" onclick="selectGroup(4)">
-        <div class="group-icon">🔥</div>
-        <div class="group-number">4</div>
-        <div class="group-system">Inflammation</div>
-      </div>
-      
-      <div class="group-option" onclick="selectGroup(5)">
-        <div class="group-icon">🩺</div>
-        <div class="group-number">5</div>
-        <div class="group-system">Endocrine</div>
-      </div>
-      
-      <div class="group-option" onclick="selectGroup(6)">
-        <div class="group-icon">🦠</div>
-        <div class="group-number">6</div>
-        <div class="group-system">Infection</div>
+    <!-- Leadership Roles Section -->
+    <div style="margin-bottom: 40px;">
+      <h3 style="color: #ffb300; font-size: 20px; margin-bottom: 20px;">🎯 Leadership Roles</h3>
+      <div class="role-grid">
+        <div class="role-option" onclick="selectLeadership('charge1')" id="charge1Option">
+          <div class="role-icon" style="font-size: 48px;">👨‍⚕️</div>
+          <div class="role-name">Charge Nurse 1</div>
+          <div class="role-badge">Oversee All Groups</div>
+          <div class="role-description">Monitor all 6 groups, approve answers, trigger RRT</div>
+        </div>
+        
+        <div class="role-option" onclick="selectLeadership('charge2')" id="charge2Option">
+          <div class="role-icon" style="font-size: 48px;">👩‍⚕️</div>
+          <div class="role-name">Charge Nurse 2</div>
+          <div class="role-badge">Oversee All Groups</div>
+          <div class="role-description">Monitor all 6 groups, approve answers, trigger RRT</div>
+        </div>
+        
+        <div class="role-option" onclick="selectLeadership('rrt')" id="rrtOption">
+          <div class="role-icon" style="font-size: 48px;">🚨</div>
+          <div class="role-name">Rapid Response RN</div>
+          <div class="role-badge">Emergency Response</div>
+          <div class="role-description">Rescue crashing groups and stabilize patients</div>
+        </div>
       </div>
     </div>
+
+    <!-- Student Groups Section -->
+    <div>
+      <h3 style="color: #00d4ff; font-size: 20px; margin-bottom: 20px;">📚 Student Groups</h3>
+      <div class="group-grid">
+        <div class="group-option" onclick="selectGroup(1)">
+          <div class="group-icon">🧠</div>
+          <div class="group-number">1</div>
+          <div class="group-system">Neurological</div>
+        </div>
+        
+        <div class="group-option" onclick="selectGroup(2)">
+          <div class="group-icon">💊</div>
+          <div class="group-number">2</div>
+          <div class="group-system">Psychopharmacology</div>
+        </div>
+        
+        <div class="group-option" onclick="selectGroup(3)">
+          <div class="group-icon">😣</div>
+          <div class="group-number">3</div>
+          <div class="group-system">Pain Management</div>
+        </div>
+        
+        <div class="group-option" onclick="selectGroup(4)">
+          <div class="group-icon">🔥</div>
+          <div class="group-number">4</div>
+          <div class="group-system">Inflammation</div>
+        </div>
+        
+        <div class="group-option" onclick="selectGroup(5)">
+          <div class="group-icon">🩺</div>
+          <div class="group-number">5</div>
+          <div class="group-system">Endocrine</div>
+        </div>
+        
+        <div class="group-option" onclick="selectGroup(6)">
+          <div class="group-icon">🦠</div>
+          <div class="group-number">6</div>
+          <div class="group-system">Infection</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERSHIP DASHBOARD (Charge/RRT) -->
+  <div class="main-wrapper group-activity-content" id="leadershipDashboard" style="display:none;">
+    <header>
+      <h1 class="main-title">Leadership Command Center</h1>
+      <p class="subtitle" id="leadershipRoleLabel">Role: …</p>
+      <a href="index.html?select=1" class="back-link">⬅ Change Role</a>
+    </header>
+
+    <!-- All Groups Stability Monitor -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">📊</span>
+        <h2 class="section-title">All Groups – Patient Stability</h2>
+      </div>
+      <div id="allGroupsStability" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- Flashcard & Jigsaw Errors -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">⚠️</span>
+        <h2 class="section-title">Error Log – All Groups</h2>
+      </div>
+      <div id="allGroupsErrors" style="max-height:400px;overflow-y:auto;">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- Group Cases & Approval -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">📋</span>
+        <h2 class="section-title">Assigned Cases & Approval</h2>
+      </div>
+      <div id="groupCases">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- RRT Rescue Controls (Charge Nurse only) -->
+    <section class="section" id="rrtControls">
+      <div class="section-header">
+        <span class="section-icon">🚨</span>
+        <h2 class="section-title">Rapid Response Team Controls</h2>
+      </div>
+      <p style="color:#ccecff;font-size:14px;margin-bottom:15px;">
+        Trigger an RRT call to rescue a crashing group. The RRT nurse will receive an alert.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+        <button class="assign-btn" onclick="triggerRRT(1)">🚨 RRT to Group 1</button>
+        <button class="assign-btn" onclick="triggerRRT(2)">🚨 RRT to Group 2</button>
+        <button class="assign-btn" onclick="triggerRRT(3)">🚨 RRT to Group 3</button>
+        <button class="assign-btn" onclick="triggerRRT(4)">🚨 RRT to Group 4</button>
+        <button class="assign-btn" onclick="triggerRRT(5)">🚨 RRT to Group 5</button>
+        <button class="assign-btn" onclick="triggerRRT(6)">🚨 RRT to Group 6</button>
+      </div>
+    </section>
+
+    <!-- RRT Active Calls (RRT role only) -->
+    <section class="section" id="rrtCalls" style="display:none;">
+      <div class="section-header">
+        <span class="section-icon">🚨</span>
+        <h2 class="section-title">Active RRT Calls</h2>
+      </div>
+      <div id="activeCalls">
+        <p style="color:#ccecff;font-size:14px;">No active calls. Standby for charge nurse alerts.</p>
+      </div>
+    </section>
   </div>
 
   <!-- ROLE SELECTION SCREEN -->
@@ -1619,82 +1722,68 @@
     }
 
     // -----------------------------
-    // GROUP & ROLE SELECTION HANDLERS
+    // GROUP & LEADERSHIP SELECTION
     // -----------------------------
     let selectedGroupNumber = null;
     let selectedRole = null;
 
-    function selectGroup(groupNumber) {
-      selectedGroupNumber = groupNumber;
-      
-      // Store group in localStorage
-      try {
-        localStorage.setItem('pharmBlitzGroupId', String(selectedGroupNumber));
-      } catch (e) {}
-
-      // Hide group selection, show role selection
-      document.getElementById('groupSelectionScreen').classList.add('hidden');
-      document.getElementById('roleSelectionScreen').classList.add('active');
-
-      // Update role screen subtitle with group info
-      const config = groupConfig[groupNumber];
-      document.getElementById('roleSubtitle').textContent = 
-        'Group ' + groupNumber + ': ' + config.name + ' – Choose your leadership role';
-
-      // Check which roles are already taken in Firebase
-      checkAvailableRoles(groupNumber);
-    }
-
-    function checkAvailableRoles(groupNumber) {
-      const rolesRef = database.ref('groups/' + groupNumber + '/roles');
-      rolesRef.once('value').then(snapshot => {
-        const roles = snapshot.val() || {};
-        
-        // Disable role options that are already taken
-        if (roles.charge1) {
-          document.getElementById('charge1Option').classList.add('disabled');
-        }
-        if (roles.charge2) {
-          document.getElementById('charge2Option').classList.add('disabled');
-        }
-        if (roles.rrt) {
-          document.getElementById('rrtOption').classList.add('disabled');
-        }
-      });
-    }
-
-    function selectRole(role) {
+    function selectLeadership(role) {
       selectedRole = role;
       
       // Store role in localStorage
       try {
         localStorage.setItem('pharmBlitzRole', role);
+        localStorage.removeItem('pharmBlitzGroupId'); // Clear group if switching to leadership
       } catch (e) {}
 
-      // Claim this role in Firebase
-      const rolesRef = database.ref('groups/' + selectedGroupNumber + '/roles/' + role);
-      rolesRef.set({
+      // Claim this leadership role in Firebase
+      const leadershipRef = database.ref('leadership/' + role);
+      leadershipRef.set({
         claimed: true,
         timestamp: Date.now()
       });
 
-      // Now show the activity content
-      currentGroupId = selectedGroupNumber;
-      document.getElementById('roleSelectionScreen').classList.remove('active');
-      document.getElementById('groupActivityContent').classList.add('active');
+      // Hide selection, show leadership dashboard
+      document.getElementById('groupSelectionScreen').classList.add('hidden');
+      document.getElementById('leadershipDashboard').style.display = 'block';
 
-      // Get group configuration
-      const config = groupConfig[selectedGroupNumber];
-
-      // Update header labels with role
+      // Set role label
       const roleNames = {
         charge1: 'Charge Nurse 1',
         charge2: 'Charge Nurse 2',
         rrt: 'Rapid Response RN'
       };
+      document.getElementById('leadershipRoleLabel').textContent = 'Role: ' + roleNames[role];
+
+      // Show appropriate sections
+      if (role === 'rrt') {
+        document.getElementById('rrtControls').style.display = 'none';
+        document.getElementById('rrtCalls').style.display = 'block';
+        setupRRTListener();
+      } else {
+        document.getElementById('rrtControls').style.display = 'block';
+        document.getElementById('rrtCalls').style.display = 'none';
+      }
+
+      // Initialize dashboards
+      setupAllGroupsMonitor();
+      setupErrorLog();
+      setupGroupCasesMonitor();
+    }
+
+    function selectGroup(groupNumber) {
+      currentGroupId = groupNumber;
+      selectedGroupNumber = groupNumber;
       
-      document.getElementById('systemLabel').textContent = 'Group System: ' + config.name;
-      document.getElementById('groupLabel').textContent = config.label + ' – ' + roleNames[role];
+      // Store group in localStorage
+      try {
+        localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
+        localStorage.removeItem('pharmBlitzRole'); // Clear leadership role if joining group
+      } catch (e) {}
+
+      // Hide selection screen, show group activity content
+      document.getElementById('groupSelectionScreen').classList.add('hidden');
+      document.getElementById('groupActivityContent').classList.add('active');
 
       // Update mission instructions
       const instructionList = document.getElementById('instructionList');
@@ -1738,14 +1827,194 @@
       }
     }
 
-    // Check if group already selected on page load
+    // -----------------------------
+    // LEADERSHIP DASHBOARD FUNCTIONS
+    // -----------------------------
+    function setupAllGroupsMonitor() {
+      const container = document.getElementById('allGroupsStability');
+      const groupNames = ['Neuro', 'Psych', 'Pain', 'Inflam', 'Endo', 'Infection'];
+      
+      for (let i = 1; i <= 6; i++) {
+        const groupRef = database.ref('groups/' + i + '/stability');
+        const groupDiv = document.createElement('div');
+        groupDiv.id = 'groupStability' + i;
+        groupDiv.style.cssText = 'padding:15px;background:rgba(255,255,255,0.05);border-radius:12px;border:2px solid rgba(0,212,255,0.3);';
+        groupDiv.innerHTML = `
+          <div style="font-size:18px;font-weight:700;color:#00d4ff;margin-bottom:8px;">Group ${i}: ${groupNames[i-1]}</div>
+          <div style="font-size:32px;font-weight:900;color:#00ffb3;" id="stabilityValue${i}">100</div>
+          <div style="font-size:12px;color:#ccecff;margin-top:4px;">Patient Stability</div>
+        `;
+        container.appendChild(groupDiv);
+        
+        groupRef.on('value', snap => {
+          const stability = snap.val() || 100;
+          const valueEl = document.getElementById('stabilityValue' + i);
+          if (valueEl) {
+            valueEl.textContent = stability;
+            valueEl.style.color = stability >= 75 ? '#00ffb3' : stability >= 50 ? '#ffb300' : '#ff006e';
+          }
+        });
+      }
+    }
+
+    function setupErrorLog() {
+      const container = document.getElementById('allGroupsErrors');
+      const eventsRef = database.ref('events').orderByChild('timestamp').limitToLast(50);
+      
+      eventsRef.on('child_added', snap => {
+        const event = snap.val();
+        if (!event.isCorrect) {
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:10px;margin-bottom:8px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:4px solid #ff006e;';
+          div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <strong style="color:#ff99c2;">Group ${event.groupId} – ${event.phase}</strong>
+              <span style="font-size:11px;color:#ccecff;">${new Date(event.timestamp).toLocaleTimeString()}</span>
+            </div>
+            <div style="font-size:13px;color:#ccecff;">${event.explanation || 'Error recorded'}</div>
+            <div style="font-size:12px;color:#ffb300;margin-top:4px;">Stability: ${event.delta}</div>
+          `;
+          container.prepend(div);
+        }
+      });
+    }
+
+    function setupGroupCasesMonitor() {
+      const container = document.getElementById('groupCases');
+      container.innerHTML = '<p style="color:#ccecff;font-size:14px;">Group case assignments will appear here during Jigsaw Speed Round.</p>';
+      
+      // Monitor jigsaw cases when they're generated
+      for (let i = 1; i <= 6; i++) {
+        const caseRef = database.ref('jigsaw/group' + i + '/assignedCase');
+        caseRef.on('value', snap => {
+          const caseData = snap.val();
+          if (caseData) {
+            // Show case with approve/escalate buttons
+            const caseDiv = document.createElement('div');
+            caseDiv.style.cssText = 'padding:15px;margin-bottom:12px;background:rgba(255,255,255,0.05);border-radius:12px;border:2px solid rgba(0,212,255,0.3);';
+            caseDiv.innerHTML = `
+              <h4 style="color:#00d4ff;margin:0 0 10px 0;">Group ${i} – ${caseData.system || 'System'}</h4>
+              <div style="font-size:13px;color:#ccecff;margin-bottom:12px;">${caseData.title || 'Case assigned'}</div>
+              <div style="display:flex;gap:10px;">
+                <button class="assign-btn" onclick="approveAnswer(${i})" style="background:#00ffb3;">✓ Approve</button>
+                <button class="assign-btn" onclick="escalateAnswer(${i})" style="background:#ff006e;">⚠ Escalate</button>
+              </div>
+            `;
+            document.getElementById('groupCases').appendChild(caseDiv);
+          }
+        });
+      }
+    }
+
+    function setupRRTListener() {
+      const container = document.getElementById('activeCalls');
+      const rrtRef = database.ref('rrt/calls');
+      
+      rrtRef.on('child_added', snap => {
+        const call = snap.val();
+        const callDiv = document.createElement('div');
+        callDiv.id = 'rrtCall' + snap.key;
+        callDiv.style.cssText = 'padding:15px;margin-bottom:12px;background:rgba(255,0,110,0.1);border-radius:12px;border:2px solid #ff006e;animation:pulse 2s infinite;';
+        callDiv.innerHTML = `
+          <h4 style="color:#ff006e;margin:0 0 10px 0;">🚨 RRT CALL: Group ${call.groupId}</h4>
+          <div style="font-size:13px;color:#ccecff;margin-bottom:12px;">Patient stability: ${call.stability || 'Critical'}</div>
+          <button class="assign-btn" onclick="stabilizeGroup(${call.groupId}, '${snap.key}')" style="background:#00ffb3;">Stabilize Patient (+30)</button>
+        `;
+        container.innerHTML = '';
+        container.appendChild(callDiv);
+      });
+    }
+
+    function triggerRRT(groupId) {
+      const rrtRef = database.ref('rrt/calls').push();
+      const groupRef = database.ref('groups/' + groupId + '/stability');
+      
+      groupRef.once('value').then(snap => {
+        const stability = snap.val() || 100;
+        rrtRef.set({
+          groupId: groupId,
+          stability: stability,
+          timestamp: Date.now(),
+          calledBy: selectedRole
+        });
+        
+        alert(`RRT called to Group ${groupId}. Rapid Response RN has been notified.`);
+      });
+    }
+
+    function stabilizeGroup(groupId, callKey) {
+      const groupRef = database.ref('groups/' + groupId + '/stability');
+      groupRef.transaction(current => {
+        return Math.min(100, (current || 0) + 30);
+      }).then(() => {
+        // Remove the call
+        database.ref('rrt/calls/' + callKey).remove();
+        
+        // Log event
+        database.ref('events').push({
+          groupId: groupId,
+          phase: 'rrt-rescue',
+          isCorrect: true,
+          delta: +30,
+          explanation: 'RRT stabilized patient',
+          timestamp: Date.now()
+        });
+        
+        alert(`Group ${groupId} stabilized! Stability +30.`);
+      });
+    }
+
+    function approveAnswer(groupId) {
+      database.ref('groups/' + groupId + '/approval').set({
+        status: 'approved',
+        by: selectedRole,
+        timestamp: Date.now()
+      });
+      alert(`Group ${groupId} answer approved!`);
+    }
+
+    function escalateAnswer(groupId) {
+      database.ref('groups/' + groupId + '/approval').set({
+        status: 'escalated',
+        by: selectedRole,
+        timestamp: Date.now()
+      });
+      alert(`Group ${groupId} case escalated for review.`);
+    }
+
+    // -----------------------------
+    // PAGE LOAD: CHECK EXISTING ROLE
+    // -----------------------------
+    
+    // Check which leadership roles are already claimed
+    (function checkLeadershipAvailability() {
+      const leadershipRef = database.ref('leadership');
+      leadershipRef.once('value').then(snapshot => {
+        const leadership = snapshot.val() || {};
+        
+        if (leadership.charge1 && leadership.charge1.claimed) {
+          const el = document.getElementById('charge1Option');
+          if (el) el.classList.add('disabled');
+        }
+        if (leadership.charge2 && leadership.charge2.claimed) {
+          const el = document.getElementById('charge2Option');
+          if (el) el.classList.add('disabled');
+        }
+        if (leadership.rrt && leadership.rrt.claimed) {
+          const el = document.getElementById('rrtOption');
+          if (el) el.classList.add('disabled');
+        }
+      });
+    })();
+    
     (function checkExistingGroup() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         
-        // If ?select=1 parameter present, clear saved group and show selection screen
+        // If ?select=1 parameter present, clear saved roles and show selection screen
         if (urlParams.get('select') === '1') {
           localStorage.removeItem('pharmBlitzGroupId');
+          localStorage.removeItem('pharmBlitzRole');
           // Show selection screen (do nothing else)
           return;
         }
@@ -1758,6 +2027,13 @@
             selectGroup(groupNum);
             return;
           }
+        }
+        
+        // Check for saved leadership role first
+        const savedRole = localStorage.getItem('pharmBlitzRole');
+        if (savedRole && ['charge1', 'charge2', 'rrt'].includes(savedRole)) {
+          selectLeadership(savedRole);
+          return;
         }
         
         // Otherwise, auto-load saved group if exists
