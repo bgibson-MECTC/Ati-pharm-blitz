@@ -575,8 +575,22 @@
     <h1 class="selection-title">Select Your Role</h1>
     <p class="selection-subtitle">Choose to join a student group or take a leadership role</p>
     
+    <!-- Continue Prompt (shown when returning user) -->
+    <div id="continuePrompt" style="display:none; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; text-align: center;">
+      <h3 style="color: #fff; margin: 0 0 10px 0; font-size: 20px;">Welcome Back!</h3>
+      <p id="continueMessage" style="color: #e0e0e0; margin: 0 0 15px 0; font-size: 16px;"></p>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <button onclick="confirmContinue()" style="background: #00d4ff; color: #0a1128; padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 8px rgba(0,212,255,0.3);">
+          Continue
+        </button>
+        <button onclick="chooseDifferent()" style="background: rgba(255,255,255,0.2); color: #fff; padding: 12px 30px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+          Choose Different
+        </button>
+      </div>
+    </div>
+    
     <!-- Leadership Roles Section -->
-    <div style="margin-bottom: 40px;">
+    <div style="margin-bottom: 40px;" id="roleSelectionOptions">
       <h3 style="color: #ffb300; font-size: 20px; margin-bottom: 20px;">🎯 Leadership Roles</h3>
       <div class="role-grid">
         <div class="role-option" onclick="selectLeadership('charge1')" id="charge1Option">
@@ -643,6 +657,7 @@
         </div>
       </div>
     </div>
+    </div>  <!-- Close roleSelectionOptions -->
   </div>
 
   <!-- LEADERSHIP DASHBOARD (Charge/RRT) -->
@@ -2707,6 +2722,33 @@
     // PAGE LOAD: CHECK EXISTING ROLE
     // -----------------------------
     
+    // Store pending selection
+    let pendingRole = null;
+    let pendingGroup = null;
+    
+    window.confirmContinue = function() {
+      console.log('confirmContinue called - pendingRole:', pendingRole, 'pendingGroup:', pendingGroup);
+      if (pendingRole) {
+        window.selectLeadership(pendingRole);
+      } else if (pendingGroup) {
+        window.selectGroup(pendingGroup);
+      }
+    };
+    
+    window.chooseDifferent = function() {
+      console.log('chooseDifferent called - clearing saved data');
+      // Clear saved data
+      try {
+        localStorage.removeItem('pharmBlitzRole');
+        localStorage.removeItem('pharmBlitzGroupId');
+      } catch (e) {}
+      // Hide continue prompt, show selection options
+      document.getElementById('continuePrompt').style.display = 'none';
+      document.getElementById('roleSelectionOptions').style.display = 'block';
+      pendingRole = null;
+      pendingGroup = null;
+    };
+    
     // Check which leadership roles are already claimed
     // TEMPORARILY DISABLED FOR TESTING
     /*
@@ -2872,12 +2914,21 @@
         const urlParams = new URLSearchParams(window.location.search);
         console.log('URL search params:', window.location.search);
         
+        const roleNames = {
+          charge1: 'Charge Nurse 1',
+          charge2: 'Charge Nurse 2',
+          rrt: 'Rapid Response RN'
+        };
+        
         // Check if URL has ?role parameter (from select.html)
         const roleParam = urlParams.get('role');
         console.log('roleParam:', roleParam);
         if (roleParam && ['charge1', 'charge2', 'rrt'].includes(roleParam)) {
-          console.log('Calling window.selectLeadership with:', roleParam);
-          window.selectLeadership(roleParam);
+          console.log('Found role parameter, showing continue prompt');
+          pendingRole = roleParam;
+          document.getElementById('continueMessage').textContent = `Continue as ${roleNames[roleParam]}?`;
+          document.getElementById('continuePrompt').style.display = 'block';
+          document.getElementById('roleSelectionOptions').style.display = 'none';
           return;
         }
         
@@ -2887,8 +2938,12 @@
         if (groupParam) {
           const groupNum = parseInt(groupParam, 10);
           if (groupNum >= 1 && groupNum <= 6) {
-            console.log('Found group parameter:', groupNum);
-            window.selectGroup(groupNum);
+            console.log('Found group parameter, showing continue prompt');
+            pendingGroup = groupNum;
+            const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain Management', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
+            document.getElementById('continueMessage').textContent = `Continue to Group ${groupNum} (${groupNames[groupNum]})?`;
+            document.getElementById('continuePrompt').style.display = 'block';
+            document.getElementById('roleSelectionOptions').style.display = 'none';
             return;
           }
         }
@@ -2896,8 +2951,11 @@
         // No URL params - check localStorage
         const savedRole = localStorage.getItem('pharmBlitzRole');
         if (savedRole && ['charge1', 'charge2', 'rrt'].includes(savedRole)) {
-          console.log('Found saved role in localStorage:', savedRole);
-          window.selectLeadership(savedRole);
+          console.log('Found saved role in localStorage, showing continue prompt');
+          pendingRole = savedRole;
+          document.getElementById('continueMessage').textContent = `Continue as ${roleNames[savedRole]}?`;
+          document.getElementById('continuePrompt').style.display = 'block';
+          document.getElementById('roleSelectionOptions').style.display = 'none';
           return;
         }
         
@@ -2905,8 +2963,12 @@
         if (savedGroup) {
           const groupNum = parseInt(savedGroup, 10);
           if (groupNum >= 1 && groupNum <= 6) {
-            console.log('Found saved group in localStorage:', groupNum);
-            window.selectGroup(groupNum);
+            console.log('Found saved group in localStorage, showing continue prompt');
+            pendingGroup = groupNum;
+            const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain Management', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
+            document.getElementById('continueMessage').textContent = `Continue to Group ${groupNum} (${groupNames[groupNum]})?`;
+            document.getElementById('continuePrompt').style.display = 'block';
+            document.getElementById('roleSelectionOptions').style.display = 'none';
             return;
           }
         }
