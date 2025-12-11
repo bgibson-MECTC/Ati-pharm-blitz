@@ -695,6 +695,40 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Debrief board */
+    .debrief-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .debrief-card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      border: 1px solid rgba(0,212,255,0.3);
+      padding: 10px;
+    }
+
+    .debrief-card h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: #00ffb3;
+    }
+
+    .debrief-card textarea {
+      width: 100%;
+      min-height: 90px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 8px;
+      border: 1px solid rgba(0,212,255,0.4);
+      color: #ffffff;
+      padding: 8px;
+      font-size: 13px;
+      resize: vertical;
+      font-family: inherit;
+    }
   </style>
 </head>
 
@@ -969,6 +1003,51 @@ Student 3
         </div>
 
       </div>
+    </section>
+
+    <!-- DEBRIEF BOARD (INSTRUCTOR VIEW) -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🧾</span>
+        <h2 class="section-title">Debrief Board – Group Takeaways</h2>
+      </div>
+
+      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">
+        During debrief, have each Charge Nurse share their top safety risk, key lab, "do not mix" rule, and one scenario.
+        Type their final answers here so the whole class can see all systems at once.
+      </p>
+
+      <div class="debrief-grid">
+        <div class="debrief-card">
+          <h3>Group 1</h3>
+          <textarea id="debrief1" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
+        </div>
+        <div class="debrief-card">
+          <h3>Group 2</h3>
+          <textarea id="debrief2" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
+        </div>
+        <div class="debrief-card">
+          <h3>Group 3</h3>
+          <textarea id="debrief3" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
+        </div>
+        <div class="debrief-card">
+          <h3>Group 4</h3>
+          <textarea id="debrief4" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
+        </div>
+        <div class="debrief-card">
+          <h3>Group 5</h3>
+          <textarea id="debrief5" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
+        </div>
+        <div class="debrief-card">
+          <h3>Group 6</h3>
+          <textarea id="debrief6" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
+        </div>
+      </div>
+
+      <button id="saveDebriefBtn" class="assign-btn" style="margin-top:15px;">
+        Save Debrief on This Device
+      </button>
+      <p id="debriefStatus" class="assign-error"></p>
     </section>
 
   </div>
@@ -1325,6 +1404,67 @@ Student 3
 
     // Initialize
     loadPhase(0);
+
+    // -----------------------------
+    // DEBRIEF BOARD SAVE / LOAD
+    // -----------------------------
+
+    function saveDebrief() {
+      const ids = ['debrief1','debrief2','debrief3','debrief4','debrief5','debrief6'];
+      const data = {};
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        data[id] = el ? el.value : '';
+      });
+
+      try {
+        localStorage.setItem('pharmBlitzDebrief', JSON.stringify(data));
+        const status = document.getElementById('debriefStatus');
+        if (status) {
+          status.style.color = '#00ffb3';
+          status.textContent = 'Debrief saved on this device.';
+          setTimeout(() => {
+            status.textContent = '';
+          }, 3000);
+        }
+      } catch (e) {
+        const status = document.getElementById('debriefStatus');
+        if (status) {
+          status.style.color = '#ff99c2';
+          status.textContent = 'Unable to save debrief (local storage unavailable).';
+        }
+      }
+    }
+
+    function loadDebrief() {
+      try {
+        const saved = localStorage.getItem('pharmBlitzDebrief');
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        Object.entries(data).forEach(([id, value]) => {
+          const el = document.getElementById(id);
+          if (el) el.value = value;
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // Load debrief on page load
+    loadDebrief();
+
+    const saveBtn = document.getElementById('saveDebriefBtn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveDebrief);
+    }
+
+    // Auto-save on input
+    ['debrief1','debrief2','debrief3','debrief4','debrief5','debrief6'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', saveDebrief);
+      }
+    });
   </script>
 </body>
 </html>
