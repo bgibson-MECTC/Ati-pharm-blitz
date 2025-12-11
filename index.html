@@ -881,6 +881,10 @@
     <header>
       <h1 class="main-title">ATI Pharm Blitz</h1>
       <p class="subtitle">Instructor Dashboard</p>
+      <div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;">
+        <a href="group.html" class="back-link" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #fff; font-size: 14px; text-decoration: none; display: inline-block;">🏠 Student Home Screen</a>
+        <button onclick="resetGame()" class="back-link" style="background: rgba(255,69,0,0.2); border: 1px solid rgba(255,69,0,0.5); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #ff6b6b; font-size: 14px; font-weight: 600;">🔄 Reset Game</button>
+      </div>
     </header>
 
     <!-- DEBRIEF BOARD (INSTRUCTOR VIEW) -->
@@ -2076,6 +2080,61 @@
         // Redirect to group selection with parameter to force selection screen
         window.location.href = 'group.html?select=1';
       }
+    }
+    
+    function resetGame() {
+      if (!confirm('⚠️ Reset all game data? This will clear all groups, events, flashcards, and progress. This action cannot be undone!')) {
+        return;
+      }
+      
+      console.log('resetGame called from instructor dashboard');
+      
+      // Initialize Firebase if not already done
+      if (typeof firebase === 'undefined') {
+        alert('❌ Firebase not loaded. Please refresh the page.');
+        return;
+      }
+      
+      if (!firebase.apps.length) {
+        const firebaseConfig = {
+          apiKey: "AIzaSyBfJ4KBqpbP4tbtikAgMEdbT5P1rb3yhHo",
+          authDomain: "ati-pharm-blitz.firebaseapp.com",
+          databaseURL: "https://ati-pharm-blitz-default-rtdb.firebaseio.com",
+          projectId: "ati-pharm-blitz",
+          storageBucket: "ati-pharm-blitz.firebasestorage.app",
+          messagingSenderId: "236104923394",
+          appId: "1:236104923394:web:201f51f9ba162438b2aa1b"
+        };
+        firebase.initializeApp(firebaseConfig);
+      }
+      
+      const database = firebase.database();
+      
+      // Clear all Firebase data
+      const resetPromises = [
+        database.ref('groups').remove(),
+        database.ref('events').remove(),
+        database.ref('flashcards').remove(),
+        database.ref('jigsaw').remove(),
+        database.ref('debrief').remove(),
+        database.ref('leadership').remove(),
+        database.ref('rrt/calls').remove(),
+        database.ref('timer').remove(),
+        database.ref('chat').remove(),
+        database.ref('messages').remove(),
+        database.ref('reflections').remove(),
+        database.ref('rrt/metrics').remove()
+      ];
+      
+      Promise.all(resetPromises).then(() => {
+        console.log('All Firebase data cleared from instructor dashboard');
+        alert('✅ Game reset complete!');
+        // Reload the page
+        window.location.reload();
+      }).catch(err => {
+        console.error('Error resetting game:', err);
+        alert('❌ Error resetting game. Please try again.');
+      });
     }
   </script>
 </body>
