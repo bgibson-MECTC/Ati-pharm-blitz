@@ -2911,9 +2911,9 @@
           }
         }
         
-        // Nothing found - redirect to select.html
-        console.log('No role/group found - redirecting to select.html');
-        window.location.href = 'select.html';
+        // Nothing found - show the built-in role selection screen
+        console.log('No role/group found - showing selection screen');
+        // The groupSelectionScreen is already visible by default
         
       } catch (e) {
         console.error('Error in checkExistingGroup:', e);
