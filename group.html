@@ -319,10 +319,138 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
+
+    /* Group Selection Landing */
+    .group-selection-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .group-selection-screen.hidden {
+      display: none;
+    }
+
+    .selection-title {
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00d4ff, #00ffb3);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+
+    .selection-subtitle {
+      font-size: 18px;
+      color: #b8e0ff;
+      margin-bottom: 40px;
+    }
+
+    .group-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .group-option {
+      background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,255,179,0.05));
+      border: 2px solid rgba(0,212,255,0.3);
+      border-radius: 16px;
+      padding: 30px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .group-option:hover {
+      transform: translateY(-8px);
+      border-color: #00d4ff;
+      box-shadow: 0 15px 35px rgba(0,212,255,0.3);
+      background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,255,179,0.1));
+    }
+
+    .group-number {
+      font-size: 48px;
+      font-weight: 900;
+      color: #00d4ff;
+      margin-bottom: 10px;
+    }
+
+    .group-system {
+      font-size: 18px;
+      font-weight: 600;
+      color: #00ffb3;
+      margin-bottom: 8px;
+    }
+
+    .group-icon {
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+
+    .group-activity-content {
+      display: none;
+    }
+
+    .group-activity-content.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
-  <div class="main-wrapper">
+  <!-- GROUP SELECTION LANDING -->
+  <div class="group-selection-screen" id="groupSelectionScreen">
+    <h1 class="selection-title">Select Your Group</h1>
+    <p class="selection-subtitle">Choose your assigned pharmacology system</p>
+    
+    <div class="group-grid">
+      <div class="group-option" onclick="selectGroup(1)">
+        <div class="group-icon">🧠</div>
+        <div class="group-number">1</div>
+        <div class="group-system">Neurological</div>
+      </div>
+      
+      <div class="group-option" onclick="selectGroup(2)">
+        <div class="group-icon">💊</div>
+        <div class="group-number">2</div>
+        <div class="group-system">Psychopharmacology</div>
+      </div>
+      
+      <div class="group-option" onclick="selectGroup(3)">
+        <div class="group-icon">😣</div>
+        <div class="group-number">3</div>
+        <div class="group-system">Pain Management</div>
+      </div>
+      
+      <div class="group-option" onclick="selectGroup(4)">
+        <div class="group-icon">🔥</div>
+        <div class="group-number">4</div>
+        <div class="group-system">Inflammation</div>
+      </div>
+      
+      <div class="group-option" onclick="selectGroup(5)">
+        <div class="group-icon">🩺</div>
+        <div class="group-number">5</div>
+        <div class="group-system">Endocrine</div>
+      </div>
+      
+      <div class="group-option" onclick="selectGroup(6)">
+        <div class="group-icon">🦠</div>
+        <div class="group-number">6</div>
+        <div class="group-system">Infection</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUP ACTIVITY CONTENT -->
+  <div class="main-wrapper group-activity-content" id="groupActivityContent">
     <header>
       <h1 class="main-title">ATI Pharm Blitz</h1>
       <p class="subtitle" id="systemLabel">Group System: …</p>
@@ -339,22 +467,6 @@
       <ul class="instructions-list" id="instructionList">
         <!-- Filled dynamically based on system -->
       </ul>
-    </section>
-
-    <!-- GROUP IDENTIFIER -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">🏷️</span>
-        <h2 class="section-title">Group Identity</h2>
-      </div>
-      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">
-        One device per table: enter your Group # exactly as assigned (1–6). The site will track your patient's stability based on your decisions.
-      </p>
-      <input id="groupIdInput" type="number" min="1" max="6"
-             placeholder="Enter your Group #"
-             style="background:rgba(255,255,255,0.08);border-radius:8px;border:1px solid rgba(0,212,255,0.4);color:#ffffff;padding:8px 10px;font-size:14px;">
-      <button id="saveGroupIdBtn" class="assign-btn" style="margin-left:8px;">Set Group</button>
-      <p id="groupIdStatus" class="assign-error"></p>
     </section>
 
     <!-- WARM-UP FLASHCARDS -->
@@ -811,77 +923,13 @@
     document.addEventListener('DOMContentLoaded', initGroupView);
 
     // -----------------------------
-    // GROUP ID HANDLING
+    // GROUP ID HANDLING (Legacy - kept for compatibility)
     // -----------------------------
 
     let currentGroupId = null;
 
-    function saveGroupId() {
-      const input = document.getElementById('groupIdInput');
-      const status = document.getElementById('groupIdStatus');
-      const value = parseInt(input.value, 10);
-
-      if (!value || value < 1 || value > 6) {
-        status.style.color = '#ff99c2';
-        status.textContent = 'Enter a valid Group # between 1 and 6.';
-        return;
-      }
-
-      currentGroupId = value;
-      status.style.color = '#00ffb3';
-      status.textContent = 'Group set to #' + currentGroupId;
-
-      // store locally so they don't retype
-      try {
-        localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
-      } catch (e) {}
-
-      // Show the mission section now that group is set
-      const missionSection = document.getElementById('missionSection');
-      if (missionSection) {
-        missionSection.style.display = 'block';
-      }
-
-      // initialize stability in Firebase if not present
-      const groupRef = database.ref('groups/' + currentGroupId);
-      groupRef.child('stability').once('value').then(snap => {
-        if (snap.val() == null) {
-          groupRef.update({ stability: 100 });
-        }
-      });
-
-      // Initialize jigsaw checkboxes now that group is set
-      if (typeof setupJigsawCheckboxes === 'function') {
-        setupJigsawCheckboxes();
-      }
-    }
-
-    const saveGroupBtn = document.getElementById('saveGroupIdBtn');
-    if (saveGroupBtn) {
-      saveGroupBtn.addEventListener('click', saveGroupId);
-    }
-
-    // Load saved groupId on page load
-    (function loadSavedGroupId() {
-      try {
-        const saved = localStorage.getItem('pharmBlitzGroupId');
-        if (saved) {
-          currentGroupId = parseInt(saved, 10);
-          const input = document.getElementById('groupIdInput');
-          const status = document.getElementById('groupIdStatus');
-          const missionSection = document.getElementById('missionSection');
-          
-          if (input) input.value = currentGroupId;
-          if (status) {
-            status.style.color = '#00ffb3';
-            status.textContent = 'Group set to #' + currentGroupId;
-          }
-          if (missionSection) {
-            missionSection.style.display = 'block';
-          }
-        }
-      } catch (e) {}
-    })();
+    // Note: Group selection now handled by selectGroup() function
+    // This legacy code kept for any direct references
 
     // -----------------------------
     // DECISION ENGINE + STABILITY
@@ -1470,6 +1518,67 @@
           });
       });
     }
+
+    // -----------------------------
+    // GROUP SELECTION HANDLER
+    // -----------------------------
+    function selectGroup(groupNumber) {
+      currentGroupId = groupNumber;
+      
+      // Store in localStorage
+      try {
+        localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
+      } catch (e) {}
+
+      // Hide selection screen, show activity content
+      document.getElementById('groupSelectionScreen').classList.add('hidden');
+      document.getElementById('groupActivityContent').classList.add('active');
+
+      // Update header labels
+      const systemNames = {
+        1: 'Neurological',
+        2: 'Psychopharmacology', 
+        3: 'Pain Management',
+        4: 'Inflammation',
+        5: 'Endocrine',
+        6: 'Infection'
+      };
+      
+      document.getElementById('systemLabel').textContent = 'Group System: ' + systemNames[groupNumber];
+      document.getElementById('groupLabel').textContent = 'Group: ' + groupNumber;
+
+      // Show mission section
+      const missionSection = document.getElementById('missionSection');
+      if (missionSection) {
+        missionSection.style.display = 'block';
+      }
+
+      // Initialize stability in Firebase
+      const groupRef = database.ref('groups/' + currentGroupId);
+      groupRef.child('stability').once('value').then(snap => {
+        if (snap.val() == null) {
+          groupRef.update({ stability: 100 });
+        }
+      });
+
+      // Initialize jigsaw checkboxes
+      if (typeof setupJigsawCheckboxes === 'function') {
+        setupJigsawCheckboxes();
+      }
+    }
+
+    // Check if group already selected on page load
+    (function checkExistingGroup() {
+      try {
+        const saved = localStorage.getItem('pharmBlitzGroupId');
+        if (saved) {
+          const groupNum = parseInt(saved, 10);
+          if (groupNum >= 1 && groupNum <= 6) {
+            selectGroup(groupNum);
+          }
+        }
+      } catch (e) {}
+    })();
   </script>
 </body>
 </html>
