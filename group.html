@@ -2778,20 +2778,26 @@
     
     // Handle URL parameters and localStorage
     (function checkExistingGroup() {
-      console.log('checkExistingGroup running...');
+      console.log('=== checkExistingGroup running ===');
+      console.log('window.selectLeadership available?', typeof window.selectLeadership);
+      console.log('window.selectGroup available?', typeof window.selectGroup);
+      
       try {
         const urlParams = new URLSearchParams(window.location.search);
+        console.log('URL search params:', window.location.search);
         
         // Check if URL has ?role parameter (from select.html)
         const roleParam = urlParams.get('role');
+        console.log('roleParam:', roleParam);
         if (roleParam && ['charge1', 'charge2', 'rrt'].includes(roleParam)) {
-          console.log('Found role parameter:', roleParam);
+          console.log('Calling window.selectLeadership with:', roleParam);
           window.selectLeadership(roleParam);
           return;
         }
         
         // Check if URL has ?group parameter (from select.html)
         const groupParam = urlParams.get('group');
+        console.log('groupParam:', groupParam);
         if (groupParam) {
           const groupNum = parseInt(groupParam, 10);
           if (groupNum >= 1 && groupNum <= 6) {
