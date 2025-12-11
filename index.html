@@ -1233,15 +1233,30 @@ Student 3
     <section class="section">
       <div class="section-header">
         <span class="section-icon">🧾</span>
-        <h2 class="section-title">Debrief Board – Group Takeaways</h2>
+        <h2 class="section-title">Debrief Board – Charge Nurse Notes</h2>
       </div>
 
-      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">
-        During debrief, have each Charge Nurse share their top safety risk, key lab, "do not mix" rule, and one scenario.
-        Type their final answers here so the whole class can see all systems at once.
+      <p style="color:#ccecff;font-size:14px;margin-bottom:15px;">
+        Review what the Charge Nurses documented for each group. This updates automatically as they save their notes.
       </p>
 
-      <div class="debrief-grid">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:20px;">
+        <div style="padding:15px;background:rgba(255,179,0,0.1);border-radius:12px;border:2px solid rgba(255,179,0,0.3);">
+          <h3 style="color:#ffb300;margin:0 0 10px 0;">👨‍⚕️ Charge Nurse 1 (Groups 1-3)</h3>
+          <div id="charge1Debriefs">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+        
+        <div style="padding:15px;background:rgba(255,179,0,0.1);border-radius:12px;border:2px solid rgba(255,179,0,0.3);">
+          <h3 style="color:#ffb300;margin:0 0 10px 0;">👩‍⚕️ Charge Nurse 2 (Groups 4-6)</h3>
+          <div id="charge2Debriefs">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="debrief-grid" style="display:none;">
         <div class="debrief-card">
           <h3>Group 1</h3>
           <textarea id="debrief1" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
@@ -1940,6 +1955,59 @@ Student 3
 
     // Initialize dashboard
     setupHuddleDashboard();
+
+    // -----------------------------
+    // DEBRIEF DASHBOARD
+    // -----------------------------
+    function setupDebriefDashboard() {
+      const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
+      
+      // Charge 1 groups (1-3)
+      const charge1Container = document.getElementById('charge1Debriefs');
+      [1, 2, 3].forEach(groupId => {
+        createDebriefDisplay(charge1Container, groupId, groupNames[groupId]);
+      });
+      
+      // Charge 2 groups (4-6)
+      const charge2Container = document.getElementById('charge2Debriefs');
+      [4, 5, 6].forEach(groupId => {
+        createDebriefDisplay(charge2Container, groupId, groupNames[groupId]);
+      });
+    }
+
+    function createDebriefDisplay(container, groupId, groupName) {
+      const debriefDiv = document.createElement('div');
+      debriefDiv.style.cssText = 'padding:12px;margin-bottom:12px;background:rgba(0,0,0,0.2);border-radius:8px;border-left:4px solid #00d4ff;';
+      debriefDiv.innerHTML = `
+        <h4 style="color:#00d4ff;margin:0 0 8px 0;font-size:15px;">Group ${groupId}: ${groupName}</h4>
+        <div id="debriefContent${groupId}" style="color:#ccecff;font-size:13px;line-height:1.6;white-space:pre-wrap;">
+          <em style="color:#888;">No notes yet from Charge Nurse...</em>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#888;" id="debriefMeta${groupId}"></div>
+      `;
+      container.appendChild(debriefDiv);
+      
+      // Listen for updates
+      const debriefRef = database.ref('debrief/group' + groupId);
+      debriefRef.on('value', snap => {
+        const data = snap.val();
+        const contentEl = document.getElementById('debriefContent' + groupId);
+        const metaEl = document.getElementById('debriefMeta' + groupId);
+        
+        if (data && data.content) {
+          contentEl.textContent = data.content;
+          const time = new Date(data.timestamp).toLocaleTimeString();
+          const nurse = data.chargeNurse === 'charge1' ? 'Charge Nurse 1' : 'Charge Nurse 2';
+          metaEl.textContent = `Updated by ${nurse} at ${time}`;
+        } else {
+          contentEl.innerHTML = '<em style="color:#888;">No notes yet from Charge Nurse...</em>';
+          metaEl.textContent = '';
+        }
+      });
+    }
+
+    // Initialize debrief dashboard
+    setupDebriefDashboard();
 
     // -----------------------------
     // JIGSAW TRACKER

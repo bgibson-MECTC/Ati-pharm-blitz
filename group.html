@@ -591,6 +591,20 @@
       </div>
     </section>
 
+    <!-- Debrief Board (Charge Nurses only) -->
+    <section class="section" id="debriefBoard">
+      <div class="section-header">
+        <span class="section-icon">📝</span>
+        <h2 class="section-title">Debrief Board</h2>
+      </div>
+      <p style="color:#ccecff;font-size:14px;margin-bottom:15px;" id="debriefInstructions">
+        Document key learnings and reflections for your assigned groups.
+      </p>
+      <div id="debriefGroups">
+        <!-- Populated based on charge nurse role -->
+      </div>
+    </section>
+
     <!-- RRT Rescue Controls (Charge Nurse only) -->
     <section class="section" id="rrtControls">
       <div class="section-header">
@@ -1804,10 +1818,13 @@
       if (role === 'rrt') {
         document.getElementById('rrtControls').style.display = 'none';
         document.getElementById('rrtCalls').style.display = 'block';
+        document.getElementById('debriefBoard').style.display = 'none';
         setupRRTListener();
       } else {
         document.getElementById('rrtControls').style.display = 'block';
         document.getElementById('rrtCalls').style.display = 'none';
+        document.getElementById('debriefBoard').style.display = 'block';
+        setupDebriefBoard(role);
       }
 
       // Initialize dashboards
@@ -1949,6 +1966,72 @@
           }
         });
       }
+    }
+
+    function setupDebriefBoard(role) {
+      const container = document.getElementById('debriefGroups');
+      const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
+      
+      // Charge 1 gets groups 1-3, Charge 2 gets groups 4-6
+      const assignedGroups = role === 'charge1' ? [1, 2, 3] : [4, 5, 6];
+      
+      assignedGroups.forEach(groupId => {
+        const groupDiv = document.createElement('div');
+        groupDiv.style.cssText = 'padding:15px;margin-bottom:15px;background:rgba(255,255,255,0.05);border-radius:12px;border:2px solid rgba(0,212,255,0.3);';
+        
+        groupDiv.innerHTML = `
+          <h4 style="color:#00d4ff;margin:0 0 10px 0;">Group ${groupId}: ${groupNames[groupId]}</h4>
+          <textarea 
+            id="debrief${groupId}" 
+            rows="4" 
+            placeholder="What did this group do well? What challenges did they face? Key learning points..."
+            style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;font-size:13px;resize:vertical;"
+          ></textarea>
+          <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
+            <button class="assign-btn" onclick="saveDebrief(${groupId})" style="background:#00ffb3;">💾 Save</button>
+            <span id="debriefStatus${groupId}" style="font-size:12px;color:#00ffb3;"></span>
+          </div>
+        `;
+        
+        container.appendChild(groupDiv);
+        
+        // Load existing debrief if any
+        const debriefRef = database.ref('debrief/group' + groupId);
+        debriefRef.on('value', snap => {
+          const data = snap.val();
+          const textarea = document.getElementById('debrief' + groupId);
+          if (data && data.content && textarea) {
+            textarea.value = data.content;
+          }
+        });
+      });
+    }
+
+    function saveDebrief(groupId) {
+      const textarea = document.getElementById('debrief' + groupId);
+      const status = document.getElementById('debriefStatus' + groupId);
+      const content = textarea.value;
+      
+      if (!content.trim()) {
+        status.style.color = '#ff99c2';
+        status.textContent = 'Please enter some notes first';
+        return;
+      }
+      
+      database.ref('debrief/group' + groupId).set({
+        content: content,
+        chargeNurse: selectedRole,
+        timestamp: Date.now()
+      }).then(() => {
+        status.style.color = '#00ffb3';
+        status.textContent = '✓ Saved';
+        setTimeout(() => {
+          status.textContent = '';
+        }, 2000);
+      }).catch(err => {
+        status.style.color = '#ff006e';
+        status.textContent = 'Error saving';
+      });
     }
 
     function setupRRTListener() {
