@@ -1956,7 +1956,8 @@
     let selectedGroupNumber = null;
     let selectedRole = null;
 
-    function selectLeadership(role) {
+    window.selectLeadership = function(role) {
+      console.log('selectLeadership called with role:', role);
       selectedRole = role;
       
       // Store role in localStorage
@@ -2009,7 +2010,8 @@
       }
     }
 
-    function selectGroup(groupNumber) {
+    window.selectGroup = function(groupNumber) {
+      console.log('selectGroup called with groupNumber:', groupNumber);
       currentGroupId = groupNumber;
       selectedGroupNumber = groupNumber;
       
