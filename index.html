@@ -1680,9 +1680,16 @@
     }
 
     // Expert Huddle Dashboard
+    let huddleDashboardInitialized = false;
     function setupHuddleDashboard() {
       const dashboard = document.getElementById('dashboard');
       if (!dashboard) return;
+      if (huddleDashboardInitialized) {
+        console.log('⚠️ Huddle dashboard already initialized, skipping...');
+        return;
+      }
+      huddleDashboardInitialized = true;
+      console.log('📋 Initializing huddle dashboard...');
 
       for (let groupNum = 1; groupNum <= 6; groupNum++) {
         const groupRef = database.ref('groups/' + groupNum);
@@ -1722,7 +1729,15 @@
     // -----------------------------
     // DEBRIEF DASHBOARD
     // -----------------------------
+    let debriefDashboardInitialized = false;
     function setupDebriefDashboard() {
+      if (debriefDashboardInitialized) {
+        console.log('⚠️ Debrief dashboard already initialized, skipping...');
+        return;
+      }
+      debriefDashboardInitialized = true;
+      console.log('📝 Initializing debrief dashboard...');
+      
       const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
       
       // Charge 1 groups (1-3)
