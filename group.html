@@ -6,6 +6,26 @@
   <title>ATI Pharm Blitz – Group View</title>
 
   <style>
+    /* ===== DEBUG BANNER ===== */
+    #debugBanner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      z-index: 10000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border-bottom: 2px solid #5568d3;
+    }
+    #debugBanner .status-ok { color: #4ade80; font-weight: bold; }
+    #debugBanner .status-error { color: #f87171; font-weight: bold; }
+    #debugBanner .status-warn { color: #fbbf24; font-weight: bold; }
+    #debugBanner small { opacity: 0.8; margin-left: 10px; }
+    
     body {
       box-sizing: border-box;
       margin: 0;
@@ -533,6 +553,12 @@
   </style>
 </head>
 <body>
+  <!-- DEBUG BANNER -->
+  <div id="debugBanner">
+    <span class="status-warn">⏳ Loading...</span>
+    <small>Script initializing</small>
+  </div>
+  
   <!-- GROUP SELECTION LANDING -->
   <div class="group-selection-screen" id="groupSelectionScreen">
     <h1 class="selection-title">Select Your Role</h1>
@@ -1054,24 +1080,46 @@
   <script>
     console.log('Script loading started...');
     
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBfJ4KBqpbP4tbtikAgMEdbT5P1rb3yhHo",
-      authDomain: "ati-pharm-blitz.firebaseapp.com",
-      databaseURL: "https://ati-pharm-blitz-default-rtdb.firebaseio.com",
-      projectId: "ati-pharm-blitz",
-      storageBucket: "ati-pharm-blitz.firebasestorage.app",
-      messagingSenderId: "236104923394",
-      appId: "1:236104923394:web:201f51f9ba162438b2aa1b"
-    };
+    // Update debug banner
+    function updateDebugBanner(status, message) {
+      const banner = document.getElementById('debugBanner');
+      if (banner) {
+        let statusClass = 'status-warn';
+        let icon = '⏳';
+        if (status === 'ok') {
+          statusClass = 'status-ok';
+          icon = '✅';
+        } else if (status === 'error') {
+          statusClass = 'status-error';
+          icon = '❌';
+        }
+        banner.innerHTML = `<span class="${statusClass}">${icon} ${message}</span>`;
+      }
+    }
+    
+    try {
+      updateDebugBanner('warn', 'Firebase initializing...');
+      
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBfJ4KBqpbP4tbtikAgMEdbT5P1rb3yhHo",
+        authDomain: "ati-pharm-blitz.firebaseapp.com",
+        databaseURL: "https://ati-pharm-blitz-default-rtdb.firebaseio.com",
+        projectId: "ati-pharm-blitz",
+        storageBucket: "ati-pharm-blitz.firebasestorage.app",
+        messagingSenderId: "236104923394",
+        appId: "1:236104923394:web:201f51f9ba162438b2aa1b"
+      };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
 
-    // CRITICAL: Define selection functions FIRST for onclick handlers
-    let currentGroupId = null;
-    let selectedGroupNumber = null;
+      updateDebugBanner('ok', 'Firebase connected | Script loaded successfully');
+      
+      // CRITICAL: Define selection functions FIRST for onclick handlers
+      let currentGroupId = null;
+      let selectedGroupNumber = null;
     let selectedRole = null;
     
     console.log('Functions will be defined later in script...');
@@ -1262,7 +1310,7 @@
     // GROUP ID HANDLING (Legacy - kept for compatibility)
     // -----------------------------
 
-    let currentGroupId = null;
+    // currentGroupId already declared at top of script
 
     // Note: Group selection now handled by selectGroup() function
     // This legacy code kept for any direct references
@@ -2848,6 +2896,11 @@
     })();
     
     console.log('Script loading completed - all functions should be ready');
+    
+    } catch (error) {
+      console.error('CRITICAL SCRIPT ERROR:', error);
+      updateDebugBanner('error', 'Script Error: ' + error.message);
+    }
   </script>
 </body>
 </html>
