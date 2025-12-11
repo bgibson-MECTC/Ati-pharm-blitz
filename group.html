@@ -1534,18 +1534,29 @@
       document.getElementById('groupSelectionScreen').classList.add('hidden');
       document.getElementById('groupActivityContent').classList.add('active');
 
+      // Get group configuration
+      const config = groupConfig[groupNumber];
+
       // Update header labels
-      const systemNames = {
-        1: 'Neurological',
-        2: 'Psychopharmacology', 
-        3: 'Pain Management',
-        4: 'Inflammation',
-        5: 'Endocrine',
-        6: 'Infection'
-      };
-      
-      document.getElementById('systemLabel').textContent = 'Group System: ' + systemNames[groupNumber];
-      document.getElementById('groupLabel').textContent = 'Group: ' + groupNumber;
+      document.getElementById('systemLabel').textContent = 'Group System: ' + config.name;
+      document.getElementById('groupLabel').textContent = config.label;
+
+      // Update mission instructions
+      const instructionList = document.getElementById('instructionList');
+      if (instructionList && config.instructions) {
+        instructionList.innerHTML = '';
+        config.instructions.forEach(text => {
+          const li = document.createElement('li');
+          li.textContent = text;
+          instructionList.appendChild(li);
+        });
+      }
+
+      // Update huddle title
+      const huddleTitle = document.getElementById('huddleTitle');
+      if (huddleTitle) {
+        huddleTitle.textContent = config.name + ' – Top 3 Priorities';
+      }
 
       // Show mission section
       const missionSection = document.getElementById('missionSection');
@@ -1560,6 +1571,11 @@
           groupRef.update({ stability: 100 });
         }
       });
+
+      // Setup Firebase sync for this group
+      if (typeof setupFirebaseSync === 'function') {
+        setupFirebaseSync(groupNumber);
+      }
 
       // Initialize jigsaw checkboxes
       if (typeof setupJigsawCheckboxes === 'function') {
