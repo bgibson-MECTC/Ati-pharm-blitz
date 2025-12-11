@@ -2789,6 +2789,8 @@
       }
     });
     
+    // DISABLED FOR DEBUGGING - Always show selection screen
+    /*
     (function checkExistingGroup() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -2830,6 +2832,12 @@
         console.error('Error in checkExistingGroup:', e);
       }
     })();
+    */
+    
+    // Clear localStorage to ensure fresh start
+    localStorage.removeItem('pharmBlitzGroupId');
+    localStorage.removeItem('pharmBlitzRole');
+    console.log('localStorage cleared - selection screen should be visible');
     
     console.log('Script loading completed - all functions should be ready');
   </script>
