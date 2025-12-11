@@ -1568,15 +1568,36 @@
     }
 
     // Check if group already selected on page load
+    // But only auto-load if they're returning directly (not from landing page)
     (function checkExistingGroup() {
       try {
-        const saved = localStorage.getItem('pharmBlitzGroupId');
-        if (saved) {
-          const groupNum = parseInt(saved, 10);
+        // Check if URL has ?group parameter (old direct links)
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupParam = urlParams.get('group');
+        
+        if (groupParam) {
+          // Direct link with group number - use that
+          const groupNum = parseInt(groupParam, 10);
           if (groupNum >= 1 && groupNum <= 6) {
             selectGroup(groupNum);
+            return;
           }
         }
+        
+        // Check if coming from landing page (referrer contains index.html)
+        const fromLanding = document.referrer.includes('index.html');
+        
+        // Only auto-load saved group if NOT coming from landing
+        if (!fromLanding) {
+          const saved = localStorage.getItem('pharmBlitzGroupId');
+          if (saved) {
+            const groupNum = parseInt(saved, 10);
+            if (groupNum >= 1 && groupNum <= 6) {
+              selectGroup(groupNum);
+            }
+          }
+        }
+        // If from landing page, show selection screen (do nothing)
       } catch (e) {}
     })();
   </script>
