@@ -675,9 +675,14 @@
     <section class="section">
       <div class="section-header">
         <span class="section-icon">📨</span>
-        <h2 class="section-title">Messages from Groups</h2>
+        <h2 class="section-title">Messages & Conversations</h2>
       </div>
-      <div id="chargeNurseMessages" style="max-height:300px;overflow-y:auto;background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;">
+      
+      <p style="color:#ccecff;font-size:13px;margin-bottom:15px;">
+        <strong>Your Role:</strong> Guide groups through clinical reasoning. Ask clarifying questions. Require <strong>condition + first action + monitoring</strong> before approval.
+      </p>
+      
+      <div id="chargeNurseMessages" style="max-height:500px;overflow-y:auto;background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;">
         <div style="color:#888;text-align:center;padding:20px;">No messages yet</div>
       </div>
     </section>
@@ -1056,13 +1061,31 @@
       </div>
 
       <div style="padding:12px;background:rgba(138,43,226,0.08);border-radius:10px;border-left:4px solid #8a2be2;">
-        <p style="margin:0 0 12px 0;font-size:14px;color:#ccecff;"><strong>📞 Send Message to Your Charge Nurse:</strong></p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <p style="margin:0 0 12px 0;font-size:14px;color:#ccecff;"><strong>📞 Contact Your Charge Nurse:</strong></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <button onclick="quickMessage('Need help with patient stability')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#8a2be2;">🆘 Help Needed</button>
           <button onclick="quickMessage('Ready for next phase')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#00ffb3;">✅ Ready</button>
           <button onclick="quickMessage('Question about medication')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#ffb300;">❓ Question</button>
         </div>
-        <p style="margin:10px 0 0 0;font-size:12px;color:#888;">Groups 1-3 → Charge Nurse 1 | Groups 4-6 → Charge Nurse 2</p>
+        
+        <!-- Custom Message Box -->
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);">
+          <p style="margin:0 0 8px 0;font-size:12px;color:#ccecff;">Or send a custom message:</p>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="customMessageInput" placeholder="Describe your clinical question..." style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:8px;color:#fff;font-family:inherit;font-size:13px;" />
+            <button onclick="sendCustomMessage()" class="assign-btn" style="background:#00d4ff;padding:8px 16px;">Send</button>
+          </div>
+        </div>
+        
+        <p style="margin:10px 0 0 0;font-size:11px;color:#888;">Groups 1-3 → Charge Nurse 1 | Groups 4-6 → Charge Nurse 2</p>
+      </div>
+      
+      <!-- Conversation History -->
+      <div id="conversationHistory" style="margin-top:15px;display:none;">
+        <h4 style="color:#00d4ff;font-size:14px;margin-bottom:10px;">💬 Conversation with Charge Nurse</h4>
+        <div id="conversationMessages" style="background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;max-height:300px;overflow-y:auto;">
+          <!-- Messages appear here -->
+        </div>
       </div>
     </section>
 
@@ -2181,6 +2204,9 @@
       if (typeof setupFirebaseSync === 'function') {
         setupFirebaseSync(groupNumber);
       }
+      
+      // Show conversation history for students
+      showConversationHistory();
 
       // Initialize jigsaw checkboxes
       if (typeof setupJigsawCheckboxes === 'function') {
@@ -2393,15 +2419,101 @@
     function quickMessage(msg) {
       if (!currentGroupId) return;
       
-      database.ref('messages/toChargeNurse').push({
+      const messageId = database.ref('messages/toChargeNurse').push().key;
+      database.ref('messages/toChargeNurse/' + messageId).set({
         from: 'Group ' + currentGroupId,
         groupNumber: currentGroupId,
         message: msg,
         timestamp: Date.now(),
-        read: false
+        read: false,
+        conversationId: 'group' + currentGroupId + '_' + Date.now(),
+        responses: {}
       });
       
       alert('📨 Message sent to Charge Nurse: "' + msg + '"');
+      showConversationHistory();
+    }
+    
+    function sendCustomMessage() {
+      const input = document.getElementById('customMessageInput');
+      const message = input?.value?.trim();
+      
+      if (!message || !currentGroupId) return;
+      
+      const messageId = database.ref('messages/toChargeNurse').push().key;
+      database.ref('messages/toChargeNurse/' + messageId).set({
+        from: 'Group ' + currentGroupId,
+        groupNumber: currentGroupId,
+        message: message,
+        timestamp: Date.now(),
+        read: false,
+        conversationId: 'group' + currentGroupId + '_' + Date.now(),
+        responses: {}
+      });
+      
+      input.value = '';
+      alert('📨 Message sent to Charge Nurse!');
+      showConversationHistory();
+    }
+    
+    function showConversationHistory() {
+      if (!currentGroupId) return;
+      
+      const historySection = document.getElementById('conversationHistory');
+      const messagesContainer = document.getElementById('conversationMessages');
+      
+      if (historySection) historySection.style.display = 'block';
+      if (!messagesContainer) return;
+      
+      // Listen for messages and responses
+      database.ref('messages/toChargeNurse').orderByChild('groupNumber').equalTo(currentGroupId).on('value', snap => {
+        messagesContainer.innerHTML = '';
+        const messages = [];
+        
+        snap.forEach(msgSnap => {
+          messages.push({ key: msgSnap.key, ...msgSnap.val() });
+        });
+        
+        messages.sort((a, b) => a.timestamp - b.timestamp);
+        
+        messages.forEach(msg => {
+          const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          
+          // Student message
+          const msgDiv = document.createElement('div');
+          msgDiv.style.cssText = 'padding:10px;margin-bottom:8px;background:rgba(0,212,255,0.1);border-radius:8px;border-left:3px solid #00d4ff;';
+          msgDiv.innerHTML = `
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <strong style="color:#00ffb3;font-size:12px;">You</strong>
+              <span style="color:#888;font-size:11px;">${time}</span>
+            </div>
+            <div style="color:#fff;font-size:13px;">${msg.message}</div>
+          `;
+          messagesContainer.appendChild(msgDiv);
+          
+          // Charge nurse responses
+          if (msg.responses) {
+            Object.values(msg.responses).forEach(response => {
+              const respTime = new Date(response.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              const respDiv = document.createElement('div');
+              respDiv.style.cssText = 'padding:10px;margin:8px 0 8px 20px;background:rgba(138,43,226,0.15);border-radius:8px;border-left:3px solid #8a2be2;';
+              respDiv.innerHTML = `
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <strong style="color:#ba55d3;font-size:12px;">Charge Nurse</strong>
+                  <span style="color:#888;font-size:11px;">${respTime}</span>
+                </div>
+                <div style="color:#fff;font-size:13px;">${response.message}</div>
+                ${response.action ? `<div style="margin-top:6px;padding:6px 10px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:11px;color:${response.action === 'approved' ? '#00ffb3' : '#ff6b6b'};">
+                  ${response.action === 'approved' ? '✅ APPROVED' : response.action === 'escalated' ? '⚠️ ESCALATED' : '🚨 ESCALATED + RRT CALLED'}
+                </div>` : ''}
+              `;
+              messagesContainer.appendChild(respDiv);
+            });
+          }
+        });
+        
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      });
     }
     
     // Setup message listener for Charge Nurses
@@ -2412,31 +2524,151 @@
       // Determine which groups this charge nurse monitors
       const myGroups = role === 'charge1' ? [1, 2, 3] : [4, 5, 6];
       
-      database.ref('messages/toChargeNurse').on('child_added', snap => {
-        const msg = snap.val();
+      database.ref('messages/toChargeNurse').on('value', snap => {
+        container.innerHTML = '';
+        const messages = [];
         
-        // Only show messages from my groups
-        if (!myGroups.includes(msg.groupNumber)) return;
+        snap.forEach(msgSnap => {
+          const msg = msgSnap.val();
+          if (myGroups.includes(msg.groupNumber)) {
+            messages.push({ key: msgSnap.key, ...msg });
+          }
+        });
         
-        const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const msgDiv = document.createElement('div');
+        if (messages.length === 0) {
+          container.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">No messages yet</div>';
+          return;
+        }
         
-        msgDiv.style.cssText = 'padding:12px;margin-bottom:10px;background:rgba(138,43,226,0.15);border-radius:8px;border-left:4px solid #8a2be2;';
-        msgDiv.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <strong style="color:#00ffb3;font-size:14px;">${msg.from}</strong>
-            <span style="color:#888;font-size:11px;">${time}</span>
-          </div>
-          <div style="color:#fff;font-size:14px;margin-bottom:8px;">${msg.message}</div>
-          <button onclick="markMessageRead('${snap.key}')" class="assign-btn" style="font-size:11px;padding:4px 12px;background:rgba(0,212,255,0.3);">✓ Mark as Read</button>
-        `;
+        messages.sort((a, b) => b.timestamp - a.timestamp);
         
-        // Insert at top (newest first)
-        const placeholder = container.querySelector('[style*="text-align:center"]');
-        if (placeholder) placeholder.remove();
-        
-        container.insertBefore(msgDiv, container.firstChild);
+        messages.forEach(msg => {
+          const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const msgDiv = document.createElement('div');
+          
+          const responseCount = msg.responses ? Object.keys(msg.responses).length : 0;
+          const hasResponded = responseCount > 0;
+          
+          msgDiv.style.cssText = `padding:15px;margin-bottom:12px;background:${hasResponded ? 'rgba(0,212,255,0.08)' : 'rgba(138,43,226,0.15)'};border-radius:10px;border-left:4px solid ${hasResponded ? '#00d4ff' : '#8a2be2'};`;
+          
+          let conversationHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <strong style="color:#00ffb3;font-size:15px;">${msg.from}</strong>
+              <span style="color:#888;font-size:11px;">${time}</span>
+            </div>
+            <div style="color:#fff;font-size:14px;margin-bottom:12px;padding:10px;background:rgba(0,0,0,0.3);border-radius:6px;">${msg.message}</div>
+          `;
+          
+          // Show previous responses
+          if (msg.responses) {
+            conversationHTML += '<div style="margin-bottom:12px;padding-left:10px;border-left:2px solid rgba(138,43,226,0.3);">';
+            Object.values(msg.responses).forEach(resp => {
+              const respTime = new Date(resp.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              conversationHTML += `
+                <div style="margin-bottom:8px;padding:8px;background:rgba(186,85,211,0.1);border-radius:6px;">
+                  <div style="font-size:11px;color:#ba55d3;margin-bottom:4px;">You responded (${respTime}):</div>
+                  <div style="font-size:13px;color:#ddd;">${resp.message}</div>
+                  ${resp.action ? `<div style="margin-top:4px;font-size:11px;color:${resp.action === 'approved' ? '#00ffb3' : '#ff6b6b'};">
+                    ${resp.action === 'approved' ? '✅ APPROVED' : resp.action === 'escalated' ? '⚠️ ESCALATED' : '🚨 ESCALATED + RRT'}
+                  </div>` : ''}
+                </div>
+              `;
+            });
+            conversationHTML += '</div>';
+          }
+          
+          // Response input
+          conversationHTML += `
+            <div style="margin-top:12px;">
+              <input type="text" id="response_${msg.key}" placeholder="Ask clarifying questions or provide guidance..." 
+                style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;font-size:13px;margin-bottom:10px;" />
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'question')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#ffb300;">❓ Ask Question</button>
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'approved')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#00ffb3;">✅ Approve</button>
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'escalated')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#ff8c00;">⚠️ Escalate</button>
+                <button onclick="respondToMessage('${msg.key}', ${msg.groupNumber}, 'rrt')" class="assign-btn" style="font-size:12px;padding:8px 14px;background:#ff4444;">🚨 Escalate + RRT</button>
+              </div>
+              <div style="margin-top:8px;font-size:11px;color:#888;line-height:1.4;">
+                💡 Require: <strong>Condition + First Action + Monitoring</strong> before approval
+              </div>
+            </div>
+          `;
+          
+          msgDiv.innerHTML = conversationHTML;
+          container.appendChild(msgDiv);
+        });
       });
+    }
+    
+    function respondToMessage(messageKey, groupNumber, action) {
+      const input = document.getElementById('response_' + messageKey);
+      const response = input?.value?.trim() || '';
+      
+      if (!response && action === 'question') {
+        alert('Please enter a question to ask the group');
+        return;
+      }
+      
+      const actionMessages = {
+        'question': response,
+        'approved': response || 'Good clinical reasoning. Approved to proceed.',
+        'escalated': response || 'Reasoning needs improvement. Review and try again.',
+        'rrt': response || 'Unsafe clinical judgment. RRT has been called.'
+      };
+      
+      // Save response
+      const responseId = database.ref('messages/toChargeNurse/' + messageKey + '/responses').push().key;
+      database.ref('messages/toChargeNurse/' + messageKey + '/responses/' + responseId).set({
+        message: actionMessages[action],
+        action: action !== 'question' ? action : null,
+        timestamp: Date.now(),
+        by: selectedRole
+      });
+      
+      // Take action based on response
+      if (action === 'approved') {
+        database.ref('groups/' + groupNumber + '/stability').once('value').then(snap => {
+          const current = snap.val() || 50;
+          database.ref('groups/' + groupNumber + '/stability').set(Math.min(100, current + 10));
+        });
+        database.ref('events').push({
+          group: groupNumber,
+          type: 'approved',
+          message: 'Charge Nurse approved clinical reasoning',
+          timestamp: Date.now()
+        });
+      } else if (action === 'escalated') {
+        database.ref('groups/' + groupNumber + '/stability').once('value').then(snap => {
+          const current = snap.val() || 50;
+          database.ref('groups/' + groupNumber + '/stability').set(Math.max(0, current - 15));
+        });
+        database.ref('events').push({
+          group: groupNumber,
+          type: 'escalated',
+          message: 'Charge Nurse escalated due to unsafe reasoning',
+          timestamp: Date.now()
+        });
+      } else if (action === 'rrt') {
+        database.ref('groups/' + groupNumber + '/stability').once('value').then(snap => {
+          const current = snap.val() || 50;
+          database.ref('groups/' + groupNumber + '/stability').set(Math.max(0, current - 25));
+        });
+        database.ref('rrt/calls').push({
+          group: groupNumber,
+          reason: 'Unsafe clinical judgment - Charge Nurse escalation',
+          calledBy: selectedRole,
+          timestamp: Date.now(),
+          resolved: false
+        });
+        database.ref('events').push({
+          group: groupNumber,
+          type: 'rrt_called',
+          message: 'RRT called by Charge Nurse due to dangerous reasoning',
+          timestamp: Date.now()
+        });
+      }
+      
+      input.value = '';
     }
     
     function markMessageRead(messageKey) {
