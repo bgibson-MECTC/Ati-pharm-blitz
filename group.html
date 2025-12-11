@@ -598,15 +598,48 @@
         <h2 class="section-title">Rapid Response Team Controls</h2>
       </div>
       <p style="color:#ccecff;font-size:14px;margin-bottom:15px;">
-        Trigger an RRT call to rescue a crashing group. The RRT nurse will receive an alert.
+        Trigger an RRT call to rescue a crashing group. Complete the SBAR report for the RRT nurse.
       </p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
-        <button class="assign-btn" onclick="triggerRRT(1)">🚨 RRT to Group 1</button>
-        <button class="assign-btn" onclick="triggerRRT(2)">🚨 RRT to Group 2</button>
-        <button class="assign-btn" onclick="triggerRRT(3)">🚨 RRT to Group 3</button>
-        <button class="assign-btn" onclick="triggerRRT(4)">🚨 RRT to Group 4</button>
-        <button class="assign-btn" onclick="triggerRRT(5)">🚨 RRT to Group 5</button>
-        <button class="assign-btn" onclick="triggerRRT(6)">🚨 RRT to Group 6</button>
+        <button class="assign-btn" onclick="openRRTReport(1)">🚨 RRT to Group 1</button>
+        <button class="assign-btn" onclick="openRRTReport(2)">🚨 RRT to Group 2</button>
+        <button class="assign-btn" onclick="openRRTReport(3)">🚨 RRT to Group 3</button>
+        <button class="assign-btn" onclick="openRRTReport(4)">🚨 RRT to Group 4</button>
+        <button class="assign-btn" onclick="openRRTReport(5)">🚨 RRT to Group 5</button>
+        <button class="assign-btn" onclick="openRRTReport(6)">🚨 RRT to Group 6</button>
+      </div>
+
+      <!-- SBAR Report Modal -->
+      <div id="sbarModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:600px;background:#0a1128;border-radius:20px;border:2px solid #00d4ff;padding:30px;max-height:90vh;overflow-y:auto;">
+          <h2 style="color:#00d4ff;margin-top:0;">🚨 RRT Call - SBAR Report</h2>
+          <p style="color:#ccecff;font-size:14px;margin-bottom:20px;" id="sbarGroupInfo">Group: …</p>
+
+          <div style="margin-bottom:15px;">
+            <label style="display:block;color:#00ffb3;font-weight:600;margin-bottom:5px;">Situation (What's happening?)</label>
+            <textarea id="sbarSituation" rows="2" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;" placeholder="Patient status is declining, stability at..."></textarea>
+          </div>
+
+          <div style="margin-bottom:15px;">
+            <label style="display:block;color:#00ffb3;font-weight:600;margin-bottom:5px;">Background (Relevant history)</label>
+            <textarea id="sbarBackground" rows="2" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;" placeholder="Group made errors on..."></textarea>
+          </div>
+
+          <div style="margin-bottom:15px;">
+            <label style="display:block;color:#00ffb3;font-weight:600;margin-bottom:5px;">Assessment (What do you think is wrong?)</label>
+            <textarea id="sbarAssessment" rows="2" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;" placeholder="I believe the patient is..."></textarea>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <label style="display:block;color:#00ffb3;font-weight:600;margin-bottom:5px;">Recommendation (What needs to happen?)</label>
+            <textarea id="sbarRecommendation" rows="2" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;" placeholder="I recommend immediate intervention..."></textarea>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="assign-btn" onclick="closeSBARModal()" style="background:rgba(255,255,255,0.1);">Cancel</button>
+            <button class="assign-btn" onclick="submitRRTCall()" style="background:#ff006e;">🚨 Send RRT Now</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -618,6 +651,18 @@
       </div>
       <div id="activeCalls">
         <p style="color:#ccecff;font-size:14px;">No active calls. Standby for charge nurse alerts.</p>
+      </div>
+    </section>
+
+    <!-- RRT Intervention Selection -->
+    <section class="section" id="rrtInterventions" style="display:none;">
+      <div class="section-header">
+        <span class="section-icon">💉</span>
+        <h2 class="section-title">Available Interventions</h2>
+      </div>
+      <p style="color:#ccecff;font-size:14px;margin-bottom:15px;">Select the appropriate intervention based on the SBAR report above.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;" id="interventionOptions">
+        <!-- Populated when call is active -->
       </div>
     </section>
   </div>
@@ -1908,44 +1953,139 @@
 
     function setupRRTListener() {
       const container = document.getElementById('activeCalls');
+      const interventionsSection = document.getElementById('rrtInterventions');
+      const interventionOptions = document.getElementById('interventionOptions');
       const rrtRef = database.ref('rrt/calls');
       
       rrtRef.on('child_added', snap => {
         const call = snap.val();
         const callDiv = document.createElement('div');
         callDiv.id = 'rrtCall' + snap.key;
-        callDiv.style.cssText = 'padding:15px;margin-bottom:12px;background:rgba(255,0,110,0.1);border-radius:12px;border:2px solid #ff006e;animation:pulse 2s infinite;';
+        callDiv.style.cssText = 'padding:20px;margin-bottom:12px;background:rgba(255,0,110,0.1);border-radius:12px;border:2px solid #ff006e;animation:pulse 2s infinite;';
         callDiv.innerHTML = `
-          <h4 style="color:#ff006e;margin:0 0 10px 0;">🚨 RRT CALL: Group ${call.groupId}</h4>
-          <div style="font-size:13px;color:#ccecff;margin-bottom:12px;">Patient stability: ${call.stability || 'Critical'}</div>
-          <button class="assign-btn" onclick="stabilizeGroup(${call.groupId}, '${snap.key}')" style="background:#00ffb3;">Stabilize Patient (+30)</button>
+          <h4 style="color:#ff006e;margin:0 0 15px 0;">🚨 RRT CALL: Group ${call.groupId}</h4>
+          
+          <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:8px;margin-bottom:15px;">
+            <h5 style="color:#00ffb3;margin:0 0 10px 0;">SBAR Report from ${call.calledBy || 'Charge Nurse'}</h5>
+            
+            <div style="margin-bottom:8px;">
+              <strong style="color:#00d4ff;">Situation:</strong>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.situation || 'Not provided'}</p>
+            </div>
+            
+            <div style="margin-bottom:8px;">
+              <strong style="color:#00d4ff;">Background:</strong>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.background || 'Not provided'}</p>
+            </div>
+            
+            <div style="margin-bottom:8px;">
+              <strong style="color:#00d4ff;">Assessment:</strong>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.assessment || 'Not provided'}</p>
+            </div>
+            
+            <div>
+              <strong style="color:#00d4ff;">Recommendation:</strong>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.recommendation || 'Not provided'}</p>
+            </div>
+          </div>
+          
+          <div style="font-size:14px;color:#ffb300;font-weight:600;">Patient Stability: ${call.stability || 'Unknown'}</div>
         `;
         container.innerHTML = '';
         container.appendChild(callDiv);
+        
+        // Show intervention options
+        interventionsSection.style.display = 'block';
+        interventionOptions.innerHTML = `
+          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'stabilize', 30)">
+            <div style="font-size:36px;margin-bottom:8px;">💉</div>
+            <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Stabilize Patient</div>
+            <div style="font-size:12px;color:#b8e0ff;">+30 stability</div>
+          </div>
+          
+          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'medication', 20)">
+            <div style="font-size:36px;margin-bottom:8px;">💊</div>
+            <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Administer Medication</div>
+            <div style="font-size:12px;color:#b8e0ff;">+20 stability</div>
+          </div>
+          
+          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'oxygen', 15)">
+            <div style="font-size:36px;margin-bottom:8px;">😮‍💨</div>
+            <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Oxygen Support</div>
+            <div style="font-size:12px;color:#b8e0ff;">+15 stability</div>
+          </div>
+          
+          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'monitoring', 10)">
+            <div style="font-size:36px;margin-bottom:8px;">📊</div>
+            <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Enhanced Monitoring</div>
+            <div style="font-size:12px;color:#b8e0ff;">+10 stability</div>
+          </div>
+        `;
+      });
+      
+      rrtRef.on('child_removed', () => {
+        container.innerHTML = '<p style="color:#ccecff;font-size:14px;">No active calls. Standby for charge nurse alerts.</p>';
+        interventionsSection.style.display = 'none';
       });
     }
 
-    function triggerRRT(groupId) {
+    let currentRRTGroup = null;
+
+    function openRRTReport(groupId) {
+      currentRRTGroup = groupId;
+      const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
+      document.getElementById('sbarGroupInfo').textContent = `Group ${groupId}: ${groupNames[groupId]}`;
+      document.getElementById('sbarModal').style.display = 'block';
+    }
+
+    function closeSBARModal() {
+      document.getElementById('sbarModal').style.display = 'none';
+      document.getElementById('sbarSituation').value = '';
+      document.getElementById('sbarBackground').value = '';
+      document.getElementById('sbarAssessment').value = '';
+      document.getElementById('sbarRecommendation').value = '';
+      currentRRTGroup = null;
+    }
+
+    function submitRRTCall() {
+      const situation = document.getElementById('sbarSituation').value;
+      const background = document.getElementById('sbarBackground').value;
+      const assessment = document.getElementById('sbarAssessment').value;
+      const recommendation = document.getElementById('sbarRecommendation').value;
+
+      if (!situation || !background || !assessment || !recommendation) {
+        alert('Please complete all SBAR fields before calling RRT.');
+        return;
+      }
+
       const rrtRef = database.ref('rrt/calls').push();
-      const groupRef = database.ref('groups/' + groupId + '/stability');
+      const groupRef = database.ref('groups/' + currentRRTGroup + '/stability');
       
       groupRef.once('value').then(snap => {
         const stability = snap.val() || 100;
         rrtRef.set({
-          groupId: groupId,
+          groupId: currentRRTGroup,
           stability: stability,
           timestamp: Date.now(),
-          calledBy: selectedRole
+          calledBy: selectedRole,
+          sbar: {
+            situation: situation,
+            background: background,
+            assessment: assessment,
+            recommendation: recommendation
+          }
         });
         
-        alert(`RRT called to Group ${groupId}. Rapid Response RN has been notified.`);
+        closeSBARModal();
+        alert(`RRT called to Group ${currentRRTGroup}. Rapid Response RN has been notified with your SBAR report.`);
       });
     }
 
-    function stabilizeGroup(groupId, callKey) {
+    function applyIntervention(groupId, callKey, interventionType, stabilityBoost) {
       const groupRef = database.ref('groups/' + groupId + '/stability');
+      
       groupRef.transaction(current => {
-        return Math.min(100, (current || 0) + 30);
+        return Math.min(100, (current || 0) + stabilityBoost);
       }).then(() => {
         // Remove the call
         database.ref('rrt/calls/' + callKey).remove();
@@ -1955,12 +2095,12 @@
           groupId: groupId,
           phase: 'rrt-rescue',
           isCorrect: true,
-          delta: +30,
-          explanation: 'RRT stabilized patient',
+          delta: stabilityBoost,
+          explanation: `RRT applied ${interventionType} intervention`,
           timestamp: Date.now()
         });
         
-        alert(`Group ${groupId} stabilized! Stability +30.`);
+        alert(`Intervention applied to Group ${groupId}! ${interventionType.toUpperCase()}: +${stabilityBoost} stability.`);
       });
     }
 
