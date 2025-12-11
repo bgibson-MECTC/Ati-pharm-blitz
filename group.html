@@ -740,7 +740,7 @@
   </div>
 
   <!-- GROUP ACTIVITY CONTENT -->
-  <div class="main-wrapper group-activity-content" id="groupActivityContent">
+  <div class="main-wrapper group-activity-content" id="groupActivityContent" style="display:none;">
     <header>
       <h1 class="main-title">ATI Pharm Blitz</h1>
       <p class="subtitle" id="systemLabel">Group System: …</p>
@@ -2019,7 +2019,7 @@
 
       // Hide selection screen, show group activity content
       document.getElementById('groupSelectionScreen').classList.add('hidden');
-      document.getElementById('groupActivityContent').classList.add('active');
+      document.getElementById('groupActivityContent').style.display = 'block';
 
       // Update mission instructions
       const instructionList = document.getElementById('instructionList');
