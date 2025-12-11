@@ -331,7 +331,7 @@
     </header>
 
     <!-- Instructions -->
-    <section class="section">
+    <section class="section" id="missionSection" style="display:none;">
       <div class="section-header">
         <span class="section-icon">📋</span>
         <h2 class="section-title">Your Mission<span class="pill">Group View</span></h2>
@@ -836,6 +836,12 @@
         localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
       } catch (e) {}
 
+      // Show the mission section now that group is set
+      const missionSection = document.getElementById('missionSection');
+      if (missionSection) {
+        missionSection.style.display = 'block';
+      }
+
       // initialize stability in Firebase if not present
       const groupRef = database.ref('groups/' + currentGroupId);
       groupRef.child('stability').once('value').then(snap => {
@@ -863,10 +869,15 @@
           currentGroupId = parseInt(saved, 10);
           const input = document.getElementById('groupIdInput');
           const status = document.getElementById('groupIdStatus');
+          const missionSection = document.getElementById('missionSection');
+          
           if (input) input.value = currentGroupId;
           if (status) {
             status.style.color = '#00ffb3';
             status.textContent = 'Group set to #' + currentGroupId;
+          }
+          if (missionSection) {
+            missionSection.style.display = 'block';
           }
         }
       } catch (e) {}
