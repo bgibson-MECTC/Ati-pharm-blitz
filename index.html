@@ -1553,8 +1553,10 @@
 
     // Listen to stability changes
     if (stabilityPanel) {
+      console.log('📊 Stability panel found, setting up listener...');
       database.ref('groups').on('value', snapshot => {
         const data = snapshot.val() || {};
+        console.log('📊 Groups data received:', data);
         stabilityPanel.innerHTML = '';
         
         let totalStability = 0;
@@ -1621,6 +1623,8 @@
           avgStabilityEl.style.color = avg >= 75 ? '#00ffb3' : avg >= 50 ? '#ffb300' : '#ff006e';
         }
       });
+    } else {
+      console.log('⚠️ Stability panel not found - instructor dashboard may not be visible yet');
     }
 
     // Listen to recent events (alerts)
@@ -1671,8 +1675,8 @@
           totalErrorsEl.textContent = errorCount;
         }
       });
-    }
-      });
+    } else {
+      console.log('⚠️ Alerts panel not found');
     }
 
     // Expert Huddle Dashboard
