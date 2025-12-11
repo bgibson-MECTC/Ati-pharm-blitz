@@ -931,19 +931,19 @@
       <div style="margin-bottom:25px;padding:20px;background:rgba(0,212,255,0.1);border:2px solid rgba(0,212,255,0.3);border-radius:15px;">
         <h3 style="color:#00ffb3;font-size:18px;margin:0 0 15px 0;">⏱️ Phase Timer Controls</h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:15px;">
-          <button onclick="startTimer('Warm-Up Flashcards', 15)" class="assign-btn" style="background:#00d4ff;">
+          <button onclick="startPhaseTimer('Warm-Up Flashcards', 15)" class="assign-btn" style="background:#00d4ff;">
             ▶ Start Warm-Up (15 min)
           </button>
-          <button onclick="startTimer('Expert Huddle', 10)" class="assign-btn" style="background:#00d4ff;">
+          <button onclick="startPhaseTimer('Expert Huddle', 10)" class="assign-btn" style="background:#00d4ff;">
             ▶ Start Huddle (10 min)
           </button>
-          <button onclick="startTimer('Jigsaw Round', 20)" class="assign-btn" style="background:#00d4ff;">
+          <button onclick="startPhaseTimer('Jigsaw Round', 20)" class="assign-btn" style="background:#00d4ff;">
             ▶ Start Jigsaw (20 min)
           </button>
-          <button onclick="startTimer('Speed Round', 10)" class="assign-btn" style="background:#00d4ff;">
+          <button onclick="startPhaseTimer('Speed Round', 10)" class="assign-btn" style="background:#00d4ff;">
             ▶ Start Speed Round (10 min)
           </button>
-          <button onclick="stopTimer()" class="assign-btn" style="background:#ff006e;">
+          <button onclick="stopPhaseTimer()" class="assign-btn" style="background:#ff006e;">
             ⏹ Stop Timer
           </button>
         </div>
@@ -1907,9 +1907,9 @@
     }
 
     // -----------------------------
-    // TIMER CONTROLS
+    // TIMER CONTROLS (INSTRUCTOR)
     // -----------------------------
-    function startTimer(phaseName, durationMinutes) {
+    function startPhaseTimer(phaseName, durationMinutes) {
       const endTime = Date.now() + (durationMinutes * 60 * 1000);
       
       database.ref('timer').set({
@@ -1925,7 +1925,7 @@
       }
     }
 
-    function stopTimer() {
+    function stopPhaseTimer() {
       database.ref('timer').remove();
       
       const status = document.getElementById('timerStatus');
