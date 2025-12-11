@@ -570,7 +570,7 @@
     </section>
 
     <!-- Flashcard & Jigsaw Errors -->
-    <section class="section">
+    <section class="section" id="errorLogSection">
       <div class="section-header">
         <span class="section-icon">⚠️</span>
         <h2 class="section-title">Error Log – All Groups</h2>
@@ -581,7 +581,7 @@
     </section>
 
     <!-- Group Cases & Approval -->
-    <section class="section">
+    <section class="section" id="groupCasesSection">
       <div class="section-header">
         <span class="section-icon">📋</span>
         <h2 class="section-title">Assigned Cases & Approval</h2>
@@ -1813,18 +1813,24 @@
         document.getElementById('rrtControls').style.display = 'none';
         document.getElementById('rrtCalls').style.display = 'block';
         document.getElementById('debriefBoard').style.display = 'none';
+        document.getElementById('errorLogSection').style.display = 'none';
+        document.getElementById('groupCasesSection').style.display = 'none';
         setupRRTListener();
       } else {
         document.getElementById('rrtControls').style.display = 'block';
         document.getElementById('rrtCalls').style.display = 'none';
         document.getElementById('debriefBoard').style.display = 'block';
+        document.getElementById('errorLogSection').style.display = 'block';
+        document.getElementById('groupCasesSection').style.display = 'block';
         setupDebriefBoard(role);
       }
 
       // Initialize dashboards
       setupAllGroupsMonitor();
-      setupErrorLog();
-      setupGroupCasesMonitor();
+      if (role !== 'rrt') {
+        setupErrorLog();
+        setupGroupCasesMonitor();
+      }
     }
 
     function selectGroup(groupNumber) {
