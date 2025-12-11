@@ -145,6 +145,24 @@
       100% { background-position: 200% center; }
     }
 
+    @keyframes pulse-warning {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 179, 0, 0.7); }
+      50% { opacity: 0.85; box-shadow: 0 0 20px 10px rgba(255, 179, 0, 0); }
+    }
+
+    @keyframes pulse-critical {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 0, 110, 0.9); }
+      50% { opacity: 0.75; box-shadow: 0 0 30px 15px rgba(255, 0, 110, 0); }
+    }
+
+    .stability-warning {
+      animation: pulse-warning 2s ease-in-out infinite;
+    }
+
+    .stability-critical {
+      animation: pulse-critical 1.5s ease-in-out infinite;
+    }
+
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -860,374 +878,10 @@
 
   <!-- INSTRUCTOR CONTENT -->
   <div class="main-wrapper instructor-content" id="instructorContent">
-
-    <!-- HEADER -->
     <header>
-      <h1 class="main-title">ATI Pharm Blitz: 1-Hour High-Yield Review</h1>
-      <p class="subtitle">Interactive NCLEX-Style Pharmacology Simulation</p>
+      <h1 class="main-title">ATI Pharm Blitz</h1>
+      <p class="subtitle">Instructor Dashboard</p>
     </header>
-
-    <!-- INSTRUCTOR PANEL -->
-    <section class="section instructor-panel">
-      <div class="section-header">
-        <span class="section-icon">🎓</span>
-        <h2 class="section-title">Instructor Command Center</h2>
-      </div>
-
-      <div class="instructor-controls">
-        
-        <!-- Timer Control -->
-        <div class="control-box">
-          <h4>⏱️ Session Timer</h4>
-          <div class="timer-display" id="timerDisplay">60:00</div>
-          <div class="timer-controls">
-            <button class="btn btn-success" id="startBtn">Start</button>
-            <button class="btn btn-warning" id="pauseBtn">Pause</button>
-            <button class="btn btn-danger" id="resetBtn">Reset</button>
-          </div>
-          <div class="phase-indicator">
-            <span class="phase active" data-phase="warmup">Warm-Up</span>
-            <span class="phase" data-phase="huddle">Huddle</span>
-            <span class="phase" data-phase="lightning">Lightning</span>
-          </div>
-        </div>
-
-        <!-- Group Links -->
-        <div class="control-box">
-          <h4>👥 Student Group Views</h4>
-          <div class="group-links">
-            <a href="group.html?group=1" class="group-link" target="_blank">
-              <span>🧠</span> Group 1: Neuro
-            </a>
-            <a href="group.html?group=2" class="group-link" target="_blank">
-              <span>💊</span> Group 2: Psych
-            </a>
-            <a href="group.html?group=3" class="group-link" target="_blank">
-              <span>😣</span> Group 3: Pain
-            </a>
-            <a href="group.html?group=4" class="group-link" target="_blank">
-              <span>🔥</span> Group 4: Inflammation
-            </a>
-            <a href="group.html?group=5" class="group-link" target="_blank">
-              <span>🩺</span> Group 5: Endocrine
-            </a>
-            <a href="group.html?group=6" class="group-link" target="_blank">
-              <span>🦠</span> Group 6: Infection
-            </a>
-          </div>
-        </div>
-
-        <!-- Quick Reference -->
-        <div class="control-box">
-          <h4>📚 Quick Answer Key</h4>
-          <div class="answer-key">
-            <h5>High-Yield Safety Priorities:</h5>
-            <ul>
-              <li><strong>Neuro:</strong> Airway, LOC, seizure precautions</li>
-              <li><strong>Psych:</strong> Suicide risk, serotonin syndrome, NMS</li>
-              <li><strong>Pain:</strong> Respiratory depression, oversedation</li>
-              <li><strong>Inflammation:</strong> GI bleed, renal injury</li>
-              <li><strong>Endocrine:</strong> Hypoglycemia, DKA/HHS</li>
-              <li><strong>Infection:</strong> Anaphylaxis, nephrotoxicity</li>
-            </ul>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Teaching Notes -->
-      <div class="teaching-notes">
-        <p><strong>💡 Facilitation Tips:</strong> Keep groups focused on SAFETY FIRST thinking. Push them to justify WHY their priority is #1. Challenge them with "What kills the patient fastest?" Encourage cross-system connections (e.g., opioid + benzo = respiratory arrest). Use the timer to maintain energy and urgency!</p>
-      </div>
-    </section>
-
-    <!-- RANDOM GROUP + ROLE ASSIGNMENT -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">🎲</span>
-        <h2 class="section-title">Random Group & Role Assignment</h2>
-      </div>
-
-      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">
-        Instructor: Paste the full class list (one name per line) and click "Randomize".
-        The tool will assign students into 6 groups and randomly pick 3 as Charge Nurse / RRT.
-      </p>
-
-      <div class="assign-grid">
-        <div class="assign-input">
-          <label for="studentNames">Student Names (one per line)</label>
-          <textarea id="studentNames" placeholder="e.g.
-Student 1
-Student 2
-Student 3
-..."></textarea>
-
-          <div class="assign-controls">
-            <div>
-              <label for="groupCount">Number of Groups</label>
-              <input id="groupCount" type="number" min="2" max="10" value="6">
-            </div>
-            <div>
-              <label for="specialCount">Charge / RRT Count</label>
-              <input id="specialCount" type="number" min="1" max="10" value="3">
-            </div>
-          </div>
-
-          <button id="assignButton" class="assign-btn">Randomize Groups</button>
-          <p id="assignError" class="assign-error"></p>
-        </div>
-
-        <div class="assign-output">
-          <h3>Group Assignments</h3>
-          <div id="groupResults" class="group-results">
-            <!-- Filled by JS -->
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- LAB FLOW + TIMER -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">⏱️</span>
-        <h2 class="section-title">Lab Flow Timer</h2>
-      </div>
-
-      <div class="timer-panel">
-        <div class="timer-info">
-          <div class="timer-phase-label" id="phaseLabel">Phase 1: Warm-Up (5 min)</div>
-          <ul class="timer-instructions" id="phaseInstructions">
-            <li>Activate prior knowledge with flashcards</li>
-            <li>Students identify systems quickly</li>
-            <li>Build energy and engagement</li>
-          </ul>
-        </div>
-
-        <div class="timer-controls">
-          <div class="timer-display" id="phaseTimer">05:00</div>
-          <div class="timer-buttons">
-            <button id="startPhaseBtn">Start</button>
-            <button id="pausePhaseBtn">Pause</button>
-            <button id="resetPhaseBtn">Reset</button>
-            <button id="nextPhaseBtn">Next Phase ➜</button>
-          </div>
-          <div class="timer-phase-count" id="phaseCount">Phase 1 of 3</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- WARM UP -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">🔥</span>
-        <h2 class="section-title">Warm-Up Activation Round</h2>
-      </div>
-
-      <div class="flashcard-container">
-        <!-- Card 1: Psychopharmacology -->
-        <div class="flashcard" data-card-id="card1" data-system="psychopharmacology">
-          <div class="flashcard-front">
-            <strong>Clinical Case:</strong> A patient on Haloperidol is showing muscle rigidity and tremors. What serious adverse effect requires immediate intervention? <em>(Psycho or Neuro?)</em>
-          </div>
-          <div class="flashcard-back">
-            <strong>System:</strong> Psychopharmacology<br>
-            <strong>Answer:</strong> Extrapyramidal symptoms (EPS) - requires immediate benztropine or dose adjustment<br>
-            <strong>Priority:</strong> Watch for tardive dyskinesia (irreversible)<br>
-            <strong>Safety Tip:</strong> Avoid combining with anticholinergics unless treating EPS<br>
-            <strong>High-Yield Med:</strong> Fluoxetine - risk of serotonin syndrome with MAOIs
-          </div>
-        </div>
-
-        <!-- Card 2: Neurological -->
-        <div class="flashcard" data-card-id="card2" data-system="neurological">
-          <div class="flashcard-front">
-            <strong>Clinical Case:</strong> A patient on Levodopa/Carbidopa experiences sudden "on-off" phenomenon. What lab value is critical to monitor? <em>(Neuro or Endocrine?)</em>
-          </div>
-          <div class="flashcard-back">
-            <strong>System:</strong> Neurological<br>
-            <strong>Answer:</strong> Vitamin B6 (pyridoxine) levels - can decrease Levodopa effectiveness<br>
-            <strong>Priority:</strong> Monitor for dyskinesias and orthostatic hypotension<br>
-            <strong>Safety Tip:</strong> Avoid high-protein meals (competes with absorption)<br>
-            <strong>High-Yield Med:</strong> Phenobarbital - monitor therapeutic levels (10-40 mcg/mL)
-          </div>
-        </div>
-
-        <!-- Card 3: Pain -->
-        <div class="flashcard" data-card-id="card3" data-system="pain">
-          <div class="flashcard-front">
-            <strong>Clinical Case:</strong> A post-op patient on IV Fentanyl has a respiratory rate of 8. What is your FIRST action? <em>(Pain or Neuro?)</em>
-          </div>
-          <div class="flashcard-back">
-            <strong>System:</strong> Pain<br>
-            <strong>Answer:</strong> Administer Naloxone (Narcan) immediately - opioid reversal agent<br>
-            <strong>Priority:</strong> Monitor respiratory rate &lt;12 = critical<br>
-            <strong>Do NOT Mix:</strong> Fentanyl + benzodiazepines (respiratory depression)<br>
-            <strong>High-Yield Med:</strong> Butorphanol - mixed agonist-antagonist, can precipitate withdrawal
-          </div>
-        </div>
-
-        <!-- Card 4: Endocrine -->
-        <div class="flashcard" data-card-id="card4" data-system="endocrine">
-          <div class="flashcard-front">
-            <strong>Clinical Case:</strong> A patient on PTU (Propylthiouracil) develops a sore throat and fever. What life-threatening complication must you suspect? <em>(Endocrine or Infection?)</em>
-          </div>
-          <div class="flashcard-back">
-            <strong>System:</strong> Endocrine<br>
-            <strong>Answer:</strong> Agranulocytosis - obtain STAT CBC with differential<br>
-            <strong>Priority:</strong> Monitor WBC &lt;3,000 = hold medication<br>
-            <strong>Safety Tip:</strong> Teach patient to report signs of infection immediately<br>
-            <strong>High-Yield Med:</strong> Somatropin - monitor blood glucose (causes hyperglycemia)
-          </div>
-        </div>
-
-        <!-- Card 5: Infection -->
-        <div class="flashcard" data-card-id="card5" data-system="infection">
-          <div class="flashcard-front">
-            <strong>Clinical Case:</strong> A patient on Erythromycin is also taking Warfarin. What dangerous interaction must you monitor? <em>(Infection or Inflammation?)</em>
-          </div>
-          <div class="flashcard-back">
-            <strong>System:</strong> Infection<br>
-            <strong>Answer:</strong> Increased bleeding risk - Erythromycin inhibits Warfarin metabolism (elevated INR)<br>
-            <strong>Priority:</strong> Monitor INR closely, target 2-3 for most indications<br>
-            <strong>Do NOT Mix:</strong> Rifampin + oral contraceptives (decreases effectiveness)<br>
-            <strong>High-Yield Med:</strong> Amphotericin B - monitor potassium (causes severe hypokalemia)
-          </div>
-        </div>
-
-        <!-- Card 6: Inflammation -->
-        <div class="flashcard" data-card-id="card6" data-system="inflammation">
-          <div class="flashcard-front">
-            <strong>Clinical Case:</strong> A patient on Belimumab (lupus treatment) is scheduled for a live vaccine. What is your nursing action? <em>(Inflammation or Infection?)</em>
-          </div>
-          <div class="flashcard-back">
-            <strong>System:</strong> Inflammation<br>
-            <strong>Answer:</strong> HOLD vaccine - immunosuppressed patients cannot receive live vaccines<br>
-            <strong>Priority:</strong> Screen for infections before each dose<br>
-            <strong>Safety Tip:</strong> Avoid NSAIDs with immunosuppressants (GI bleeding risk)<br>
-            <strong>High-Yield Meds:</strong> Allopurinol (monitor uric acid), Hydrocortisone (taper slowly - adrenal crisis)
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- HUDDLE SECTION -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">👥</span>
-        <h2 class="section-title">Expert Huddle</h2>
-      </div>
-
-      <div class="huddle-grid">
-
-        <div class="huddle-box" data-group="1">
-          <h3>Neurological</h3>
-          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text" data-field="safetyRisk" readonly></div>
-          <div class="huddle-field"><label>#1 Lab</label><input type="text" data-field="priorityLab" readonly></div>
-          <div class="huddle-field"><label>Do Not Mix</label><input type="text" data-field="doNotMix" readonly></div>
-          <div class="huddle-field"><label>High-Yield Med</label><input type="text" data-field="highYieldMed" readonly></div>
-          <div class="huddle-field"><label>Scenarios</label><textarea data-field="scenarioPrompts" readonly></textarea></div>
-        </div>
-
-        <div class="huddle-box" data-group="2">
-          <h3>Psychopharmacology</h3>
-          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text" data-field="safetyRisk" readonly></div>
-          <div class="huddle-field"><label>#1 Lab</label><input type="text" data-field="priorityLab" readonly></div>
-          <div class="huddle-field"><label>Do Not Mix</label><input type="text" data-field="doNotMix" readonly></div>
-          <div class="huddle-field"><label>High-Yield Med</label><input type="text" data-field="highYieldMed" readonly></div>
-          <div class="huddle-field"><label>Scenarios</label><textarea data-field="scenarioPrompts" readonly></textarea></div>
-        </div>
-
-        <div class="huddle-box" data-group="3">
-          <h3>Pain Management</h3>
-          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text" data-field="safetyRisk" readonly></div>
-          <div class="huddle-field"><label>#1 Lab</label><input type="text" data-field="priorityLab" readonly></div>
-          <div class="huddle-field"><label>Do Not Mix</label><input type="text" data-field="doNotMix" readonly></div>
-          <div class="huddle-field"><label>High-Yield Med</label><input type="text" data-field="highYieldMed" readonly></div>
-          <div class="huddle-field"><label>Scenarios</label><textarea data-field="scenarioPrompts" readonly></textarea></div>
-        </div>
-
-        <div class="huddle-box" data-group="4">
-          <h3>Inflammation</h3>
-          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text" data-field="safetyRisk" readonly></div>
-          <div class="huddle-field"><label>#1 Lab</label><input type="text" data-field="priorityLab" readonly></div>
-          <div class="huddle-field"><label>Do Not Mix</label><input type="text" data-field="doNotMix" readonly></div>
-          <div class="huddle-field"><label>High-Yield Med</label><input type="text" data-field="highYieldMed" readonly></div>
-          <div class="huddle-field"><label>Scenarios</label><textarea data-field="scenarioPrompts" readonly></textarea></div>
-        </div>
-
-        <div class="huddle-box" data-group="5">
-          <h3>Endocrine</h3>
-          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text" data-field="safetyRisk" readonly></div>
-          <div class="huddle-field"><label>#1 Lab</label><input type="text" data-field="priorityLab" readonly></div>
-          <div class="huddle-field"><label>Do Not Mix</label><input type="text" data-field="doNotMix" readonly></div>
-          <div class="huddle-field"><label>High-Yield Med</label><input type="text" data-field="highYieldMed" readonly></div>
-          <div class="huddle-field"><label>Scenarios</label><textarea data-field="scenarioPrompts" readonly></textarea></div>
-        </div>
-
-        <div class="huddle-box" data-group="6">
-          <h3>Infection</h3>
-          <div class="huddle-field"><label>#1 Safety Risk</label><input type="text" data-field="safetyRisk" readonly></div>
-          <div class="huddle-field"><label>#1 Lab</label><input type="text" data-field="priorityLab" readonly></div>
-          <div class="huddle-field"><label>Do Not Mix</label><input type="text" data-field="doNotMix" readonly></div>
-          <div class="huddle-field"><label>High-Yield Med</label><input type="text" data-field="highYieldMed" readonly></div>
-          <div class="huddle-field"><label>Scenarios</label><textarea data-field="scenarioPrompts" readonly></textarea></div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- JIGSAW TEACHING ROUNDS -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">🔄</span>
-        <h2 class="section-title">Jigsaw Teaching Rounds</h2>
-      </div>
-
-      <p style="color:#ccecff;font-size:14px;margin-bottom:15px;">
-        <strong>Objective:</strong> Each group teaches the other 5 systems their Top 3 priorities using the Expert Huddle framework.
-        Track which systems each group has completed below.
-      </p>
-
-      <div class="teaching-notes" style="margin-bottom:15px;">
-        <p><strong>💡 How to Run Jigsaw:</strong> Send one "expert" from each group to rotate through all 6 stations. At each station, the home group teaches their system's #1 safety risk, critical lab, and do-not-mix rule. Visitors take notes and ask questions. Rotate every 3-5 minutes until all groups have learned all 6 systems.</p>
-      </div>
-
-      <div id="jigsawTracker" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;">
-        <!-- Filled by JS -->
-      </div>
-    </section>
-
-    <!-- LIGHTNING ROUND -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">⚡</span>
-        <h2 class="section-title">Lightning Round</h2>
-      </div>
-
-      <div class="question-tiles">
-
-        <div class="question-tile">
-          <div class="tile-question">Name a photosensitivity medication.</div>
-          <div class="tile-answer">Tetracycline</div>
-        </div>
-
-        <div class="question-tile">
-          <div class="tile-question">What is the antidote for opioids?</div>
-          <div class="tile-answer">Naloxone</div>
-        </div>
-
-        <div class="question-tile">
-          <div class="tile-question">Which lab must be monitored for Lithium?</div>
-          <div class="tile-answer">Lithium level (0.6-1.2)</div>
-        </div>
-
-        <div class="question-tile">
-          <div class="tile-question">What drug class risks tendon rupture?</div>
-          <div class="tile-answer">Fluoroquinolones</div>
-        </div>
-
-      </div>
-    </section>
 
     <!-- DEBRIEF BOARD (INSTRUCTOR VIEW) -->
     <section class="section">
@@ -1256,35 +910,8 @@ Student 3
         </div>
       </div>
 
-      <div class="debrief-grid" style="display:none;">
-        <div class="debrief-card">
-          <h3>Group 1</h3>
-          <textarea id="debrief1" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
-        </div>
-        <div class="debrief-card">
-          <h3>Group 2</h3>
-          <textarea id="debrief2" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
-        </div>
-        <div class="debrief-card">
-          <h3>Group 3</h3>
-          <textarea id="debrief3" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
-        </div>
-        <div class="debrief-card">
-          <h3>Group 4</h3>
-          <textarea id="debrief4" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
-        </div>
-        <div class="debrief-card">
-          <h3>Group 5</h3>
-          <textarea id="debrief5" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
-        </div>
-        <div class="debrief-card">
-          <h3>Group 6</h3>
-          <textarea id="debrief6" placeholder="System, #1 safety risk, key lab, do-not-mix, scenario highlight..."></textarea>
-        </div>
-      </div>
-
-      <button id="saveDebriefBtn" class="assign-btn" style="margin-top:15px;">
-        Save Debrief on This Device
+      <button onclick="exportSessionReport()" class="assign-btn" style="margin-top:15px;background:#00d4ff;">
+        📥 Export Session Report
       </button>
       <p id="debriefStatus" class="assign-error"></p>
     </section>
@@ -1296,9 +923,108 @@ Student 3
         <h2 class="section-title">Instructor Dashboard – Live View</h2>
       </div>
 
+      <!-- Phase Timer Controls -->
+      <div style="margin-bottom:25px;padding:20px;background:rgba(0,212,255,0.1);border:2px solid rgba(0,212,255,0.3);border-radius:15px;">
+        <h3 style="color:#00ffb3;font-size:18px;margin:0 0 15px 0;">⏱️ Phase Timer Controls</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:15px;">
+          <button onclick="startTimer('Warm-Up Flashcards', 15)" class="assign-btn" style="background:#00d4ff;">
+            ▶ Start Warm-Up (15 min)
+          </button>
+          <button onclick="startTimer('Expert Huddle', 10)" class="assign-btn" style="background:#00d4ff;">
+            ▶ Start Huddle (10 min)
+          </button>
+          <button onclick="startTimer('Jigsaw Round', 20)" class="assign-btn" style="background:#00d4ff;">
+            ▶ Start Jigsaw (20 min)
+          </button>
+          <button onclick="startTimer('Speed Round', 10)" class="assign-btn" style="background:#00d4ff;">
+            ▶ Start Speed Round (10 min)
+          </button>
+          <button onclick="stopTimer()" class="assign-btn" style="background:#ff006e;">
+            ⏹ Stop Timer
+          </button>
+        </div>
+        <div id="timerStatus" style="color:#ccecff;font-size:14px;text-align:center;"></div>
+      </div>
+
+      <!-- Adaptive Difficulty Controls -->
+      <div style="margin-bottom:25px;padding:20px;background:rgba(138,43,226,0.05);border:2px solid rgba(138,43,226,0.2);border-radius:15px;">
+        <h3 style="color:#8a2be2;font-size:18px;margin:0 0 15px 0;">🎚️ Adaptive Difficulty</h3>
+        
+        <div style="margin-bottom:15px;">
+          <label style="display:block;color:#ccecff;font-size:14px;margin-bottom:8px;">
+            Error Penalty Multiplier: <span id="difficultyValue" style="color:#00ffb3;font-weight:700;">1.0x</span>
+          </label>
+          <input type="range" id="difficultySlider" min="0.5" max="2.0" step="0.1" value="1.0" 
+            style="width:100%;accent-color:#8a2be2;" 
+            oninput="updateDifficulty(this.value)" />
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-top:5px;">
+            <span>Easy (0.5x)</span>
+            <span>Normal (1.0x)</span>
+            <span>Hard (2.0x)</span>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);padding:12px;border-radius:8px;font-size:12px;color:#ccecff;">
+          <strong style="color:#8a2be2;">Effect:</strong> Adjusts stability penalty for errors. 
+          Easy mode = -2 to -12 stability. Normal = -5 to -25. Hard = -10 to -50.
+          <div style="margin-top:8px;padding:8px;background:rgba(138,43,226,0.1);border-radius:6px;">
+            <strong>Current Settings:</strong><br>
+            Minor errors: <span id="minorPenalty">-5</span><br>
+            Moderate errors: <span id="moderatePenalty">-15</span><br>
+            Critical errors: <span id="criticalPenalty">-25</span>
+          </div>
+        </div>
+      </div>
+
       <div style="margin-bottom:25px;">
         <h3 style="color:#00ffb3;font-size:18px;margin:0 0 12px 0;">Patient Stability by Group</h3>
         <div id="stabilityPanel" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;"></div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div style="margin-bottom:25px;padding:20px;background:rgba(0,255,179,0.05);border:2px solid rgba(0,255,179,0.2);border-radius:15px;">
+        <h3 style="color:#00ffb3;font-size:18px;margin:0 0 15px 0;">📈 Session Performance Metrics</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;">
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:28px;font-weight:900;color:#00ffb3;" id="avgStability">--</div>
+            <div style="font-size:12px;color:#ccecff;margin-top:5px;">Average Stability</div>
+          </div>
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:28px;font-weight:900;color:#ff006e;" id="totalErrors">--</div>
+            <div style="font-size:12px;color:#ccecff;margin-top:5px;">Total Errors</div>
+          </div>
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:28px;font-weight:900;color:#ffb300;" id="rrtCalls">--</div>
+            <div style="font-size:12px;color:#ccecff;margin-top:5px;">RRT Calls Made</div>
+          </div>
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:28px;font-weight:900;color:#00d4ff;" id="interventions">--</div>
+            <div style="font-size:12px;color:#ccecff;margin-top:5px;">Interventions Applied</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RRT Performance Metrics -->
+      <div style="margin-bottom:25px;padding:20px;background:rgba(255,107,107,0.05);border:2px solid rgba(255,107,107,0.2);border-radius:15px;">
+        <h3 style="color:#ff6b6b;font-size:18px;margin:0 0 15px 0;">⚡ RRT Performance Metrics</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;">
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:28px;font-weight:900;color:#00d4ff;" id="avgResponseTime">--</div>
+            <div style="font-size:11px;color:#ccecff;margin-top:5px;">Avg Response Time</div>
+          </div>
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:28px;font-weight:900;color:#00ffb3;" id="avgStabilityGain">--</div>
+            <div style="font-size:11px;color:#ccecff;margin-top:5px;">Avg Stability Gain</div>
+          </div>
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:20px;font-weight:700;color:#ffb300;" id="mostUsedIntervention">--</div>
+            <div style="font-size:11px;color:#ccecff;margin-top:5px;">Most Used</div>
+          </div>
+          <div style="text-align:center;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;">
+            <div style="font-size:28px;font-weight:900;color:#8a2be2;" id="reflectionCount">0</div>
+            <div style="font-size:11px;color:#ccecff;margin-top:5px;">Reflections Submitted</div>
+          </div>
+        </div>
       </div>
 
       <div style="margin-bottom:25px;">
@@ -1826,15 +1552,28 @@ Student 3
       database.ref('groups').on('value', snapshot => {
         const data = snapshot.val() || {};
         stabilityPanel.innerHTML = '';
+        
+        let totalStability = 0;
+        let groupCount = 0;
 
         // Ensure all 6 groups are shown
         for (let groupId = 1; groupId <= 6; groupId++) {
           const g = data[groupId] || {};
           const stability = typeof g.stability === 'number' ? g.stability : 100;
+          
+          totalStability += stability;
+          groupCount++;
 
           const box = document.createElement('div');
           box.className = 'groupBox';
           box.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;border:2px solid rgba(0,212,255,0.4);';
+
+          // Add pulsing animation for critical levels
+          if (stability < 25) {
+            box.classList.add('stability-critical');
+          } else if (stability < 50) {
+            box.classList.add('stability-warning');
+          }
 
           const title = document.createElement('div');
           title.style.cssText = 'font-size:14px;font-weight:600;color:#00d4ff;margin-bottom:8px;text-align:center;';
@@ -1869,6 +1608,14 @@ Student 3
 
           stabilityPanel.appendChild(box);
         }
+        
+        // Update average stability metric
+        const avgStabilityEl = document.getElementById('avgStability');
+        if (avgStabilityEl && groupCount > 0) {
+          const avg = Math.round(totalStability / groupCount);
+          avgStabilityEl.textContent = avg;
+          avgStabilityEl.style.color = avg >= 75 ? '#00ffb3' : avg >= 50 ? '#ffb300' : '#ff006e';
+        }
       });
     }
 
@@ -1880,39 +1627,47 @@ Student 3
 
         if (entries.length === 0) {
           alertsPanel.innerHTML = '<p style="color:#ccecff;font-size:13px;margin:0;">No alerts yet</p>';
-          return;
+        } else {
+          alertsPanel.innerHTML = '';
+
+          entries.forEach(ev => {
+            const div = document.createElement('div');
+            div.className = 'alert-item ' + (ev.severity || 'minor');
+            div.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;';
+            
+            // Border color based on severity
+            if (ev.severity === 'critical') {
+              div.style.borderLeft = '4px solid #ff006e';
+            } else if (ev.severity === 'moderate') {
+              div.style.borderLeft = '4px solid #ffb300';
+            } else {
+              div.style.borderLeft = '4px solid #00d4ff';
+            }
+
+            const time = new Date(ev.timestamp).toLocaleTimeString();
+            const correctness = ev.isCorrect ? '✅' : '⚠️';
+
+            div.innerHTML = `
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;">
+                <span style="font-size:13px;font-weight:600;color:${ev.isCorrect ? '#00ffb3' : '#ff99c2'};">${correctness} Group ${ev.groupId} – ${ev.phase}</span>
+                <span style="font-size:11px;color:#ccecff;">${time}</span>
+              </div>
+              <div style="font-size:12px;color:#ccecff;">${ev.explanation || 'No details'}</div>
+              <div style="font-size:11px;color:#00d4ff;margin-top:4px;">Severity: ${ev.severity} | Delta: ${ev.delta > 0 ? '+' : ''}${ev.delta || 0}</div>
+            `;
+
+            alertsPanel.appendChild(div);
+          });
         }
-
-        alertsPanel.innerHTML = '';
-
-        entries.forEach(ev => {
-          const div = document.createElement('div');
-          div.className = 'alert-item ' + (ev.severity || 'minor');
-          div.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;';
-          
-          // Border color based on severity
-          if (ev.severity === 'critical') {
-            div.style.borderLeft = '4px solid #ff006e';
-          } else if (ev.severity === 'moderate') {
-            div.style.borderLeft = '4px solid #ffb300';
-          } else {
-            div.style.borderLeft = '4px solid #00d4ff';
-          }
-
-          const time = new Date(ev.timestamp).toLocaleTimeString();
-          const correctness = ev.isCorrect ? '✅' : '⚠️';
-
-          div.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;">
-              <span style="font-size:13px;font-weight:600;color:${ev.isCorrect ? '#00ffb3' : '#ff99c2'};">${correctness} Group ${ev.groupId} – ${ev.phase}</span>
-              <span style="font-size:11px;color:#ccecff;">${time}</span>
-            </div>
-            <div style="font-size:12px;color:#ccecff;">${ev.explanation || 'No details'}</div>
-            <div style="font-size:11px;color:#00d4ff;margin-top:4px;">Severity: ${ev.severity} | Delta: ${ev.delta > 0 ? '+' : ''}${ev.delta || 0}</div>
-          `;
-
-          alertsPanel.appendChild(div);
-        });
+        
+        // Update total errors metric
+        const totalErrorsEl = document.getElementById('totalErrors');
+        if (totalErrorsEl) {
+          const errorCount = entries.filter(ev => !ev.isCorrect).length;
+          totalErrorsEl.textContent = errorCount;
+        }
+      });
+    }
       });
     }
 
@@ -2056,6 +1811,256 @@ Student 3
 
     // Initialize jigsaw tracker
     setupJigsawTracker();
+
+    // -----------------------------
+    // PERFORMANCE METRICS TRACKING
+    // -----------------------------
+    // Track RRT calls
+    database.ref('rrt/calls').on('value', snapshot => {
+      const rrtCallsEl = document.getElementById('rrtCalls');
+      if (rrtCallsEl) {
+        const calls = snapshot.val() || {};
+        rrtCallsEl.textContent = Object.keys(calls).length;
+      }
+    });
+
+    // Track interventions (count events with type 'intervention')
+    database.ref('events').on('value', snapshot => {
+      const interventionsEl = document.getElementById('interventions');
+      if (interventionsEl) {
+        const events = snapshot.val() || {};
+        const interventionCount = Object.values(events).filter(ev => ev.phase === 'rrt-intervention').length;
+        interventionsEl.textContent = interventionCount;
+      }
+    });
+
+    // Track RRT performance metrics
+    database.ref('rrt/metrics').on('value', snapshot => {
+      const metrics = snapshot.val();
+      if (metrics) {
+        const metricArray = Object.values(metrics);
+        
+        // Average response time
+        const avgTime = metricArray.reduce((sum, m) => sum + m.responseTimeMs, 0) / metricArray.length;
+        const avgTimeSeconds = (avgTime / 1000).toFixed(1);
+        document.getElementById('avgResponseTime').textContent = avgTimeSeconds + 's';
+        
+        // Average stability gain
+        const avgGain = metricArray.reduce((sum, m) => sum + m.stabilityGain, 0) / metricArray.length;
+        document.getElementById('avgStabilityGain').textContent = '+' + avgGain.toFixed(1);
+        
+        // Most used intervention
+        const interventionCounts = {};
+        metricArray.forEach(m => {
+          interventionCounts[m.interventionType] = (interventionCounts[m.interventionType] || 0) + 1;
+        });
+        const mostUsed = Object.entries(interventionCounts).sort((a, b) => b[1] - a[1])[0];
+        if (mostUsed) {
+          document.getElementById('mostUsedIntervention').textContent = mostUsed[0].toUpperCase() + ' (' + mostUsed[1] + ')';
+        }
+      }
+    });
+
+    // Track reflections
+    database.ref('reflections').on('value', snapshot => {
+      const reflections = snapshot.val();
+      if (reflections) {
+        document.getElementById('reflectionCount').textContent = Object.keys(reflections).length;
+      }
+    });
+
+    // -----------------------------
+    // ADAPTIVE DIFFICULTY
+    // -----------------------------
+    function updateDifficulty(value) {
+      const multiplier = parseFloat(value);
+      
+      // Update display
+      document.getElementById('difficultyValue').textContent = multiplier.toFixed(1) + 'x';
+      
+      // Calculate penalties
+      const minorBase = 5;
+      const moderateBase = 15;
+      const criticalBase = 25;
+      
+      const minorPenalty = Math.round(minorBase * multiplier);
+      const moderatePenalty = Math.round(moderateBase * multiplier);
+      const criticalPenalty = Math.round(criticalBase * multiplier);
+      
+      // Update display
+      document.getElementById('minorPenalty').textContent = '-' + minorPenalty;
+      document.getElementById('moderatePenalty').textContent = '-' + moderatePenalty;
+      document.getElementById('criticalPenalty').textContent = '-' + criticalPenalty;
+      
+      // Save to Firebase so student views can read it
+      database.ref('settings/difficulty').set({
+        multiplier: multiplier,
+        minorPenalty: minorPenalty,
+        moderatePenalty: moderatePenalty,
+        criticalPenalty: criticalPenalty,
+        timestamp: Date.now()
+      });
+    }
+
+    // -----------------------------
+    // TIMER CONTROLS
+    // -----------------------------
+    function startTimer(phaseName, durationMinutes) {
+      const endTime = Date.now() + (durationMinutes * 60 * 1000);
+      
+      database.ref('timer').set({
+        phase: phaseName,
+        endTime: endTime,
+        duration: durationMinutes
+      });
+      
+      const status = document.getElementById('timerStatus');
+      if (status) {
+        status.style.color = '#00ffb3';
+        status.textContent = `✓ Timer started: ${phaseName} - ${durationMinutes} minutes`;
+      }
+    }
+
+    function stopTimer() {
+      database.ref('timer').remove();
+      
+      const status = document.getElementById('timerStatus');
+      if (status) {
+        status.style.color = '#ff99c2';
+        status.textContent = '⏹ Timer stopped';
+      }
+    }
+
+    // -----------------------------
+    // EXPORT SESSION REPORT
+    // -----------------------------
+    async function exportSessionReport() {
+      try {
+        // Fetch all data
+        const groupsSnapshot = await database.ref('groups').once('value');
+        const eventsSnapshot = await database.ref('events').once('value');
+        const rrtSnapshot = await database.ref('rrt/calls').once('value');
+        const debriefSnapshot = await database.ref('debrief').once('value');
+        
+        const groups = groupsSnapshot.val() || {};
+        const events = eventsSnapshot.val() || {};
+        const rrtCalls = rrtSnapshot.val() || {};
+        const debriefNotes = debriefSnapshot.val() || {};
+        
+        // Build report
+        let report = '═══════════════════════════════════════════════\n';
+        report += '       ATI PHARM BLITZ - SESSION REPORT\n';
+        report += '═══════════════════════════════════════════════\n';
+        report += `Generated: ${new Date().toLocaleString()}\n\n`;
+        
+        // Performance Summary
+        report += '─────────────────────────────────────────────\n';
+        report += 'PERFORMANCE SUMMARY\n';
+        report += '─────────────────────────────────────────────\n';
+        
+        const groupStabilities = Object.keys(groups).map(gId => groups[gId].stability || 100);
+        const avgStability = groupStabilities.length > 0 
+          ? Math.round(groupStabilities.reduce((a,b) => a+b, 0) / groupStabilities.length)
+          : 100;
+        const totalErrors = Object.values(events).filter(ev => !ev.isCorrect).length;
+        const totalRRTCalls = Object.keys(rrtCalls).length;
+        const interventions = Object.values(events).filter(ev => ev.phase === 'rrt-intervention').length;
+        
+        report += `Average Patient Stability: ${avgStability}%\n`;
+        report += `Total Errors Made: ${totalErrors}\n`;
+        report += `RRT Calls: ${totalRRTCalls}\n`;
+        report += `Interventions Applied: ${interventions}\n\n`;
+        
+        // Group Stability Details
+        report += '─────────────────────────────────────────────\n';
+        report += 'GROUP STABILITY SCORES\n';
+        report += '─────────────────────────────────────────────\n';
+        const groupNames = ['Neurological', 'Psychopharmacology', 'Pain Management', 
+                           'Inflammation', 'Endocrine', 'Infection'];
+        for (let i = 1; i <= 6; i++) {
+          const stability = groups[i]?.stability || 100;
+          report += `Group ${i} (${groupNames[i-1]}): ${stability}%\n`;
+        }
+        report += '\n';
+        
+        // Debrief Notes
+        report += '─────────────────────────────────────────────\n';
+        report += 'DEBRIEF NOTES (From Charge Nurses)\n';
+        report += '─────────────────────────────────────────────\n';
+        for (let i = 1; i <= 6; i++) {
+          const debrief = debriefNotes[`group${i}`];
+          if (debrief && debrief.content) {
+            report += `\nGroup ${i} (by ${debrief.chargeNurse}):\n`;
+            report += debrief.content.trim() + '\n';
+          }
+        }
+        report += '\n';
+        
+        // Error Log
+        report += '─────────────────────────────────────────────\n';
+        report += 'ERROR LOG (Most Recent 50)\n';
+        report += '─────────────────────────────────────────────\n';
+        const errorEvents = Object.values(events)
+          .filter(ev => !ev.isCorrect)
+          .sort((a,b) => b.timestamp - a.timestamp)
+          .slice(0, 50);
+        
+        errorEvents.forEach(ev => {
+          const time = new Date(ev.timestamp).toLocaleTimeString();
+          report += `[${time}] Group ${ev.groupId} - ${ev.phase}\n`;
+          report += `  ${ev.explanation || 'Error occurred'}\n`;
+          report += `  Severity: ${ev.severity} | Stability Impact: ${ev.delta}\n\n`;
+        });
+        
+        // RRT Calls
+        if (totalRRTCalls > 0) {
+          report += '─────────────────────────────────────────────\n';
+          report += 'RRT CALLS SUMMARY\n';
+          report += '─────────────────────────────────────────────\n';
+          Object.values(rrtCalls).forEach(call => {
+            const time = new Date(call.timestamp).toLocaleTimeString();
+            report += `[${time}] Group ${call.groupId} - Stability: ${call.stability}\n`;
+            if (call.sbar) {
+              report += `  Situation: ${call.sbar.situation}\n`;
+              report += `  Background: ${call.sbar.background}\n`;
+              report += `  Assessment: ${call.sbar.assessment}\n`;
+              report += `  Recommendation: ${call.sbar.recommendation}\n`;
+            }
+            report += '\n';
+          });
+        }
+        
+        report += '═══════════════════════════════════════════════\n';
+        report += '             END OF REPORT\n';
+        report += '═══════════════════════════════════════════════\n';
+        
+        // Download as text file
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `PharmBlitz_Session_${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Show success message
+        const status = document.getElementById('debriefStatus');
+        if (status) {
+          status.style.color = '#00ffb3';
+          status.textContent = '✓ Session report downloaded successfully!';
+          setTimeout(() => { status.textContent = ''; }, 3000);
+        }
+      } catch (error) {
+        console.error('Export error:', error);
+        const status = document.getElementById('debriefStatus');
+        if (status) {
+          status.style.color = '#ff006e';
+          status.textContent = '✗ Export failed. Check console for details.';
+        }
+      }
+    }
   </script>
 
   </div>

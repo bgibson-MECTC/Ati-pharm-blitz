@@ -65,6 +65,64 @@
       100% { background-position: 200% center; }
     }
 
+    @keyframes pulse-warning {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 179, 0, 0.7); }
+      50% { opacity: 0.85; box-shadow: 0 0 20px 10px rgba(255, 179, 0, 0); }
+    }
+
+    @keyframes pulse-critical {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 0, 110, 0.9); }
+      50% { opacity: 0.75; box-shadow: 0 0 30px 15px rgba(255, 0, 110, 0); }
+    }
+
+    @keyframes successPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 255, 179, 0.7); }
+      50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(0, 255, 179, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 255, 179, 0); }
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    @keyframes stabilityBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.1); }
+    }
+
+    @keyframes celebration {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+      100% { transform: scale(1) rotate(360deg); opacity: 1; }
+    }
+
+    .success-flash {
+      animation: successPulse 0.6s ease-out;
+    }
+
+    .error-flash {
+      animation: errorShake 0.5s ease-out;
+      border-color: #ff006e !important;
+    }
+
+    .stability-boost {
+      animation: stabilityBounce 0.8s ease-out;
+    }
+
+    .celebration-icon {
+      animation: celebration 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .stability-warning {
+      animation: pulse-warning 2s ease-in-out infinite;
+    }
+
+    .stability-critical {
+      animation: pulse-critical 1.5s ease-in-out infinite;
+    }
+
     .section {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
@@ -681,41 +739,21 @@
     </section>
   </div>
 
-  <!-- ROLE SELECTION SCREEN -->
-  <div class="role-selection-screen" id="roleSelectionScreen">
-    <h1 class="selection-title">Select Your Role</h1>
-    <p class="selection-subtitle" id="roleSubtitle">Choose your leadership role for this activity</p>
-    
-    <div class="role-grid">
-      <div class="role-option" onclick="selectRole('charge1')" id="charge1Option">
-        <div class="role-icon" style="font-size: 48px;">👨‍⚕️</div>
-        <div class="role-name">Charge Nurse</div>
-        <div class="role-badge">Role 1 of 2</div>
-        <div class="role-description">Lead delegation and prioritization decisions</div>
-      </div>
-      
-      <div class="role-option" onclick="selectRole('charge2')" id="charge2Option">
-        <div class="role-icon" style="font-size: 48px;">👩‍⚕️</div>
-        <div class="role-name">Charge Nurse</div>
-        <div class="role-badge">Role 2 of 2</div>
-        <div class="role-description">Lead delegation and prioritization decisions</div>
-      </div>
-      
-      <div class="role-option" onclick="selectRole('rrt')" id="rrtOption">
-        <div class="role-icon" style="font-size: 48px;">🚨</div>
-        <div class="role-name">Rapid Response RN</div>
-        <div class="role-badge">Critical Care</div>
-        <div class="role-description">Respond to patient emergencies and instability</div>
-      </div>
-    </div>
-  </div>
-
   <!-- GROUP ACTIVITY CONTENT -->
   <div class="main-wrapper group-activity-content" id="groupActivityContent">
     <header>
       <h1 class="main-title">ATI Pharm Blitz</h1>
       <p class="subtitle" id="systemLabel">Group System: …</p>
       <p class="group-label" id="groupLabel">Group: …</p>
+      
+      <!-- Phase Timer Display -->
+      <div id="phaseTimer" style="display:none;margin-top:20px;padding:15px;background:rgba(0,212,255,0.15);border:2px solid rgba(0,212,255,0.4);border-radius:15px;text-align:center;">
+        <div style="font-size:14px;color:#00d4ff;font-weight:600;margin-bottom:5px;">CURRENT PHASE</div>
+        <div id="phaseNameDisplay" style="font-size:20px;color:#00ffb3;font-weight:700;margin-bottom:8px;">Warm-Up</div>
+        <div style="font-size:36px;font-weight:900;color:#ffffff;font-family:monospace;" id="timeRemaining">15:00</div>
+        <div style="font-size:12px;color:#ccecff;margin-top:5px;">Time Remaining</div>
+      </div>
+      
       <a href="index.html" class="back-link">⬅ Back to Instructor View</a>
     </header>
 
@@ -939,6 +977,32 @@
           <strong>📝 Pro Tip:</strong> Take notes on each system's #1 safety risk, critical lab, and do-not-mix rule. 
           You'll use this knowledge in the Lightning Round!
         </p>
+      </div>
+    </section>
+
+    <!-- TEAM COMMUNICATION -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">💬</span>
+        <h2 class="section-title">Team Chat</h2>
+      </div>
+
+      <div id="chatMessages" style="background:rgba(0,0,0,0.3);border-radius:10px;padding:15px;max-height:250px;overflow-y:auto;margin-bottom:15px;font-size:13px;">
+        <div style="color:#888;text-align:center;padding:20px;">No messages yet. Start the conversation!</div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <input type="text" id="chatInput" placeholder="Type your message..." style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;" />
+        <button onclick="sendChatMessage()" class="assign-btn" style="background:#00d4ff;min-width:100px;">Send</button>
+      </div>
+
+      <div style="margin-top:15px;padding:12px;background:rgba(138,43,226,0.08);border-radius:10px;border-left:4px solid #8a2be2;">
+        <p style="margin:0;font-size:12px;color:#ccecff;"><strong>📞 Quick Message to Charge Nurse:</strong></p>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <button onclick="quickMessage('Need help with patient stability')" class="assign-btn" style="font-size:11px;padding:6px 12px;background:#8a2be2;">🆘 Help Needed</button>
+          <button onclick="quickMessage('Ready for next phase')" class="assign-btn" style="font-size:11px;padding:6px 12px;background:#00ffb3;">✅ Ready</button>
+          <button onclick="quickMessage('Question about medication')" class="assign-btn" style="font-size:11px;padding:6px 12px;background:#ffb300;">❓ Question</button>
+        </div>
       </div>
     </section>
 
@@ -1219,39 +1283,75 @@
       const groupRef = database.ref('groups/' + currentGroupId);
       const eventsRef = database.ref('events');
 
-      // Stability deltas
-      let delta = 0;
-      if (!isCorrect) {
-        if (severity === 'critical') delta = -25;
-        else if (severity === 'moderate') delta = -15;
-        else delta = -5;
-      } else {
-        // small positive bump for correct decisions if you want
-        delta = +2;
-      }
+      // Get difficulty settings from Firebase, then apply penalty
+      database.ref('settings/difficulty').once('value').then(diffSnap => {
+        const diffSettings = diffSnap.val();
+        let delta = 0;
+        
+        if (!isCorrect) {
+          if (diffSettings) {
+            // Use instructor-set difficulty
+            if (severity === 'critical') delta = -diffSettings.criticalPenalty;
+            else if (severity === 'moderate') delta = -diffSettings.moderatePenalty;
+            else delta = -diffSettings.minorPenalty;
+          } else {
+            // Default values if no difficulty set
+            if (severity === 'critical') delta = -25;
+            else if (severity === 'moderate') delta = -15;
+            else delta = -5;
+          }
+        } else {
+          // small positive bump for correct decisions
+          delta = +2;
+        }
 
-      // Update stability atomically
-      groupRef.child('stability').transaction(current => {
-        if (typeof current !== 'number') current = 100;
-        let next = current + delta;
-        if (next > 100) next = 100;
-        if (next < 0) next = 0;
-        return next;
+        // Update stability atomically
+        groupRef.child('stability').transaction(current => {
+          if (typeof current !== 'number') current = 100;
+          let next = current + delta;
+          if (next > 100) next = 100;
+          if (next < 0) next = 0;
+          return next;
+        }).then(() => {
+          // Show visual feedback for stability change
+          if (delta !== 0) {
+            showStabilityFeedback(delta);
+          }
+        });
+
+        // Log event (for instructor alerts/consequence mapping)
+        const payload = {
+          groupId: currentGroupId,
+          phase: phase,
+          itemId: itemId,
+          isCorrect: !!isCorrect,
+          severity: severity,
+          explanation: explanation,
+          delta: delta,
+          timestamp: Date.now()
+        };
+
+        eventsRef.push(payload);
       });
-
-      // Log event (for instructor alerts/consequence mapping)
-      const payload = {
-        groupId: currentGroupId,
-        phase: phase,
-        itemId: itemId,
-        isCorrect: !!isCorrect,
-        severity: severity,
-        explanation: explanation,
-        delta: delta,
-        timestamp: Date.now()
-      };
-
-      eventsRef.push(payload);
+    }
+    
+    function showStabilityFeedback(delta) {
+      const feedbackDiv = document.createElement('div');
+      const isPositive = delta > 0;
+      const icon = isPositive ? '📈' : '📉';
+      const color = isPositive ? '#00ffb3' : '#ff006e';
+      const sign = isPositive ? '+' : '';
+      
+      feedbackDiv.textContent = `${icon} ${sign}${delta}`;
+      feedbackDiv.style.cssText = `position:fixed;top:20%;right:20px;font-size:48px;font-weight:900;color:${color};z-index:10000;pointer-events:none;text-shadow:0 0 20px ${color};`;
+      feedbackDiv.classList.add('stability-boost');
+      document.body.appendChild(feedbackDiv);
+      
+      setTimeout(() => {
+        feedbackDiv.style.transition = 'opacity 0.5s ease';
+        feedbackDiv.style.opacity = '0';
+        setTimeout(() => feedbackDiv.remove(), 500);
+      }, 1500);
     }
 
     // -----------------------------
@@ -1291,6 +1391,26 @@
 
     // Initialize flashcard sync
     setupFlashcardSync();
+    
+    // Randomize flashcard display order
+    function randomizeFlashcards() {
+      const container = document.querySelector('.flashcard-container');
+      if (!container) return;
+      
+      const cards = Array.from(container.querySelectorAll('.flashcard'));
+      
+      // Fisher-Yates shuffle
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      
+      // Reappend in shuffled order
+      cards.forEach(card => container.appendChild(card));
+    }
+    
+    // Randomize on page load
+    document.addEventListener('DOMContentLoaded', randomizeFlashcards);
 
     // -----------------------------
     // FLASHCARD GUESS – AUTO CHECK
@@ -1310,12 +1430,16 @@
       const cardInput = document.getElementById('fgCard');
       const systemInput = document.getElementById('fgSystem');
       const statusEl = document.getElementById('fgStatus');
+      const submitBtn = document.getElementById('fgSubmit');
+      const guessSection = document.getElementById('flashcardGuessSection');
 
       statusEl.textContent = '';
 
       if (!currentGroupId) {
         statusEl.style.color = '#ff99c2';
         statusEl.textContent = 'Set your Group # first.';
+        submitBtn?.classList.add('error-flash');
+        setTimeout(() => submitBtn?.classList.remove('error-flash'), 500);
         return;
       }
 
@@ -1325,11 +1449,15 @@
       if (!cardId) {
         statusEl.style.color = '#ff99c2';
         statusEl.textContent = 'Choose which card you are answering for.';
+        cardInput?.classList.add('error-flash');
+        setTimeout(() => cardInput?.classList.remove('error-flash'), 500);
         return;
       }
       if (!systemGuess) {
         statusEl.style.color = '#ff99c2';
         statusEl.textContent = 'Select your system guess.';
+        systemInput?.classList.add('error-flash');
+        setTimeout(() => systemInput?.classList.remove('error-flash'), 500);
         return;
       }
 
@@ -1340,6 +1468,13 @@
         statusEl.style.color = '#00ffb3';
         statusEl.textContent = '✓ Correct – nice call! Your patient remains stable.';
         
+        // Visual success feedback
+        guessSection?.classList.add('success-flash');
+        setTimeout(() => guessSection?.classList.remove('success-flash'), 600);
+        
+        // Show celebration icon
+        showCelebration('✅');
+        
         // Record correct decision (affects patient stability only)
         recordDecision({
           phase: 'flashcard',
@@ -1349,14 +1484,22 @@
           explanation: `Correctly identified ${cardId} as ${correctSystem}.`
         });
       } else {
-        statusEl.style.color = '#ffb300';
-        statusEl.textContent = `Not quite – you picked ${systemGuess}, but the correct answer is ${correctSystem}. This affects your patient's stability.`;
+        statusEl.style.color = '#ff006e';
+        statusEl.textContent = `Wrong – you picked ${systemGuess}, but the correct answer is ${correctSystem}. Your patient's condition is worsening!`;
+        
+        // Visual error feedback
+        guessSection?.classList.add('error-flash');
+        setTimeout(() => guessSection?.classList.remove('error-flash'), 500);
+        
+        showCelebration('❌');
+        
+        // INCREASED DIFFICULTY: Wrong flashcard now treated as critical error (-20 stability)
         recordDecision({
           phase: 'flashcard',
           itemId: cardId,
           isCorrect: false,
-          severity: 'moderate',
-          explanation: `Misclassified ${cardId}: guessed ${systemGuess}, correct was ${correctSystem}.`
+          severity: 'critical',
+          explanation: `CRITICAL: Misclassified ${cardId}: guessed ${systemGuess}, correct was ${correctSystem}. Major clinical reasoning error.`
         });
       }
 
@@ -1365,6 +1508,16 @@
         cardInput.value = '';
         systemInput.value = '';
       }, 2000);
+    }
+    
+    function showCelebration(icon) {
+      const celebDiv = document.createElement('div');
+      celebDiv.textContent = icon;
+      celebDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:120px;z-index:10000;pointer-events:none;';
+      celebDiv.classList.add('celebration-icon');
+      document.body.appendChild(celebDiv);
+      
+      setTimeout(() => celebDiv.remove(), 800);
     }
 
     const fgBtn = document.getElementById('fgSubmit');
@@ -1502,7 +1655,7 @@
           `
         },
         consequence: {
-          title: 'Psych – Consequence Case: Fluoxetine + Tramadol (Serotonin Syndrome)',
+          title: 'Psych – NGN Multi-Step Case: Fluoxetine + Tramadol (Serotonin Syndrome)',
           html: `
             <p><strong>Scenario:</strong></p>
             <p>Patient on <strong>fluoxetine</strong> for depression and <strong>tramadol</strong> for chronic pain presents with:</p>
@@ -1512,8 +1665,17 @@
               <li>Agitation, flushed skin, heavy sweating</li>
               <li>BP <strong>154/90</strong>, HR <strong>132</strong></li>
             </ul>
-            <p><strong>Question for your group:</strong><br>
-            What is happening, and what is your <strong>first priority action</strong>?</p>
+            <div style="background:rgba(255,107,107,0.15);padding:15px;border-radius:10px;border-left:4px solid #ff006e;margin:15px 0;">
+              <p style="color:#ff99c2;font-weight:700;margin-bottom:10px;">⚠️ NGN-STYLE MULTI-STEP CLINICAL JUDGMENT</p>
+              <p style="color:#fff;margin-bottom:8px;"><strong>As a group, complete ALL of the following steps:</strong></p>
+              <ol style="margin-left:20px;color:#ccecff;line-height:1.8;">
+                <li><strong>IDENTIFY:</strong> What is the most likely condition this patient is experiencing?</li>
+                <li><strong>PRIORITIZE:</strong> What is your FIRST nursing action? (Choose one specific intervention)</li>
+                <li><strong>ANALYZE:</strong> Which provider order would you question or hold immediately?</li>
+                <li><strong>EDUCATE:</strong> Identify ONE priority teaching point for this patient before discharge to prevent recurrence.</li>
+              </ol>
+              <p style="color:#ffb300;font-size:12px;margin-top:10px;">⚡ Charge Nurse: ALL 4 steps must be addressed correctly to APPROVE.</p>
+            </div>
           `
         }
       },
@@ -1632,7 +1794,7 @@
           `
         },
         consequence: {
-          title: 'Infection – Consequence Case: Amphotericin B Nephrotoxicity',
+          title: 'Infection – NGN Multi-Step Case: Amphotericin B Nephrotoxicity + Hyperkalemia',
           html: `
             <p><strong>Scenario:</strong></p>
             <p>A patient on IV <strong>Amphotericin B</strong> for fungal infection now has:</p>
@@ -1642,8 +1804,17 @@
               <li>EKG showing <strong>peaked T waves</strong></li>
               <li>Rigors and fevers with infusions</li>
             </ul>
-            <p><strong>Question for your group:</strong><br>
-            What is your <strong>priority</strong> response, and what earlier monitoring could have prevented this?</p>
+            <div style="background:rgba(255,107,107,0.15);padding:15px;border-radius:10px;border-left:4px solid #ff006e;margin:15px 0;">
+              <p style="color:#ff99c2;font-weight:700;margin-bottom:10px;">⚠️ NGN-STYLE MULTI-STEP CLINICAL JUDGMENT</p>
+              <p style="color:#fff;margin-bottom:8px;"><strong>As a group, complete ALL of the following steps:</strong></p>
+              <ol style="margin-left:20px;color:#ccecff;line-height:1.8;">
+                <li><strong>IDENTIFY:</strong> What TWO critical conditions is this patient experiencing? (List both)</li>
+                <li><strong>PRIORITIZE:</strong> Which condition poses the most IMMEDIATE life threat and why?</li>
+                <li><strong>INTERVENE:</strong> State your FIRST nursing action before calling the provider.</li>
+                <li><strong>PREVENT:</strong> What earlier monitoring (specific lab + frequency) could have prevented this crisis?</li>
+              </ol>
+              <p style="color:#ffb300;font-size:12px;margin-top:10px;">⚡ Charge Nurse: ALL 4 steps must show critical thinking to APPROVE.</p>
+            </div>
           `
         }
       },
@@ -1713,10 +1884,13 @@
             }
           });
 
-          // RULE:
-          // If they missed the flashcard for this system OR their stability is < 75 → consequence case.
-          // Otherwise → standard case.
-          if (hadFlashcardMiss || stability < 75) {
+          // RULE (INCREASED DIFFICULTY):
+          // If they missed the flashcard for this system → ALWAYS consequence case.
+          // Else, if stability < 90 → consequence case.
+          // Only assign standard if: no flashcard miss AND stability >= 90
+          if (hadFlashcardMiss) {
+            resolve('consequence');
+          } else if (stability < 90) {
             resolve('consequence');
           } else {
             resolve('standard');
@@ -1826,10 +2000,10 @@
       }
 
       // Initialize dashboards
-      setupAllGroupsMonitor();
+      setupAllGroupsMonitor(role);
       if (role !== 'rrt') {
-        setupErrorLog();
-        setupGroupCasesMonitor();
+        setupErrorLog(role);
+        setupGroupCasesMonitor(role);
       }
     }
 
@@ -1887,16 +2061,27 @@
       if (typeof setupJigsawCheckboxes === 'function') {
         setupJigsawCheckboxes();
       }
+      
+      // Setup chat listener
+      setupChatListener();
     }
 
     // -----------------------------
     // LEADERSHIP DASHBOARD FUNCTIONS
     // -----------------------------
-    function setupAllGroupsMonitor() {
+    function setupAllGroupsMonitor(role) {
       const container = document.getElementById('allGroupsStability');
       const groupNames = ['Neuro', 'Psych', 'Pain', 'Inflam', 'Endo', 'Infection'];
       
-      for (let i = 1; i <= 6; i++) {
+      // Charge 1 sees groups 1-3, Charge 2 sees groups 4-6, RRT sees all
+      let groupsToShow = [1, 2, 3, 4, 5, 6];
+      if (role === 'charge1') {
+        groupsToShow = [1, 2, 3];
+      } else if (role === 'charge2') {
+        groupsToShow = [4, 5, 6];
+      }
+      
+      groupsToShow.forEach(i => {
         const groupRef = database.ref('groups/' + i + '/stability');
         const groupDiv = document.createElement('div');
         groupDiv.id = 'groupStability' + i;
@@ -1911,21 +2096,41 @@
         groupRef.on('value', snap => {
           const stability = snap.val() || 100;
           const valueEl = document.getElementById('stabilityValue' + i);
+          const parentDiv = document.getElementById('groupStability' + i);
           if (valueEl) {
             valueEl.textContent = stability;
             valueEl.style.color = stability >= 75 ? '#00ffb3' : stability >= 50 ? '#ffb300' : '#ff006e';
+            
+            // Add pulsing animation for critical levels
+            if (parentDiv) {
+              parentDiv.classList.remove('stability-warning', 'stability-critical');
+              if (stability < 25) {
+                parentDiv.classList.add('stability-critical');
+              } else if (stability < 50) {
+                parentDiv.classList.add('stability-warning');
+              }
+            }
           }
         });
-      }
+      });
     }
 
-    function setupErrorLog() {
+    function setupErrorLog(role) {
       const container = document.getElementById('allGroupsErrors');
       const eventsRef = database.ref('events').orderByChild('timestamp').limitToLast(50);
       
+      // Determine which groups this charge nurse oversees
+      let allowedGroups = [1, 2, 3, 4, 5, 6];
+      if (role === 'charge1') {
+        allowedGroups = [1, 2, 3];
+      } else if (role === 'charge2') {
+        allowedGroups = [4, 5, 6];
+      }
+      
       eventsRef.on('child_added', snap => {
         const event = snap.val();
-        if (!event.isCorrect) {
+        // Only show errors for assigned groups
+        if (!event.isCorrect && allowedGroups.includes(event.groupId)) {
           const div = document.createElement('div');
           div.style.cssText = 'padding:10px;margin-bottom:8px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:4px solid #ff006e;';
           div.innerHTML = `
@@ -1941,12 +2146,20 @@
       });
     }
 
-    function setupGroupCasesMonitor() {
+    function setupGroupCasesMonitor(role) {
       const container = document.getElementById('groupCases');
       container.innerHTML = '<p style="color:#ccecff;font-size:14px;">Group case assignments will appear here during Jigsaw Speed Round.</p>';
       
-      // Monitor jigsaw cases when they're generated
-      for (let i = 1; i <= 6; i++) {
+      // Determine which groups this charge nurse oversees
+      let groupsToMonitor = [1, 2, 3, 4, 5, 6];
+      if (role === 'charge1') {
+        groupsToMonitor = [1, 2, 3];
+      } else if (role === 'charge2') {
+        groupsToMonitor = [4, 5, 6];
+      }
+      
+      // Monitor jigsaw cases for assigned groups only
+      groupsToMonitor.forEach(i => {
         const caseRef = database.ref('jigsaw/group' + i + '/assignedCase');
         caseRef.on('value', snap => {
           const caseData = snap.val();
@@ -1957,6 +2170,20 @@
             caseDiv.innerHTML = `
               <h4 style="color:#00d4ff;margin:0 0 10px 0;">Group ${i} – ${caseData.system || 'System'}</h4>
               <div style="font-size:13px;color:#ccecff;margin-bottom:12px;">${caseData.title || 'Case assigned'}</div>
+              
+              <!-- STRICT GRADING RUBRIC (INCREASED DIFFICULTY) -->
+              <div style="background:rgba(255,179,0,0.1);padding:12px;border-radius:8px;border-left:3px solid #ffb300;margin-bottom:12px;font-size:12px;color:#ffd27f;">
+                <strong style="color:#ffb300;">⚠️ STRICT GRADING RUBRIC:</strong><br>
+                <div style="margin-top:6px;line-height:1.6;">
+                  ✓ <strong>APPROVE</strong> only if group correctly identifies:<br>
+                  <span style="margin-left:15px;">1) The condition (diagnosis/syndrome)</span><br>
+                  <span style="margin-left:15px;">2) The correct FIRST action (specific intervention)</span><br>
+                  <span style="margin-left:15px;">3) One key lab/monitoring OR teaching point</span><br>
+                  <br>
+                  ⚠️ <strong>ESCALATE</strong> if they miss ANY of the above or reasoning is incomplete/unsafe.
+                </div>
+              </div>
+              
               <div style="display:flex;gap:10px;">
                 <button class="assign-btn" onclick="approveAnswer(${i})" style="background:#00ffb3;">✓ Approve</button>
                 <button class="assign-btn" onclick="escalateAnswer(${i})" style="background:#ff006e;">⚠ Escalate</button>
@@ -1965,7 +2192,7 @@
             document.getElementById('groupCases').appendChild(caseDiv);
           }
         });
-      }
+      });
     }
 
     function setupDebriefBoard(role) {
@@ -2033,6 +2260,76 @@
         status.textContent = 'Error saving';
       });
     }
+
+    // Team Chat Functions
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input?.value?.trim();
+      
+      if (!message || !currentGroupId) return;
+      
+      database.ref('chat/group' + currentGroupId).push({
+        message: message,
+        timestamp: Date.now(),
+        sender: 'Team Member'
+      });
+      
+      input.value = '';
+    }
+    
+    function quickMessage(msg) {
+      if (!currentGroupId) return;
+      
+      database.ref('messages/toChargeNurse').push({
+        from: 'Group ' + currentGroupId,
+        message: msg,
+        timestamp: Date.now(),
+        read: false
+      });
+      
+      alert('📨 Message sent to Charge Nurse: "' + msg + '"');
+    }
+    
+    function setupChatListener() {
+      if (!currentGroupId) return;
+      
+      const chatRef = database.ref('chat/group' + currentGroupId);
+      const container = document.getElementById('chatMessages');
+      
+      chatRef.on('child_added', snap => {
+        const msg = snap.val();
+        const msgDiv = document.createElement('div');
+        const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        
+        msgDiv.style.cssText = 'padding:10px;margin-bottom:8px;background:rgba(0,212,255,0.1);border-radius:8px;border-left:3px solid #00d4ff;';
+        msgDiv.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <strong style="color:#00ffb3;font-size:12px;">${msg.sender}</strong>
+            <span style="color:#888;font-size:11px;">${time}</span>
+          </div>
+          <div style="color:#fff;font-size:13px;">${msg.message}</div>
+        `;
+        
+        container.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
+        
+        // Remove "no messages" placeholder
+        const placeholder = container.querySelector('[style*="text-align:center"]');
+        if (placeholder) placeholder.remove();
+      });
+    }
+    
+    // Chat input - send on Enter key
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatInput = document.getElementById('chatInput');
+      if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            sendChatMessage();
+          }
+        });
+      }
+    });
 
     function setupRRTListener() {
       const container = document.getElementById('activeCalls');
@@ -2166,25 +2463,122 @@
 
     function applyIntervention(groupId, callKey, interventionType, stabilityBoost) {
       const groupRef = database.ref('groups/' + groupId + '/stability');
+      const callRef = database.ref('rrt/calls/' + callKey);
       
-      groupRef.transaction(current => {
-        return Math.min(100, (current || 0) + stabilityBoost);
-      }).then(() => {
-        // Remove the call
-        database.ref('rrt/calls/' + callKey).remove();
+      // Get call data for metrics
+      callRef.once('value').then(callSnap => {
+        const callData = callSnap.val();
+        const responseTime = Date.now() - callData.timestamp;
+        const stabilityBefore = callData.stability || 0;
         
-        // Log event
-        database.ref('events').push({
+        groupRef.transaction(current => {
+          const newStability = (current || 0) + stabilityBoost;
+          
+          // INCREASED DIFFICULTY: Cap RRT recovery for critically ill patients
+          // If patient was critical (<50), they can't jump straight to 100
+          // Cap at 50-80 range to maintain "rescued but still sick" state
+          if (stabilityBefore < 50) {
+            // Critical patients max out at 80 even with intervention
+            return Math.min(80, Math.max(50, newStability));
+          } else {
+            // Non-critical patients can recover more fully
+            return Math.min(100, newStability);
+          }
+        }).then((result) => {
+          const stabilityAfter = result.snapshot.val();
+          
+          // Remove the call
+          callRef.remove();
+          
+          // Log intervention with metrics
+          database.ref('events').push({
+            groupId: groupId,
+            phase: 'rrt-intervention',
+            isCorrect: true,
+            delta: stabilityBoost,
+            explanation: `RRT applied ${interventionType} intervention`,
+            timestamp: Date.now()
+          });
+          
+          // Store RRT metrics
+          database.ref('rrt/metrics').push({
+            groupId: groupId,
+            interventionType: interventionType,
+            stabilityBefore: stabilityBefore,
+            stabilityAfter: stabilityAfter,
+            stabilityGain: stabilityBoost,
+            responseTimeMs: responseTime,
+            timestamp: Date.now()
+          });
+          
+          alert(`Intervention applied to Group ${groupId}! ${interventionType.toUpperCase()}: +${stabilityBoost} stability.`);
+          
+          // Show reflection prompt to the group
+          showReflectionPrompt(groupId, interventionType, stabilityBefore, stabilityAfter);
+        });
+      });
+    }
+    
+    function showReflectionPrompt(groupId, interventionType, stabilityBefore, stabilityAfter) {
+      // Only show to the affected group
+      if (selectedGroupNumber === groupId) {
+        const reflectionDiv = document.createElement('div');
+        reflectionDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#0a1128,#1e3a5f);padding:30px;border-radius:20px;border:3px solid #00d4ff;z-index:10000;max-width:600px;box-shadow:0 20px 60px rgba(0,212,255,0.4);';
+        reflectionDiv.innerHTML = `
+          <h3 style="color:#00ffb3;margin:0 0 20px 0;text-align:center;">🤔 Reflection Moment</h3>
+          <div style="background:rgba(255,179,0,0.1);padding:15px;border-radius:10px;margin-bottom:20px;border-left:4px solid #ffb300;">
+            <div style="color:#ffb300;font-weight:600;margin-bottom:8px;">RRT just intervened with ${interventionType}</div>
+            <div style="color:#ccecff;font-size:13px;">Patient stability: ${stabilityBefore} → ${stabilityAfter}</div>
+          </div>
+          
+          <div style="margin-bottom:15px;">
+            <label style="display:block;color:#00d4ff;font-weight:600;margin-bottom:8px;">Why did your patient's stability drop?</label>
+            <textarea id="reflectionWhy" style="width:100%;height:60px;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;resize:vertical;" placeholder="Consider errors made, timing, medications..."></textarea>
+          </div>
+          
+          <div style="margin-bottom:20px;">
+            <label style="display:block;color:#00d4ff;font-weight:600;margin-bottom:8px;">What could your team do differently to prevent this next time?</label>
+            <textarea id="reflectionPrevent" style="width:100%;height:60px;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-family:inherit;resize:vertical;" placeholder="Think about safety checks, communication, prioritization..."></textarea>
+          </div>
+          
+          <div style="display:flex;gap:10px;justify-content:center;">
+            <button onclick="submitReflection(${groupId})" class="assign-btn" style="background:#00ffb3;">Submit Reflection</button>
+            <button onclick="closeReflection()" class="assign-btn" style="background:#888;">Skip</button>
+          </div>
+        `;
+        
+        const overlay = document.createElement('div');
+        overlay.id = 'reflectionOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;';
+        overlay.appendChild(reflectionDiv);
+        document.body.appendChild(overlay);
+      }
+    }
+    
+    function submitReflection(groupId) {
+      const why = document.getElementById('reflectionWhy').value;
+      const prevent = document.getElementById('reflectionPrevent').value;
+      
+      if (why && prevent) {
+        database.ref('reflections').push({
           groupId: groupId,
-          phase: 'rrt-rescue',
-          isCorrect: true,
-          delta: stabilityBoost,
-          explanation: `RRT applied ${interventionType} intervention`,
+          why: why,
+          prevent: prevent,
           timestamp: Date.now()
         });
         
-        alert(`Intervention applied to Group ${groupId}! ${interventionType.toUpperCase()}: +${stabilityBoost} stability.`);
-      });
+        alert('✓ Great reflection! These insights will help improve patient safety.');
+      }
+      
+      closeReflection();
+    }
+    
+    function closeReflection() {
+      const overlay = document.getElementById('reflectionOverlay');
+      if (overlay) {
+        overlay.remove();
+      }
+    }
     }
 
     function approveAnswer(groupId) {
@@ -2240,6 +2634,129 @@
       }, 500);
     })();
     */
+    
+    // -----------------------------
+    // PHASE TIMER SYSTEM
+    // -----------------------------
+    let timerInterval = null;
+    let currentPhaseEndTime = null;
+
+    function startPhaseTimer(phaseName, durationMinutes) {
+      const timerDisplay = document.getElementById('phaseTimer');
+      const phaseNameDisplay = document.getElementById('phaseNameDisplay');
+      const timeRemaining = document.getElementById('timeRemaining');
+      
+      if (!timerDisplay || !phaseNameDisplay || !timeRemaining) return;
+      
+      // Show timer
+      timerDisplay.style.display = 'block';
+      phaseNameDisplay.textContent = phaseName;
+      
+      // Calculate end time
+      currentPhaseEndTime = Date.now() + (durationMinutes * 60 * 1000);
+      
+      // Save to Firebase so all groups see same timer
+      database.ref('timer').set({
+        phase: phaseName,
+        endTime: currentPhaseEndTime,
+        duration: durationMinutes
+      });
+      
+      // Clear existing interval
+      if (timerInterval) clearInterval(timerInterval);
+      
+      // Update timer display every second
+      timerInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = currentPhaseEndTime - now;
+        
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          timeRemaining.textContent = '0:00';
+          timeRemaining.style.color = '#ff006e';
+          
+          // Flash the timer
+          timerDisplay.style.animation = 'pulse-critical 0.5s ease-in-out 3';
+          
+          // Optionally auto-advance or notify
+          setTimeout(() => {
+            timerDisplay.style.animation = '';
+          }, 1500);
+        } else {
+          const minutes = Math.floor(remaining / 60000);
+          const seconds = Math.floor((remaining % 60000) / 1000);
+          timeRemaining.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          
+          // Color coding based on time remaining
+          if (remaining < 60000) { // < 1 minute
+            timeRemaining.style.color = '#ff006e';
+          } else if (remaining < 180000) { // < 3 minutes
+            timeRemaining.style.color = '#ffb300';
+          } else {
+            timeRemaining.style.color = '#ffffff';
+          }
+        }
+      }, 1000);
+    }
+
+    function stopPhaseTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      const timerDisplay = document.getElementById('phaseTimer');
+      if (timerDisplay) {
+        timerDisplay.style.display = 'none';
+      }
+    }
+
+    // Listen for timer updates from Firebase (instructor controlled)
+    database.ref('timer').on('value', snap => {
+      const timerData = snap.val();
+      if (timerData && timerData.endTime) {
+        const timerDisplay = document.getElementById('phaseTimer');
+        const phaseNameDisplay = document.getElementById('phaseNameDisplay');
+        const timeRemaining = document.getElementById('timeRemaining');
+        
+        if (!timerDisplay || !selectedGroupNumber) return; // Only show for active groups
+        
+        timerDisplay.style.display = 'block';
+        phaseNameDisplay.textContent = timerData.phase || 'Activity';
+        currentPhaseEndTime = timerData.endTime;
+        
+        // Start the display update if not already running
+        if (!timerInterval) {
+          timerInterval = setInterval(() => {
+            const now = Date.now();
+            const remaining = currentPhaseEndTime - now;
+            
+            if (remaining <= 0) {
+              clearInterval(timerInterval);
+              timerInterval = null;
+              timeRemaining.textContent = '0:00';
+              timeRemaining.style.color = '#ff006e';
+              timerDisplay.style.animation = 'pulse-critical 0.5s ease-in-out 3';
+              setTimeout(() => timerDisplay.style.animation = '', 1500);
+            } else {
+              const minutes = Math.floor(remaining / 60000);
+              const seconds = Math.floor((remaining % 60000) / 1000);
+              timeRemaining.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+              
+              if (remaining < 60000) {
+                timeRemaining.style.color = '#ff006e';
+              } else if (remaining < 180000) {
+                timeRemaining.style.color = '#ffb300';
+              } else {
+                timeRemaining.style.color = '#ffffff';
+              }
+            }
+          }, 1000);
+        }
+      } else {
+        // Timer cleared/stopped
+        stopPhaseTimer();
+      }
+    });
     
     (function checkExistingGroup() {
       try {

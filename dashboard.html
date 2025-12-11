@@ -388,7 +388,10 @@
     // Live stability bars
     database.ref('groups').on('value', snapshot => {
       const data = snapshot.val() || {};
-      stabilityPanel.innerHTML = '';
+      stabilityPanel.innerHTML = ''; // Clear everything including empty state
+
+      // Check if we have any real data
+      const hasData = Object.keys(data).length > 0;
 
       // Ensure all 6 groups are shown
       for (let groupId = 1; groupId <= 6; groupId++) {
@@ -439,12 +442,12 @@
       const data = snapshot.val() || {};
       const entries = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
 
+      alertsPanel.innerHTML = ''; // Clear first
+
       if (entries.length === 0) {
-        alertsPanel.innerHTML = '<div class="empty-state">No alerts yet</div>';
+        alertsPanel.innerHTML = '<div class="empty-state">No alerts yet - waiting for student activity...</div>';
         return;
       }
-
-      alertsPanel.innerHTML = '';
 
       entries.forEach(ev => {
         const div = document.createElement('div');
@@ -470,6 +473,8 @@
 
     // Expert Huddle submissions
     function setupHuddleDashboard() {
+      dashboardPanel.innerHTML = ''; // Clear empty state
+      
       for (let groupNum = 1; groupNum <= 6; groupNum++) {
         const groupRef = database.ref('groups/' + groupNum);
         
@@ -481,7 +486,7 @@
             <span>Group ${groupNum}</span>
             <span style="font-size:12px;font-weight:normal;color:#888;">${systemNames[groupNum] || ''}</span>
           </h3>
-          <div class="huddle-data"></div>
+          <div class="huddle-data"><em style="color:#888;">Waiting for submission...</em></div>
         `;
         dashboardPanel.appendChild(card);
 
@@ -496,10 +501,12 @@
             if (data.priorityLab) html += `<div><strong>Lab:</strong> ${data.priorityLab}</div>`;
             if (data.doNotMix) html += `<div><strong>Do Not Mix:</strong> ${data.doNotMix}</div>`;
             if (data.highYieldMed) html += `<div><strong>Med:</strong> ${data.highYieldMed}</div>`;
+            if (data.scenarioPrompts) html += `<div><strong>Scenarios:</strong> ${data.scenarioPrompts}</div>`;
+            if (data.rationale) html += `<div><strong>Rationale:</strong> ${data.rationale}</div>`;
             
             dataEl.innerHTML = html;
           } else {
-            dataEl.innerHTML = '<em style="color:#888;">No data yet</em>';
+            dataEl.innerHTML = '<em style="color:#888;">Waiting for submission...</em>';
           }
         });
       }
@@ -507,16 +514,6 @@
 
     // Initialize huddle dashboard
     setupHuddleDashboard();
-
-    // Clear empty state after first load
-    setTimeout(() => {
-      const emptyStates = document.querySelectorAll('.empty-state');
-      emptyStates.forEach(el => {
-        if (el.parentElement.children.length > 1) {
-          el.remove();
-        }
-      });
-    }, 2000);
   </script>
 </body>
 </html>
