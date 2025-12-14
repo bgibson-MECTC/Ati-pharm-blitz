@@ -1,0 +1,15 @@
+{
+  "name": "ati-pharm-blitz",
+  "version": "1.0.0",
+  "description": "Interactive ATI Pharm Blitz game for RN pharm review — flashcards, expert huddles, patient charts, and NCLEX-style lightning rounds in one 1-hour activity.",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

@@ -80,6 +80,90 @@
       color: #ccecff;
     }
 
+      /* ===== PHASE BANNER ===== */
+      .phase-banner {
+        background: linear-gradient(90deg, #00d4ff 0%, #00ffb3 100%);
+        color: #0a1128;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        text-align: center;
+        font-size: 16px;
+      }
+    
+      .phase-banner.phase1 { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; }
+      .phase-banner.phase2 { background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%); color: white; }
+      .phase-banner.phase3 { background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); color: #0a1128; }
+    
+      .phase-subtitle {
+        font-size: 12px;
+        opacity: 0.85;
+        margin-top: 4px;
+      }
+
+      /* ===== STABILITY BAR (STUDENT VIEW) ===== */
+      .stability-container {
+        background: rgba(0,212,255,0.1);
+        border: 2px solid #00d4ff;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 20px;
+      }
+    
+      .stability-label {
+        font-size: 12px;
+        color: #00d4ff;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+    
+      .stability-bar {
+        height: 30px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid rgba(0,212,255,0.4);
+      }
+    
+      .stability-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00ffb3, #00d4ff);
+        width: 100%;
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0a1128;
+      }
+    
+      .stability-fill.critical { background: linear-gradient(90deg, #ff006e, #cc0058); color: white; }
+      .stability-fill.warning { background: linear-gradient(90deg, #ffb300, #ff8c00); color: #0a1128; }
+
+      /* ===== FEEDBACK TOAST ===== */
+      .feedback-toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        z-index: 9000;
+        animation: slideUp 0.4s ease-out;
+        max-width: 300px;
+      }
+    
+      @keyframes slideUp {
+        from { transform: translateY(100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+    
+      .feedback-toast.success { background: #00ffb3; color: #0a1128; }
+      .feedback-toast.error { background: #ff006e; color: white; }
+      .feedback-toast.warning { background: #ffb300; color: #0a1128; }
     @keyframes shimmer {
       0% { background-position: 0% center; }
       100% { background-position: 200% center; }
@@ -550,6 +634,24 @@
       line-height: 1.5;
       margin-top: 8px;
     }
+
+    /* Mobile-first adjustments */
+    @media (max-width: 640px) {
+      .assign-btn,
+      .back-link {
+        width: 100%;
+        text-align: center;
+      }
+      .flashguess-grid,
+      .huddle-box,
+      .role-selection,
+      .group-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .section {
+        padding: 16px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -559,15 +661,94 @@
     <small>Script initializing</small>
   </div>
   
+  <!-- PASSCODE MODAL -->
+  <div id="passcodeModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:12000;align-items:center;justify-content:center;">
+    <div style="background:#0a1128;border:2px solid #00d4ff;border-radius:16px;padding:24px;max-width:360px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+      <h3 style="color:#00d4ff;margin-top:0;margin-bottom:8px;">Leadership Access</h3>
+      <p id="passcodeRoleLabel" style="color:#ccecff;font-size:14px;margin:0 0 12px 0;">Enter passcode to continue.</p>
+      <input type="password" id="passcodeInput" placeholder="Enter passcode" style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;color:#fff;font-size:15px;" />
+      <p id="passcodeError" style="color:#ff99c2;font-size:12px;margin:8px 0 0 0;display:none;">Incorrect passcode</p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+        <button id="passcodeCancel" class="assign-btn" style="background:rgba(255,255,255,0.1);">Cancel</button>
+        <button id="passcodeConfirm" class="assign-btn" style="background:#00d4ff;">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERROR SCREEN -->
+  <div id="groupErrorScreen" style="display:none;padding:30px;text-align:center;color:#fff;">
+    <h2 style="margin-bottom:10px;color:#ff99c2;">Missing group link</h2>
+    <p style="color:#ccecff;font-size:15px;">Use the link your instructor provided (must include ?group=1–6).</p>
+    <a href="select.html" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#00d4ff;color:#0a1128;text-decoration:none;border-radius:8px;font-weight:600;">← Back to Role Selection</a>
+  </div>
+  
   <script>
-    // IMMEDIATE TEST - Update banner as soon as possible
-    (function() {
-      const banner = document.getElementById('debugBanner');
-      if (banner) {
-        banner.innerHTML = '<span class="status-warn">⏳ HTML loaded | Waiting for Firebase SDK...</span>';
-        console.log('Banner test: HTML and inline script working');
+    // ==========================================
+    // PHASE 1: ROUTING & AUTHORIZATION (mednurse2024)
+    // ==========================================
+    
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    // Hardcoded passcode for leadership roles
+    const LEADERSHIP_PASSCODE = 'mednurse2024';
+    let authRole = null;  // Will be 'student', 'charge', or 'rrt' after auth
+    
+    function showPasscodeModal(roleLabel) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('passcodeModal');
+        const input = document.getElementById('passcodeInput');
+        const error = document.getElementById('passcodeError');
+        const roleText = document.getElementById('passcodeRoleLabel');
+        roleText.textContent = `Enter passcode to access ${roleLabel.toUpperCase()} controls.`;
+        error.style.display = 'none';
+        input.value = '';
+        modal.style.display = 'flex';
+        input.focus();
+
+        function cleanup() {
+          document.getElementById('passcodeConfirm').removeEventListener('click', onConfirm);
+          document.getElementById('passcodeCancel').removeEventListener('click', onCancel);
+          input.removeEventListener('keyup', onKey);
+        }
+        function close(result) {
+          modal.style.display = 'none';
+          cleanup();
+          resolve(result);
+        }
+        function onConfirm() {
+          if (input.value === LEADERSHIP_PASSCODE) {
+            close(true);
+          } else {
+            error.style.display = 'block';
+          }
+        }
+        function onCancel() { close(false); }
+        function onKey(e) { if (e.key === 'Enter') onConfirm(); if (e.key === 'Escape') onCancel(); }
+
+        document.getElementById('passcodeConfirm').addEventListener('click', onConfirm);
+        document.getElementById('passcodeCancel').addEventListener('click', onCancel);
+        input.addEventListener('keyup', onKey);
+      });
+    }
+
+    function initializeRole() {
+      const roleParam = getQueryParam('role') || 'student';
+      if (roleParam === 'charge' || roleParam === 'rrt') {
+        authRole = roleParam;
+      } else {
+        authRole = 'student';
       }
-    })();
+    }
+
+    // Initialize role BEFORE Firebase (no modal here; bootstrap handles prompts)
+    initializeRole();
+    const banner = document.getElementById('debugBanner');
+    if (banner) {
+      banner.innerHTML = `<span class="status-warn">⏳ ${authRole.toUpperCase()} MODE | Waiting for Firebase...</span>`;
+    }
   </script>
   
   <!-- GROUP SELECTION LANDING -->
@@ -616,6 +797,12 @@
       </div>
     </div>
 
+        </div>
+        <div>
+          <label class="fg-label">FIRST Action (required before reveal)</label>
+          <select id="fgAction" class="fg-input">
+            <option value="">Select first action…</option>
+          </select>
     <!-- Student Groups Section -->
     <div>
       <h3 style="color: #00d4ff; font-size: 20px; margin-bottom: 20px;">📚 Student Groups</h3>
@@ -708,6 +895,45 @@
       <div id="allGroupsStability" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;">
         <!-- Populated by JS -->
       </div>
+    </section>
+
+    <!-- Auto Alerts -->
+    <section class="section" id="autoAlertsSection">
+      <div class="section-header">
+        <span class="section-icon">🚩</span>
+        <h2 class="section-title">Auto Alerts</h2>
+      </div>
+      <div id="autoAlertsList" style="display:grid;gap:8px;" data-empty="true">
+        <div style="color:#888;font-size:13px;">No alerts yet</div>
+      </div>
+    </section>
+
+    <!-- Phase Controls (Charge/RRT) -->
+    <section class="section" id="phaseControlSection">
+      <div class="section-header">
+        <span class="section-icon">⏩</span>
+        <h2 class="section-title">Phase Controls</h2>
+      </div>
+      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">Advance a group through phases. Phase 1 → Flashcards; Phase 2 → Expert Huddle unlocks; Phase 3 → Jigsaw unlocks.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <label for="phaseGroupSelect" style="color:#ccecff;font-size:14px;">Group #</label>
+        <select id="phaseGroupSelect" class="fg-input" style="min-width:120px;">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+        <button class="assign-btn" style="background:#f093fb;" onclick="setGroupPhase('phase2')">Advance to Phase 2</button>
+        <button class="assign-btn" style="background:#4facfe;" onclick="setGroupPhase('phase3')">Advance to Phase 3</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+        <button class="assign-btn" style="background:#00ffb3;" onclick="setAllGroupsPhase('phase1')">Start Phase 1 (All Groups)</button>
+        <button class="assign-btn" style="background:#00d4ff;" onclick="setAllGroupsPhase('phase2')">Start Phase 2 (All Groups)</button>
+        <button class="assign-btn" style="background:#ff9f43;" onclick="setAllGroupsPhase('phase3')">Start Phase 3 (All Groups)</button>
+      </div>
+      <p id="phaseControlStatus" style="color:#ccecff;font-size:12px;margin-top:8px;"></p>
     </section>
 
     <!-- Flashcard & Jigsaw Errors -->
@@ -829,6 +1055,14 @@
       <p class="subtitle" id="systemLabel">Group System: …</p>
       <p class="group-label" id="groupLabel">Group: …</p>
       
+        <!-- Patient Stability Bar -->
+        <div class="stability-container">
+          <label>Patient Stability</label>
+          <div class="stability-bar">
+            <div class="stability-fill" id="stabilityFill">100</div>
+          </div>
+        </div>
+      
       <!-- Phase Timer Display -->
       <div id="phaseTimer" style="display:none;margin-top:20px;padding:15px;background:rgba(0,212,255,0.15);border:2px solid rgba(0,212,255,0.4);border-radius:15px;text-align:center;">
         <div style="font-size:14px;color:#00d4ff;font-weight:600;margin-bottom:5px;">CURRENT PHASE</div>
@@ -872,11 +1106,7 @@
             <strong>Clinical Case:</strong> A patient on Haloperidol is showing muscle rigidity and tremors. What serious adverse effect requires immediate intervention? <em>(Psycho or Neuro?)</em>
           </div>
           <div class="flashcard-back">
-            <strong>System:</strong> Psychopharmacology<br>
-            <strong>Answer:</strong> Extrapyramidal symptoms (EPS) - requires immediate benztropine or dose adjustment<br>
-            <strong>Priority:</strong> Watch for tardive dyskinesia (irreversible)<br>
-            <strong>Safety Tip:</strong> Avoid combining with anticholinergics unless treating EPS<br>
-            <strong>High-Yield Med:</strong> Fluoxetine - risk of serotonin syndrome with MAOIs
+            <em>Locked – submit the correct system to reveal.</em>
           </div>
         </div>
 
@@ -887,11 +1117,7 @@
             <strong>Clinical Case:</strong> A patient on Levodopa/Carbidopa experiences sudden "on-off" phenomenon. What lab value is critical to monitor? <em>(Neuro or Endocrine?)</em>
           </div>
           <div class="flashcard-back">
-            <strong>System:</strong> Neurological<br>
-            <strong>Answer:</strong> Vitamin B6 (pyridoxine) levels - can decrease Levodopa effectiveness<br>
-            <strong>Priority:</strong> Monitor for dyskinesias and orthostatic hypotension<br>
-            <strong>Safety Tip:</strong> Avoid high-protein meals (competes with absorption)<br>
-            <strong>High-Yield Med:</strong> Phenobarbital - monitor therapeutic levels (10-40 mcg/mL)
+            <em>Locked – submit the correct system to reveal.</em>
           </div>
         </div>
 
@@ -902,11 +1128,7 @@
             <strong>Clinical Case:</strong> A post-op patient on IV Fentanyl has a respiratory rate of 8. What is your FIRST action? <em>(Pain or Neuro?)</em>
           </div>
           <div class="flashcard-back">
-            <strong>System:</strong> Pain<br>
-            <strong>Answer:</strong> Administer Naloxone (Narcan) immediately - opioid reversal agent<br>
-            <strong>Priority:</strong> Monitor respiratory rate &lt;12 = critical<br>
-            <strong>Do NOT Mix:</strong> Fentanyl + benzodiazepines (respiratory depression)<br>
-            <strong>High-Yield Med:</strong> Butorphanol - mixed agonist-antagonist, can precipitate withdrawal
+            <em>Locked – submit the correct system to reveal.</em>
           </div>
         </div>
 
@@ -917,11 +1139,7 @@
             <strong>Clinical Case:</strong> A patient on PTU (Propylthiouracil) develops a sore throat and fever. What life-threatening complication must you suspect? <em>(Endocrine or Infection?)</em>
           </div>
           <div class="flashcard-back">
-            <strong>System:</strong> Endocrine<br>
-            <strong>Answer:</strong> Agranulocytosis - obtain STAT CBC with differential<br>
-            <strong>Priority:</strong> Monitor WBC &lt;3,000 = hold medication<br>
-            <strong>Safety Tip:</strong> Teach patient to report signs of infection immediately<br>
-            <strong>High-Yield Med:</strong> Somatropin - monitor blood glucose (causes hyperglycemia)
+            <em>Locked – submit the correct system to reveal.</em>
           </div>
         </div>
 
@@ -932,11 +1150,7 @@
             <strong>Clinical Case:</strong> A patient on Erythromycin is also taking Warfarin. What dangerous interaction must you monitor? <em>(Infection or Inflammation?)</em>
           </div>
           <div class="flashcard-back">
-            <strong>System:</strong> Infection<br>
-            <strong>Answer:</strong> Increased bleeding risk - Erythromycin inhibits Warfarin metabolism (elevated INR)<br>
-            <strong>Priority:</strong> Monitor INR closely, target 2-3 for most indications<br>
-            <strong>Do NOT Mix:</strong> Rifampin + oral contraceptives (decreases effectiveness)<br>
-            <strong>High-Yield Med:</strong> Amphotericin B - monitor potassium (causes severe hypokalemia)
+            <em>Locked – submit the correct system to reveal.</em>
           </div>
         </div>
 
@@ -947,11 +1161,7 @@
             <strong>Clinical Case:</strong> A patient on Belimumab (lupus treatment) is scheduled for a live vaccine. What is your nursing action? <em>(Inflammation or Infection?)</em>
           </div>
           <div class="flashcard-back">
-            <strong>System:</strong> Inflammation<br>
-            <strong>Answer:</strong> HOLD vaccine - immunosuppressed patients cannot receive live vaccines<br>
-            <strong>Priority:</strong> Screen for infections before each dose<br>
-            <strong>Safety Tip:</strong> Avoid NSAIDs with immunosuppressants (GI bleeding risk)<br>
-            <strong>High-Yield Meds:</strong> Allopurinol (monitor uric acid), Hydrocortisone (taper slowly - adrenal crisis)
+            <em>Locked – submit the correct system to reveal.</em>
           </div>
         </div>
       </div>
@@ -1073,21 +1283,36 @@
       </div>
 
       <div style="padding:12px;background:rgba(138,43,226,0.08);border-radius:10px;border-left:4px solid #8a2be2;">
-        <p style="margin:0 0 12px 0;font-size:14px;color:#ccecff;"><strong>📞 Contact Your Charge Nurse:</strong></p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-          <button onclick="quickMessage('Need help with patient stability')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#8a2be2;">🆘 Help Needed</button>
-          <button onclick="quickMessage('Ready for next phase')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#00ffb3;">✅ Ready</button>
-          <button onclick="quickMessage('Question about medication')" class="assign-btn" style="font-size:13px;padding:10px 16px;background:#ffb300;">❓ Question</button>
-        </div>
-        
-        <!-- Custom Message Box -->
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);">
-          <p style="margin:0 0 8px 0;font-size:12px;color:#ccecff;">Or send a custom message:</p>
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="customMessageInput" placeholder="Describe your clinical question..." style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:8px;color:#fff;font-family:inherit;font-size:13px;" />
-            <button onclick="sendCustomMessage()" class="assign-btn" style="background:#00d4ff;padding:8px 16px;">Send</button>
+        <p style="margin:0 0 12px 0;font-size:14px;color:#ccecff;"><strong>📞 Structured Escalation to Charge Nurse</strong></p>
+        <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+          <div>
+            <label style="display:block;font-size:12px;color:#ccecff;margin-bottom:4px;">We think it’s…</label>
+            <input id="chargeHypothesis" class="fg-input" placeholder="Suspected condition/diagnosis" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#ccecff;margin-bottom:4px;">Because…</label>
+            <input id="chargeBecause" class="fg-input" placeholder="Key evidence: vitals, labs, symptoms" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#ccecff;margin-bottom:4px;">First action is…</label>
+            <input id="chargeAction" class="fg-input" placeholder="e.g., Hold med, give Naloxone, call provider" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#ccecff;margin-bottom:4px;">We’re monitoring…</label>
+            <input id="chargeMonitoring" class="fg-input" placeholder="e.g., RR/SpO2, neuro checks, BP/HR" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#ccecff;margin-bottom:4px;">We request…</label>
+            <select id="chargeRequestType" class="fg-input" style="width:100%;">
+              <option value="">Choose one…</option>
+              <option value="Approve">Approve</option>
+              <option value="Check our priority">Check our priority</option>
+              <option value="Need RRT">Need RRT</option>
+            </select>
           </div>
         </div>
+
+        <button onclick="sendChargeRequest()" class="assign-btn" style="margin-top:12px;background:#00d4ff;">Send Structured Request</button>
         
         <p style="margin:10px 0 0 0;font-size:11px;color:#888;">Groups 1-3 → Charge Nurse 1 | Groups 4-6 → Charge Nurse 2</p>
       </div>
@@ -1139,6 +1364,27 @@
            style="margin-top:16px;padding:16px;border-radius:12px;border:1px solid rgba(0,212,255,0.4);background:rgba(255,255,255,0.04);min-height:80px;">
         <em style="color:#ccecff;font-size:13px;">Your case will appear here once generated. Do not refresh or you may lose your assigned scenario.</em>
       </div>
+    </section>
+
+    <!-- PHASE 3 REFLECTIONS -->
+    <section class="section" id="reflectionSection" style="display:none;">
+      <div class="section-header">
+        <span class="section-icon">🧭</span>
+        <h2 class="section-title">End-of-Round Reflection</h2>
+      </div>
+      <p style="color:#ccecff;font-size:14px;margin-bottom:10px;">Required at end of Phase 3.</p>
+      <div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+        <div>
+          <label style="display:block;font-size:12px;color:#ccecff;margin-bottom:4px;">What almost killed the patient?</label>
+          <textarea id="reflectionNearMiss" class="fg-input" placeholder="e.g., Missed opioid RR drop, delayed lab check"></textarea>
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:#ccecff;margin-bottom:4px;">What will you do differently next time?</label>
+          <textarea id="reflectionNextTime" class="fg-input" placeholder="e.g., Check RR before giving opioid, call provider sooner"></textarea>
+        </div>
+      </div>
+      <button class="assign-btn" id="reflectionSubmit" style="margin-top:12px;" onclick="submitReflection()">Submit Reflection</button>
+      <p id="reflectionStatus" class="assign-error"></p>
     </section>
   </div>
 
@@ -1209,6 +1455,108 @@
     
     console.log('Functions will be defined later in script...');
 
+      // ==========================================
+      // PHASE LOCKING & STABILITY FEEDBACK
+      // ==========================================
+
+      let currentPhase = 'phase1';
+      let currentStability = 100;
+
+      function getPhaseLabel(phase) {
+        const labels = {
+          phase1: { title: 'PHASE 1 – System ID & Priority Check', desc: 'Identify the drug class and most critical safety concern.' },
+          phase2: { title: 'PHASE 2 – Expert Huddle', desc: 'Collaborate with peers to build your teaching points.' },
+          phase3: { title: 'PHASE 3 – Jigsaw Case', desc: 'Apply your expertise to solve a complex clinical scenario.' }
+        };
+        return labels[phase] || labels.phase1;
+      }
+
+      function renderPhaseBanner(wrapper, phase) {
+        const phaseLabel = getPhaseLabel(phase);
+        const banner = document.createElement('div');
+        banner.className = `phase-banner ${phase}`;
+        banner.innerHTML = `<div>${phaseLabel.title}</div><div class="phase-subtitle">${phaseLabel.desc}</div>`;
+        wrapper.insertBefore(banner, wrapper.firstChild);
+      }
+
+      function isPhaseActive(requiredPhase) {
+        const phaseOrder = { phase1: 1, phase2: 2, phase3: 3 };
+        const currentOrder = phaseOrder[currentPhase] || 1;
+        const requiredOrder = phaseOrder[requiredPhase] || 1;
+        return currentOrder >= requiredOrder;
+      }
+
+      function showFeedbackToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `feedback-toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity 0.4s ease';
+          setTimeout(() => toast.remove(), 400);
+        }, 2000);
+      }
+
+      function updateStabilityDisplay(stability) {
+        currentStability = Math.max(0, Math.min(100, stability));
+        const fillEl = document.getElementById('stabilityFill');
+        if (fillEl) {
+          const percent = currentStability;
+          fillEl.style.width = percent + '%';
+          fillEl.textContent = percent;
+          fillEl.classList.remove('critical', 'warning');
+          if (percent < 50) fillEl.classList.add('critical');
+          else if (percent < 75) fillEl.classList.add('warning');
+        }
+      }
+
+      function setFlashcardsReadonly(isReadOnly) {
+        const ids = ['caseGuess', 'highestPriority', 'safetyFlag', 'nextStep', 'whyBetter', 'systemSelect'];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = isReadOnly;
+        });
+        const submit = document.getElementById('fgSubmit');
+        if (submit) {
+          submit.disabled = isReadOnly;
+          submit.textContent = isReadOnly ? 'Locked this phase' : 'Submit Guess';
+        }
+      }
+
+      function applyPhaseLocks() {
+        const flashcardSection = document.getElementById('flashcardGuessSection');
+        const huddleBox = document.getElementById('huddleBox');
+        const huddleSection = huddleBox ? huddleBox.closest('section') : null;
+        const jigsawSection = document.getElementById('jigsawSection');
+        const reflectionSection = document.getElementById('reflectionSection');
+
+        if (currentPhase === 'phase1') {
+          if (huddleSection) huddleSection.style.display = 'none';
+          if (jigsawSection) jigsawSection.style.display = 'none';
+          if (reflectionSection) reflectionSection.style.display = 'none';
+          if (flashcardSection) flashcardSection.style.display = 'block';
+          setFlashcardsReadonly(false);
+        } else if (currentPhase === 'phase2') {
+          if (huddleSection) huddleSection.style.display = 'block';
+          if (jigsawSection) jigsawSection.style.display = 'none';
+          if (reflectionSection) reflectionSection.style.display = 'none';
+          if (flashcardSection) flashcardSection.style.display = 'block';
+          setFlashcardsReadonly(true);
+        } else if (currentPhase === 'phase3') {
+          if (huddleSection) huddleSection.style.display = 'block';
+          if (jigsawSection) jigsawSection.style.display = 'block';
+          if (reflectionSection) reflectionSection.style.display = 'block';
+          if (flashcardSection) flashcardSection.style.display = 'block';
+          setFlashcardsReadonly(true);
+          // Lock huddle inputs to read-only
+          const ids = ['safetyRisk','priorityLab','doNotMix','highYieldMed','scenarioPrompts','rationale'];
+          ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = true;
+          });
+        }
+      }
     // Map group number -> system name + instructions
     const groupConfig = {
       1: {
@@ -1287,7 +1635,8 @@
     function initGroupView() {
       let groupNum = parseInt(getQueryParam('group'), 10);
       if (isNaN(groupNum) || groupNum < 1 || groupNum > 6) {
-        groupNum = 1; // default to Group 1 if invalid
+        showMissingGroupError();
+        return;
       }
 
       const config = groupConfig[groupNum];
@@ -1423,7 +1772,7 @@
         return;
       }
 
-      const { phase, itemId, isCorrect, severity, explanation } = config;
+      const { phase, itemId, isCorrect, severity, explanation, followUpReason } = config;
       const groupRef = database.ref('groups/' + currentGroupId);
       const eventsRef = database.ref('events');
 
@@ -1441,7 +1790,7 @@
           } else {
             // Default values if no difficulty set
             if (severity === 'critical') delta = -25;
-            else if (severity === 'moderate') delta = -15;
+            else if (severity === 'moderate') delta = -20;
             else delta = -5;
           }
         } else {
@@ -1461,6 +1810,10 @@
           if (delta !== 0) {
             showStabilityFeedback(delta);
           }
+          const msg = isCorrect
+            ? `✅ Correct – Stability +${Math.abs(delta)}`
+            : `⚠ Unsafe: Stability ${delta}. Consequence risk increased.`;
+          showFeedbackToast(msg, isCorrect ? 'success' : 'error');
         });
 
         // Log event (for instructor alerts/consequence mapping)
@@ -1472,6 +1825,8 @@
           severity: severity,
           explanation: explanation,
           delta: delta,
+          followUp: !isCorrect,
+          followUpReason: followUpReason || null,
           timestamp: Date.now()
         };
 
@@ -1515,6 +1870,11 @@
           if (data && data.flipped) {
             // Unlock and can be flipped
             card.classList.remove('locked');
+            const back = card.querySelector('.flashcard-back');
+            if (back && back.dataset.loaded !== 'true') {
+              back.innerHTML = flashcardBackContent[cardId] || '<em>Content not found.</em>';
+              back.dataset.loaded = 'true';
+            }
             
             // Add visual feedback
             card.style.animation = 'pulse 0.5s ease';
@@ -1570,9 +1930,134 @@
       card6: 'Inflammation'         // Belimumab/Allopurinol/Hydrocortisone - live vaccines
     };
 
+    // Lazy-loaded flashcard answers to avoid initial HTML leakage
+    const flashcardBackContent = {
+      card1: `
+        <strong>System:</strong> Psychopharmacology<br>
+        <strong>Answer:</strong> Extrapyramidal symptoms (EPS) - requires immediate benztropine or dose adjustment<br>
+        <strong>Priority:</strong> Watch for tardive dyskinesia (irreversible)<br>
+        <strong>Safety Tip:</strong> Avoid combining with anticholinergics unless treating EPS<br>
+        <strong>High-Yield Med:</strong> Fluoxetine - risk of serotonin syndrome with MAOIs
+      `,
+      card2: `
+        <strong>System:</strong> Neurological<br>
+        <strong>Answer:</strong> Vitamin B6 (pyridoxine) levels - can decrease Levodopa effectiveness<br>
+        <strong>Priority:</strong> Monitor for dyskinesias and orthostatic hypotension<br>
+        <strong>Safety Tip:</strong> Avoid high-protein meals (competes with absorption)<br>
+        <strong>High-Yield Med:</strong> Phenobarbital - monitor therapeutic levels (10-40 mcg/mL)
+      `,
+      card3: `
+        <strong>System:</strong> Pain<br>
+        <strong>Answer:</strong> Administer Naloxone (Narcan) immediately - opioid reversal agent<br>
+        <strong>Priority:</strong> Monitor respiratory rate &lt;12 = critical<br>
+        <strong>Do NOT Mix:</strong> Fentanyl + benzodiazepines (respiratory depression)<br>
+        <strong>High-Yield Med:</strong> Butorphanol - mixed agonist-antagonist, can precipitate withdrawal
+      `,
+      card4: `
+        <strong>System:</strong> Endocrine<br>
+        <strong>Answer:</strong> Agranulocytosis - obtain STAT CBC with differential<br>
+        <strong>Priority:</strong> Monitor WBC &lt;3,000 = hold medication<br>
+        <strong>Safety Tip:</strong> Teach patient to report signs of infection immediately<br>
+        <strong>High-Yield Med:</strong> Somatropin - monitor blood glucose (causes hyperglycemia)
+      `,
+      card5: `
+        <strong>System:</strong> Infection<br>
+        <strong>Answer:</strong> Increased bleeding risk - Erythromycin inhibits Warfarin metabolism (elevated INR)<br>
+        <strong>Priority:</strong> Monitor INR closely, target 2-3 for most indications<br>
+        <strong>Do NOT Mix:</strong> Rifampin + oral contraceptives (decreases effectiveness)<br>
+        <strong>High-Yield Med:</strong> Amphotericin B - monitor potassium (causes severe hypokalemia)
+      `,
+      card6: `
+        <strong>System:</strong> Inflammation<br>
+        <strong>Answer:</strong> HOLD vaccine - immunosuppressed patients cannot receive live vaccines<br>
+        <strong>Priority:</strong> Screen for infections before each dose<br>
+        <strong>Safety Tip:</strong> Avoid NSAIDs with immunosuppressants (GI bleeding risk)<br>
+        <strong>High-Yield Meds:</strong> Allopurinol (monitor uric acid), Hydrocortisone (taper slowly - adrenal crisis)
+      `
+    };
+
+    function populateFirstActionOptions(cardId) {
+      const actionSelect = document.getElementById('fgAction');
+      if (!actionSelect) return;
+      actionSelect.innerHTML = '<option value="">Select first action…</option>';
+      const config = flashcardActions[cardId];
+      if (!config) return;
+      config.options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        actionSelect.appendChild(option);
+      });
+    }
+
+    // First-action requirements per flashcard
+    const flashcardActions = {
+      card1: {
+        options: [
+          'Give benztropine, hold haloperidol, notify provider',
+          'Reassure and continue haloperidol',
+          'Give lorazepam for anxiety',
+          'Increase haloperidol dose'
+        ],
+        correct: 'Give benztropine, hold haloperidol, notify provider',
+        rationale: 'EPS first action is benztropine + hold/notify to prevent progression to NMS.'
+      },
+      card2: {
+        options: [
+          'Check Vitamin B6 interactions and adjust dosing',
+          'Increase protein intake',
+          'Give PRN opioid for tremors',
+          'Stop levodopa immediately without consult'
+        ],
+        correct: 'Check Vitamin B6 interactions and adjust dosing',
+        rationale: 'High B6 or protein blocks levodopa; adjust and monitor to prevent wearing off.'
+      },
+      card3: {
+        options: [
+          'Give Naloxone now and support airway',
+          'Call provider and wait',
+          'Give morphine for pain',
+          'Place patient flat and reassess later'
+        ],
+        correct: 'Give Naloxone now and support airway',
+        rationale: 'RR 8 on fentanyl = opioid toxicity. First action is Naloxone + airway support.'
+      },
+      card4: {
+        options: [
+          'Hold PTU and order STAT CBC with diff',
+          'Give next PTU dose early',
+          'Give acetaminophen only',
+          'Ignore and recheck in 24h'
+        ],
+        correct: 'Hold PTU and order STAT CBC with diff',
+        rationale: 'Sore throat+fever on PTU = agranulocytosis until proven otherwise. Hold and lab check.'
+      },
+      card5: {
+        options: [
+          'Call provider, check INR, anticipate dose reduction',
+          'Double the warfarin dose',
+          'Stop antibiotics immediately without consult',
+          'No action needed'
+        ],
+        correct: 'Call provider, check INR, anticipate dose reduction',
+        rationale: 'Erythromycin raises INR; first action is assess INR and adjust/hold per provider.'
+      },
+      card6: {
+        options: [
+          'Hold live vaccine and assess for infection',
+          'Proceed with vaccine now',
+          'Give NSAID premedication and vaccinate',
+          'Increase steroid dose and vaccinate'
+        ],
+        correct: 'Hold live vaccine and assess for infection',
+        rationale: 'Immunosuppressed patients cannot receive live vaccines; hold and reassess infection risk.'
+      }
+    };
+
     function submitFlashcardGuess() {
       const cardInput = document.getElementById('fgCard');
       const systemInput = document.getElementById('fgSystem');
+      const actionInput = document.getElementById('fgAction');
       const statusEl = document.getElementById('fgStatus');
       const submitBtn = document.getElementById('fgSubmit');
       const guessSection = document.getElementById('flashcardGuessSection');
@@ -1589,6 +2074,7 @@
 
       const cardId = cardInput.value;
       const systemGuess = systemInput.value;
+      const actionGuess = actionInput.value;
 
       if (!cardId) {
         statusEl.style.color = '#ff99c2';
@@ -1604,14 +2090,31 @@
         setTimeout(() => systemInput?.classList.remove('error-flash'), 500);
         return;
       }
+      if (!actionGuess) {
+        statusEl.style.color = '#ff99c2';
+        statusEl.textContent = 'Select your FIRST nursing action before reveal.';
+        actionInput?.classList.add('error-flash');
+        setTimeout(() => actionInput?.classList.remove('error-flash'), 500);
+        return;
+      }
 
       const correctSystem = flashcardKey[cardId];
-      const isCorrect = (systemGuess === correctSystem);
+      const actionConfig = flashcardActions[cardId] || { correct: '', rationale: '' };
+      const isSystemCorrect = (systemGuess === correctSystem);
+      const isActionCorrect = (actionGuess === actionConfig.correct);
+      const isFullyCorrect = isSystemCorrect && isActionCorrect;
 
-      if (isCorrect) {
+      if (isFullyCorrect) {
         statusEl.style.color = '#00ffb3';
-        statusEl.textContent = '✓ Correct – nice call! Your patient remains stable.';
+        statusEl.textContent = `✓ Correct – stability protected. Rationale: ${actionConfig.rationale}`;
         
+        // Unlock flashcard answer across the cohort
+        database.ref('flashcards/' + cardId).set({
+          flipped: true,
+          unlockedBy: currentGroupId,
+          timestamp: Date.now()
+        });
+
         // Visual success feedback
         guessSection?.classList.add('success-flash');
         setTimeout(() => guessSection?.classList.remove('success-flash'), 600);
@@ -1625,11 +2128,14 @@
           itemId: cardId,
           isCorrect: true,
           severity: 'minor',
-          explanation: `Correctly identified ${cardId} as ${correctSystem}.`
+          explanation: `Correctly identified ${cardId} as ${correctSystem}; first action: ${actionGuess}.`
         });
       } else {
+        const misses = [];
+        if (!isSystemCorrect) misses.push(`System guess ${systemGuess} (needs ${correctSystem})`);
+        if (!isActionCorrect) misses.push(`First action '${actionGuess}' (needs ${actionConfig.correct || 'correct first action'})`);
         statusEl.style.color = '#ff006e';
-        statusEl.textContent = `Wrong – you picked ${systemGuess}, but the correct answer is ${correctSystem}. Your patient's condition is worsening!`;
+        statusEl.textContent = `Wrong – ${misses.join(' | ')}. Patient stability drops.`;
         
         // Visual error feedback
         guessSection?.classList.add('error-flash');
@@ -1643,7 +2149,8 @@
           itemId: cardId,
           isCorrect: false,
           severity: 'critical',
-          explanation: `CRITICAL: Misclassified ${cardId}: guessed ${systemGuess}, correct was ${correctSystem}. Major clinical reasoning error.`
+          explanation: `CRITICAL miss on ${cardId}: ${misses.join(' | ')}`,
+          followUpReason: `Earlier miss on ${correctSystem} action will return as a consequence.`
         });
       }
 
@@ -1651,6 +2158,7 @@
       setTimeout(() => {
         cardInput.value = '';
         systemInput.value = '';
+        actionInput.value = '';
       }, 2000);
     }
     
@@ -1667,6 +2175,11 @@
     const fgBtn = document.getElementById('fgSubmit');
     if (fgBtn) {
       fgBtn.addEventListener('click', submitFlashcardGuess);
+    }
+
+    const fgCardSelect = document.getElementById('fgCard');
+    if (fgCardSelect) {
+      fgCardSelect.addEventListener('change', (e) => populateFirstActionOptions(e.target.value));
     }
 
     // -----------------------------
@@ -1793,6 +2306,8 @@
       infection: 'card5',
       inflammation: 'card6'
     };
+
+    const cardToSystemKey = Object.fromEntries(Object.entries(systemToCard).map(([sys, card]) => [card, sys]));
 
     // JIGSAW CASE BANK
     const jigsawCases = {
@@ -2030,6 +2545,7 @@
         ]).then(([stabilitySnap, eventsSnap]) => {
           const stability = typeof stabilitySnap.val() === 'number' ? stabilitySnap.val() : 100;
           let hadFlashcardMiss = false;
+          let followUpReason = null;
 
           const eventsVal = eventsSnap.val() || {};
           Object.values(eventsVal).forEach(ev => {
@@ -2040,6 +2556,12 @@
             ) {
               hadFlashcardMiss = true;
             }
+
+            // Capture earliest consequence reason tied to this system
+            const evSystemKey = cardToSystemKey[ev.itemId];
+            if (!ev.isCorrect && evSystemKey === systemKey && (ev.followUp || ev.followUpReason)) {
+              followUpReason = ev.followUpReason || ev.explanation;
+            }
           });
 
           // RULE (INCREASED DIFFICULTY):
@@ -2047,11 +2569,11 @@
           // Else, if stability < 90 → consequence case.
           // Only assign standard if: no flashcard miss AND stability >= 90
           if (hadFlashcardMiss) {
-            resolve('consequence');
+            resolve({ variant: 'consequence', followUpReason });
           } else if (stability < 90) {
-            resolve('consequence');
+            resolve({ variant: 'consequence', followUpReason });
           } else {
-            resolve('standard');
+            resolve({ variant: 'standard', followUpReason });
           }
 
         }).catch(err => reject(err));
@@ -2084,7 +2606,8 @@
         }
 
         decideJigsawVariantForGroup(systemKey)
-          .then(variant => {
+          .then(result => {
+            const { variant, followUpReason } = result;
             const caseData = jigsawCases[systemKey][variant];
             if (!caseData) {
               throw new Error('No case configured for that variant.');
@@ -2095,6 +2618,7 @@
               <p style="margin-top:12px;font-size:12px;color:#ccecff;">
                 <em>Note for your group:</em> This scenario was assigned based on your earlier decisions in Phase 1.
               </p>
+              ${variant === 'consequence' && followUpReason ? `<div style="margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,0,110,0.12);border:1px solid rgba(255,0,110,0.3);color:#ff99c2;font-size:12px;">Because earlier you missed: ${followUpReason}</div>` : ''}
             `;
           })
           .catch(err => {
@@ -2115,6 +2639,12 @@
     window.selectLeadership = function(role) {
       console.log('selectLeadership called with role:', role);
       selectedRole = role;
+
+      // Require prior auth; bootstrap flow sets authRole before calling this
+      if (authRole !== 'charge' && authRole !== 'rrt') {
+        showFeedbackToast('Leadership access denied', 'error');
+        return;
+      }
       
       // Store role in localStorage
       try {
@@ -2160,6 +2690,7 @@
 
       // Initialize dashboards
       setupAllGroupsMonitor(role);
+      setupEventAlerts(role);
       setupChargeNurseMessages(role); // Add message listener
       if (role !== 'rrt') {
         setupErrorLog(role);
@@ -2179,6 +2710,7 @@
       const config = groupConfig[groupNumber];
       if (!config) {
         console.error('No config found for group:', groupNumber);
+        showMissingGroupError();
         return;
       }
       
@@ -2229,6 +2761,32 @@
         }
       });
 
+      // Listen for stability updates
+      groupRef.child('stability').on('value', snap => {
+        const val = typeof snap.val() === 'number' ? snap.val() : 100;
+        updateStabilityDisplay(val);
+      });
+
+      // Listen for phase updates
+      groupRef.child('phase').on('value', snap => {
+        currentPhase = snap.val() || 'phase1';
+        const wrapper = document.querySelector('.main-wrapper.group-activity-content');
+        if (wrapper) {
+          wrapper.querySelectorAll('.phase-banner').forEach(el => el.remove());
+          renderPhaseBanner(wrapper, currentPhase);
+        }
+        applyPhaseLocks();
+      });
+
+      // Initial render
+      const wrapper = document.querySelector('.main-wrapper.group-activity-content');
+      if (wrapper) {
+        wrapper.querySelectorAll('.phase-banner').forEach(el => el.remove());
+        renderPhaseBanner(wrapper, currentPhase);
+      }
+      applyPhaseLocks();
+      updateStabilityDisplay(100);
+
       // Setup Firebase sync for this group
       if (typeof setupFirebaseSync === 'function') {
         setupFirebaseSync(groupNumber);
@@ -2250,8 +2808,73 @@
     console.log('window.selectGroup:', typeof window.selectGroup);
 
     // -----------------------------
+    // PARAM ROUTING
+    // -----------------------------
+    function getUrlGroupId() {
+      const g = parseInt(getQueryParam('group'), 10);
+      if (Number.isNaN(g)) return null;
+      return g >= 1 && g <= 6 ? g : null;
+    }
+
+    function showMissingGroupError() {
+      const err = document.getElementById('groupErrorScreen');
+      const selection = document.getElementById('groupSelectionScreen');
+      const student = document.getElementById('groupActivityContent');
+      const leader = document.getElementById('leadershipDashboard');
+      if (selection) selection.style.display = 'none';
+      if (student) student.style.display = 'none';
+      if (leader) leader.style.display = 'none';
+      if (err) err.style.display = 'block';
+    }
+
+    async function bootstrapFromParams() {
+      const requestedRole = getQueryParam('role') || 'student';
+      const urlGroupId = getUrlGroupId();
+      const selection = document.getElementById('groupSelectionScreen');
+      const student = document.getElementById('groupActivityContent');
+      const leader = document.getElementById('leadershipDashboard');
+      const err = document.getElementById('groupErrorScreen');
+
+      // Hide everything by default
+      if (selection) selection.style.display = 'none';
+      if (student) student.style.display = 'none';
+      if (leader) leader.style.display = 'none';
+      if (err) err.style.display = 'none';
+
+      if (requestedRole === 'charge' || requestedRole === 'rrt') {
+        const ok = await showPasscodeModal(requestedRole);
+        if (!ok) {
+          authRole = 'student';
+          if (!urlGroupId) {
+            showMissingGroupError();
+            return;
+          }
+          selectGroup(urlGroupId);
+          return;
+        }
+        authRole = requestedRole;
+        const roleKey = requestedRole === 'charge' ? 'charge1' : 'rrt';
+        selectLeadership(roleKey);
+        return;
+      }
+
+      // Student default
+      authRole = 'student';
+      if (!urlGroupId) {
+        showMissingGroupError();
+        return;
+      }
+      selectGroup(urlGroupId);
+    }
+
+    document.addEventListener('DOMContentLoaded', bootstrapFromParams);
+
+    // -----------------------------
     // LEADERSHIP DASHBOARD FUNCTIONS
     // -----------------------------
+
+    const lowStabilityAlerted = {};
+    const criticalStreak = {};
     function setupAllGroupsMonitor(role) {
       const container = document.getElementById('allGroupsStability');
       const groupNames = ['Neuro', 'Psych', 'Pain', 'Inflam', 'Endo', 'Infection'];
@@ -2294,7 +2917,80 @@
               }
             }
           }
+
+          // Auto-alert when stability is concerning
+          if (stability < 70 && !lowStabilityAlerted[i]) {
+            lowStabilityAlerted[i] = true;
+            pushAutoAlert(`Group ${i}: Stability ${stability}% – check now`, 'critical', 'stabilityLow');
+          }
+          if (stability >= 75) {
+            lowStabilityAlerted[i] = false;
+          }
         });
+      });
+    }
+
+    const alertCooldowns = { stabilityLow: 60000, criticalStreak: 120000, needRRT: 120000 };
+    const lastAlertAt = { stabilityLow: 0, criticalStreak: 0, needRRT: 0 };
+
+    function pushAutoAlert(message, level = 'warning', type = 'generic') {
+      const list = document.getElementById('autoAlertsList');
+      if (!list) return;
+      const now = Date.now();
+      if (type !== 'generic') {
+        const last = lastAlertAt[type] || 0;
+        const cd = alertCooldowns[type] || 60000;
+        if (now - last < cd) return;
+        lastAlertAt[type] = now;
+      }
+      if (list.dataset.empty === 'true') {
+        list.innerHTML = '';
+        delete list.dataset.empty;
+      }
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);font-size:13px;color:#ccecff;';
+      if (level === 'critical') {
+        div.style.borderColor = 'rgba(255,0,110,0.6)';
+        div.style.background = 'rgba(255,0,110,0.12)';
+        div.style.color = '#ff99c2';
+      } else if (level === 'info') {
+        div.style.borderColor = 'rgba(0,212,255,0.6)';
+        div.style.background = 'rgba(0,212,255,0.08)';
+        div.style.color = '#ccecff';
+      }
+      div.textContent = message;
+      list.prepend(div);
+    }
+
+    const lastFollowUpByGroup = {};
+
+    function setupEventAlerts(role) {
+      const allowedGroups = role === 'charge1' ? [1,2,3] : role === 'charge2' ? [4,5,6] : [1,2,3,4,5,6];
+      const eventsRef = database.ref('events').orderByChild('timestamp').limitToLast(100);
+
+      eventsRef.on('child_added', snap => {
+        const ev = snap.val();
+        if (!ev || !allowedGroups.includes(ev.groupId)) return;
+
+        if (ev && ev.groupId && ev.followUpReason) {
+          lastFollowUpByGroup[ev.groupId] = ev.followUpReason;
+        }
+
+        // Critical streak detection
+        if (!ev.isCorrect && ev.severity === 'critical') {
+          criticalStreak[ev.groupId] = (criticalStreak[ev.groupId] || 0) + 1;
+          if (criticalStreak[ev.groupId] >= 2) {
+            pushAutoAlert(`Group ${ev.groupId}: 2 critical errors in a row`, 'critical', 'criticalStreak');
+            criticalStreak[ev.groupId] = 0; // avoid spamming
+          }
+        } else if (ev.isCorrect) {
+          criticalStreak[ev.groupId] = 0;
+        }
+
+        // Need RRT request
+        if (ev.phase === 'chargeRequest' && ev.itemId === 'Need RRT') {
+          pushAutoAlert(`Group ${ev.groupId}: NEED RRT requested`, 'critical', 'needRRT');
+        }
       });
     }
 
@@ -2322,6 +3018,7 @@
               <span style="font-size:11px;color:#ccecff;">${new Date(event.timestamp).toLocaleTimeString()}</span>
             </div>
             <div style="font-size:13px;color:#ccecff;">${event.explanation || 'Error recorded'}</div>
+            ${event.followUpReason ? `<div style="font-size:12px;color:#ccecff;margin-top:4px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.3);padding:6px;border-radius:6px;">Follow-up consequence: ${event.followUpReason}</div>` : ''}
             <div style="font-size:12px;color:#ffb300;margin-top:4px;">Stability: ${event.delta}</div>
           `;
           container.prepend(div);
@@ -2353,6 +3050,7 @@
             caseDiv.innerHTML = `
               <h4 style="color:#00d4ff;margin:0 0 10px 0;">Group ${i} – ${caseData.system || 'System'}</h4>
               <div style="font-size:13px;color:#ccecff;margin-bottom:12px;">${caseData.title || 'Case assigned'}</div>
+              ${caseData.followUpReason ? `<div style="margin:8px 0 12px 0;padding:10px;border-radius:8px;background:rgba(255,0,110,0.12);border:1px solid rgba(255,0,110,0.3);color:#ff99c2;font-size:12px;">Consequence context: ${caseData.followUpReason}</div>` : ''}
               
               <!-- STRICT GRADING RUBRIC (INCREASED DIFFICULTY) -->
               <div style="background:rgba(255,179,0,0.1);padding:12px;border-radius:8px;border-left:3px solid #ffb300;margin-bottom:12px;font-size:12px;color:#ffd27f;">
@@ -2375,6 +3073,59 @@
             document.getElementById('groupCases').appendChild(caseDiv);
           }
         });
+      });
+    }
+
+    // Leadership phase advancement controls
+    function setGroupPhase(nextPhase) {
+      if (authRole !== 'charge' && authRole !== 'rrt') {
+        showFeedbackToast('Phase control is leadership-only', 'error');
+        return;
+      }
+      const select = document.getElementById('phaseGroupSelect');
+      const statusEl = document.getElementById('phaseControlStatus');
+      const groupId = select ? parseInt(select.value, 10) : NaN;
+      if (!groupId || groupId < 1 || groupId > 6) {
+        if (statusEl) statusEl.textContent = 'Choose a valid group (1-6).';
+        return;
+      }
+      database.ref('groups/' + groupId + '/phase').set(nextPhase).then(() => {
+        if (statusEl) {
+          statusEl.style.color = '#00ffb3';
+          statusEl.textContent = `Group ${groupId} → ${nextPhase.toUpperCase()} applied.`;
+        }
+        showFeedbackToast(`Group ${groupId} advanced to ${nextPhase.toUpperCase()}`, 'success');
+      }).catch(() => {
+        if (statusEl) {
+          statusEl.style.color = '#ff006e';
+          statusEl.textContent = 'Failed to update phase. Check connection.';
+        }
+        showFeedbackToast('Failed to update phase', 'error');
+      });
+    }
+
+    function setAllGroupsPhase(nextPhase) {
+      if (authRole !== 'charge' && authRole !== 'rrt') {
+        showFeedbackToast('Phase control is leadership-only', 'error');
+        return;
+      }
+      const statusEl = document.getElementById('phaseControlStatus');
+      const updates = [];
+      for (let i = 1; i <= 6; i++) {
+        updates.push(database.ref('groups/' + i + '/phase').set(nextPhase));
+      }
+      Promise.all(updates).then(() => {
+        if (statusEl) {
+          statusEl.style.color = '#00ffb3';
+          statusEl.textContent = `All groups → ${nextPhase.toUpperCase()} applied.`;
+        }
+        showFeedbackToast(`All groups set to ${nextPhase.toUpperCase()}`, 'success');
+      }).catch(() => {
+        if (statusEl) {
+          statusEl.style.color = '#ff006e';
+          statusEl.textContent = 'Failed to update all groups.';
+        }
+        showFeedbackToast('Failed to update all groups', 'error');
       });
     }
 
@@ -2401,6 +3152,12 @@
             <button class="assign-btn" onclick="saveDebrief(${groupId})" style="background:#00ffb3;">💾 Save</button>
             <span id="debriefStatus${groupId}" style="font-size:12px;color:#00ffb3;"></span>
           </div>
+          <div id="reflectionDisplay${groupId}" style="margin-top:10px;padding:10px;border-radius:8px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);color:#ccecff;font-size:12px;">
+            <strong style="color:#00d4ff;">Student Reflection</strong>
+            <div class="reflection-body${groupId}" style="margin-top:6px;">
+              <em style="color:#888;">No reflection submitted.</em>
+            </div>
+          </div>
         `;
         
         container.appendChild(groupDiv);
@@ -2413,6 +3170,23 @@
           if (data && data.content && textarea) {
             textarea.value = data.content;
           }
+        });
+
+        const reflectionRef = database.ref('reflections/group' + groupId);
+        reflectionRef.on('value', snap => {
+          const data = snap.val();
+          const target = document.querySelector('.reflection-body' + groupId);
+          if (!target) return;
+          if (!data) {
+            target.innerHTML = '<em style="color:#888;">No reflection submitted.</em>';
+            return;
+          }
+          const latest = Object.values(data).sort((a,b) => (b.timestamp||0) - (a.timestamp||0))[0];
+          target.innerHTML = `
+            <div><strong>Near miss:</strong> ${latest.nearMiss || '—'}</div>
+            <div><strong>Next time:</strong> ${latest.nextTime || '—'}</div>
+            <div style="font-size:11px;color:#888;margin-top:4px;">Updated at ${latest.timestamp ? new Date(latest.timestamp).toLocaleTimeString() : ''}</div>
+          `;
         });
       });
     }
@@ -2444,45 +3218,94 @@
       });
     }
 
-    // Quick Message to Charge Nurse
-    function quickMessage(msg) {
-      if (!currentGroupId) return;
-      
+    // Structured escalation to Charge Nurse / RRT
+    function sendChargeRequest() {
+      if (!currentGroupId) {
+        alert('Set your Group # first.');
+        return;
+      }
+
+      const hypothesis = (document.getElementById('chargeHypothesis')?.value || '').trim();
+      const because = (document.getElementById('chargeBecause')?.value || '').trim();
+      const action = (document.getElementById('chargeAction')?.value || '').trim();
+      const monitoring = (document.getElementById('chargeMonitoring')?.value || '').trim();
+      const requestType = (document.getElementById('chargeRequestType')?.value || '').trim();
+
+      if (!hypothesis || !because || !action || !monitoring || !requestType) {
+        showFeedbackToast('Please complete all fields', 'warning');
+        return;
+      }
+
+      const severity = requestType === 'Need RRT' ? 'critical' : 'moderate';
+      const explanation = `We think it is ${hypothesis} because ${because}. First action: ${action}. Monitoring: ${monitoring}. Request: ${requestType}.`;
+
+      // Log to events for instructor/charge visibility
+      database.ref('events').push({
+        groupId: currentGroupId,
+        phase: 'chargeRequest',
+        itemId: requestType,
+        isCorrect: false,
+        severity,
+        explanation,
+        timestamp: Date.now()
+      });
+
+      // Also send to charge nurse message stream for continuity
       const messageId = database.ref('messages/toChargeNurse').push().key;
       database.ref('messages/toChargeNurse/' + messageId).set({
         from: 'Group ' + currentGroupId,
         groupNumber: currentGroupId,
-        message: msg,
+        message: explanation,
+        requestType,
+        severity,
         timestamp: Date.now(),
         read: false,
         conversationId: 'group' + currentGroupId + '_' + Date.now(),
         responses: {}
       });
-      
-      alert('📨 Message sent to Charge Nurse: "' + msg + '"');
+
+      showFeedbackToast('Request sent to Charge Nurse', 'success');
       showConversationHistory();
     }
-    
-    function sendCustomMessage() {
-      const input = document.getElementById('customMessageInput');
-      const message = input?.value?.trim();
-      
-      if (!message || !currentGroupId) return;
-      
-      const messageId = database.ref('messages/toChargeNurse').push().key;
-      database.ref('messages/toChargeNurse/' + messageId).set({
-        from: 'Group ' + currentGroupId,
-        groupNumber: currentGroupId,
-        message: message,
-        timestamp: Date.now(),
-        read: false,
-        conversationId: 'group' + currentGroupId + '_' + Date.now(),
-        responses: {}
+
+    // Student reflections (Phase 3)
+    function submitReflection() {
+      if (!currentGroupId) {
+        showFeedbackToast('Set your Group # first.', 'error');
+        return;
+      }
+      const nearMiss = (document.getElementById('reflectionNearMiss')?.value || '').trim();
+      const nextTime = (document.getElementById('reflectionNextTime')?.value || '').trim();
+      const status = document.getElementById('reflectionStatus');
+      if (!nearMiss || !nextTime) {
+        if (status) {
+          status.style.color = '#ff99c2';
+          status.textContent = 'Please answer both reflection prompts.';
+        }
+        return;
+      }
+
+      const entry = {
+        groupId: currentGroupId,
+        nearMiss,
+        nextTime,
+        timestamp: Date.now()
+      };
+
+      database.ref('reflections/group' + currentGroupId).push(entry).then(() => {
+        if (status) {
+          status.style.color = '#00ffb3';
+          status.textContent = 'Reflection submitted.';
+        }
+        showFeedbackToast('Reflection submitted', 'success');
+        setTimeout(() => { if (status) status.textContent = ''; }, 2500);
+      }).catch(() => {
+        if (status) {
+          status.style.color = '#ff006e';
+          status.textContent = 'Could not submit reflection.';
+        }
+        showFeedbackToast('Failed to submit reflection', 'error');
       });
-      
-      input.value = '';
-      alert('📨 Message sent to Charge Nurse!');
-      showConversationHistory();
     }
     
     function showConversationHistory() {
@@ -2543,6 +3366,10 @@
                 'rrt': '🚨 ESCALATED + RRT CALLED (-25)'
               };
               
+              const escalationContext = (response.action === 'escalated' || response.action === 'rrt') && lastFollowUpByGroup[msg.groupNumber]
+                ? `<div style="margin-top:6px;padding:6px 10px;background:rgba(255,0,110,0.12);border:1px solid rgba(255,0,110,0.3);border-radius:6px;font-size:11px;color:#ff99c2;">Prior consequence context: ${lastFollowUpByGroup[msg.groupNumber]}</div>`
+                : '';
+
               respDiv.innerHTML = `
                 <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
                   <strong style="color:#ba55d3;font-size:12px;">Charge Nurse</strong>
@@ -2552,6 +3379,7 @@
                 ${response.action ? `<div style="margin-top:6px;padding:6px 10px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:11px;font-weight:600;color:${actionColors[response.action] || '#ccc'};">
                   ${actionLabels[response.action] || response.action.toUpperCase()}
                 </div>` : ''}
+                ${escalationContext}
               `;
               messagesContainer.appendChild(respDiv);
             });
