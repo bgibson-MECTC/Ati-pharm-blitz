@@ -852,6 +852,13 @@
       resize: vertical;
       font-family: inherit;
     }
+    
+    /* Passcode modal shake animation */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
   </style>
 </head>
 
@@ -861,17 +868,70 @@
     <h1 class="landing-title">ATI Pharm Blitz</h1>
     <p class="landing-subtitle">1-Hour High-Yield NCLEX Pharmacology Review</p>
     
-    <div class="role-selection">
-      <div class="role-card" onclick="selectRole('instructor')">
-        <div class="role-icon">🎓</div>
-        <div class="role-title">Instructor</div>
-        <div class="role-description">Access command center, timer controls, and live monitoring dashboard</div>
+    <!-- STUDENT SECTION (Default View) -->
+    <div id="studentLanding" style="max-width: 600px; margin: 0 auto;">
+      <p style="color: #ccecff; font-size: 16px; margin-bottom: 25px; text-align: center;">
+        Select your assigned group to begin:
+      </p>
+      
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
+        <a href="group.html?group=1" class="role-card" style="text-decoration: none; cursor: pointer;">
+          <div class="role-icon">🧠</div>
+          <div class="role-title">Group 1</div>
+          <div class="role-description">Neurological</div>
+        </a>
+        <a href="group.html?group=2" class="role-card" style="text-decoration: none; cursor: pointer;">
+          <div class="role-icon">💊</div>
+          <div class="role-title">Group 2</div>
+          <div class="role-description">Psychopharmacology</div>
+        </a>
+        <a href="group.html?group=3" class="role-card" style="text-decoration: none; cursor: pointer;">
+          <div class="role-icon">😣</div>
+          <div class="role-title">Group 3</div>
+          <div class="role-description">Pain Management</div>
+        </a>
+        <a href="group.html?group=4" class="role-card" style="text-decoration: none; cursor: pointer;">
+          <div class="role-icon">🔥</div>
+          <div class="role-title">Group 4</div>
+          <div class="role-description">Inflammation</div>
+        </a>
+        <a href="group.html?group=5" class="role-card" style="text-decoration: none; cursor: pointer;">
+          <div class="role-icon">🩺</div>
+          <div class="role-title">Group 5</div>
+          <div class="role-description">Endocrine</div>
+        </a>
+        <a href="group.html?group=6" class="role-card" style="text-decoration: none; cursor: pointer;">
+          <div class="role-icon">🦠</div>
+          <div class="role-title">Group 6</div>
+          <div class="role-description">Infection</div>
+        </a>
       </div>
       
-      <div class="role-card" onclick="selectRole('student')">
-        <div class="role-icon">👥</div>
-        <div class="role-title">Student</div>
-        <div class="role-description">Join your group for interactive pharmacology challenges</div>
+      <div style="text-align: center; margin-top: 35px;">
+        <button onclick="showInstructorPasscode()" style="background: rgba(0, 212, 255, 0.15); border: 2px solid rgba(0, 212, 255, 0.4); color: #00d4ff; padding: 12px 30px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+          🔓 Enter Instructor Mode
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- INSTRUCTOR PASSCODE MODAL -->
+  <div id="instructorPasscodeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: linear-gradient(135deg, #0a1128 0%, #1a2540 100%); border: 2px solid rgba(0, 212, 255, 0.6); border-radius: 20px; padding: 35px 40px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);">
+      <h2 style="color: #00d4ff; margin: 0 0 10px; font-size: 24px; text-align: center;">🔐 Instructor Access</h2>
+      <p style="color: #ccecff; font-size: 14px; margin: 0 0 25px; text-align: center;">Enter the instructor passcode to access the dashboard</p>
+      
+      <input type="password" id="instructorPasscodeInput" placeholder="Enter passcode" style="width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(0, 212, 255, 0.4); border-radius: 12px; color: #ffffff; font-size: 16px; margin-bottom: 8px; font-family: inherit;" />
+      
+      <p id="instructorPasscodeError" style="color: #ff99c2; font-size: 13px; min-height: 20px; margin: 0 0 20px; text-align: center;"></p>
+      
+      <div style="display: flex; gap: 12px;">
+        <button onclick="cancelInstructorPasscode()" style="flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: #ccecff; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+          Cancel
+        </button>
+        <button onclick="verifyInstructorPasscode()" style="flex: 1; padding: 12px; background: #00ffb3; border: 2px solid #00ffb3; border-radius: 12px; color: #0a1128; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0, 255, 179, 0.3);">
+          Unlock
+        </button>
       </div>
     </div>
   </div>
@@ -2090,6 +2150,60 @@
   <!-- END INSTRUCTOR CONTENT -->
 
   <script>
+    // Instructor passcode modal control
+    const INSTRUCTOR_PASSCODE = 'mednurse2024';
+    
+    function showInstructorPasscode() {
+      const modal = document.getElementById('instructorPasscodeModal');
+      const input = document.getElementById('instructorPasscodeInput');
+      const error = document.getElementById('instructorPasscodeError');
+      
+      modal.style.display = 'flex';
+      error.textContent = '';
+      input.value = '';
+      
+      // Focus input after modal renders
+      setTimeout(() => input.focus(), 100);
+      
+      // Enter key submits
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          verifyInstructorPasscode();
+        } else if (e.key === 'Escape') {
+          cancelInstructorPasscode();
+        }
+      };
+    }
+    
+    function cancelInstructorPasscode() {
+      const modal = document.getElementById('instructorPasscodeModal');
+      modal.style.display = 'none';
+    }
+    
+    function verifyInstructorPasscode() {
+      const input = document.getElementById('instructorPasscodeInput');
+      const error = document.getElementById('instructorPasscodeError');
+      const enteredPasscode = input.value.trim();
+      
+      if (enteredPasscode === INSTRUCTOR_PASSCODE) {
+        // Correct passcode - show instructor dashboard
+        document.getElementById('instructorPasscodeModal').style.display = 'none';
+        document.getElementById('landingScreen').classList.add('hidden');
+        document.getElementById('instructorContent').classList.add('active');
+      } else {
+        // Incorrect passcode
+        error.textContent = '❌ Incorrect passcode. Please try again.';
+        input.value = '';
+        input.focus();
+        
+        // Shake animation
+        input.style.animation = 'shake 0.3s ease';
+        setTimeout(() => {
+          input.style.animation = '';
+        }, 300);
+      }
+    }
+    
     function selectRole(role) {
       if (role === 'instructor') {
         // Show instructor content
