@@ -2051,7 +2051,17 @@
     function submitFlashcardGuess() {
       // Access global Firebase database and group ID
       const database = window.database;
-      const currentGroupId = window.currentGroupId;
+      let currentGroupId = window.currentGroupId;
+      
+      // Fallback: try to get from localStorage if not set
+      if (!currentGroupId) {
+        const stored = localStorage.getItem('pharmBlitzGroupId');
+        if (stored) {
+          currentGroupId = parseInt(stored, 10);
+          window.currentGroupId = currentGroupId;
+          console.log('Recovered currentGroupId from localStorage:', currentGroupId);
+        }
+      }
       
       console.log('submitFlashcardGuess - database:', !!database, 'currentGroupId:', currentGroupId);
       
@@ -2070,9 +2080,10 @@
       statusEl.textContent = '';
 
       if (!currentGroupId) {
-        console.error('currentGroupId is not set!');
+        console.error('currentGroupId is not set! window.currentGroupId:', window.currentGroupId);
+        console.error('All window properties:', Object.keys(window).filter(k => k.includes('roup')));
         statusEl.style.color = '#ff99c2';
-        statusEl.textContent = 'Set your Group # first.';
+        statusEl.textContent = `Set your Group # first. (Debug: window.currentGroupId = ${window.currentGroupId})`;
         submitBtn?.classList.add('error-flash');
         setTimeout(() => submitBtn?.classList.remove('error-flash'), 500);
         return;
