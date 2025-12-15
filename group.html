@@ -2720,7 +2720,7 @@
       
       // Store group in localStorage
       try {
-        localStorage.setItem('pharmBlitzGroupId', String(currentGroupId));
+        localStorage.setItem('pharmBlitzGroupId', String(groupNumber));
         localStorage.removeItem('pharmBlitzRole'); // Clear leadership role if joining group
       } catch (e) {}
 
@@ -2758,7 +2758,8 @@
       }
 
       // Initialize stability in Firebase
-      const groupRef = database.ref('groups/' + currentGroupId);
+      const database = window.database;
+      const groupRef = database.ref('groups/' + groupNumber);
       groupRef.child('stability').once('value').then(snap => {
         if (snap.val() == null) {
           groupRef.update({ stability: 100 });
