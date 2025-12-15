@@ -1699,6 +1699,8 @@
           alertsPanel.innerHTML = '';
 
           entries.forEach(ev => {
+            const gid = ev.groupId || ev.group || '?';
+            const phaseLabel = ev.phase || ev.type || 'event';
             const div = document.createElement('div');
             div.className = 'alert-item ' + (ev.severity || 'minor');
             div.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;';
@@ -1717,11 +1719,11 @@
 
             div.innerHTML = `
               <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;">
-                <span style="font-size:13px;font-weight:600;color:${ev.isCorrect ? '#00ffb3' : '#ff99c2'};">${correctness} Group ${ev.groupId} – ${ev.phase}</span>
+                <span style="font-size:13px;font-weight:600;color:${ev.isCorrect ? '#00ffb3' : '#ff99c2'};">${correctness} Group ${gid} – ${phaseLabel}</span>
                 <span style="font-size:11px;color:#ccecff;">${time}</span>
               </div>
               <div style="font-size:12px;color:#ccecff;">${ev.explanation || 'No details'}</div>
-              <div style="font-size:11px;color:#00d4ff;margin-top:4px;">Severity: ${ev.severity} | Delta: ${ev.delta > 0 ? '+' : ''}${ev.delta || 0}</div>
+              <div style="font-size:11px;color:#00d4ff;margin-top:4px;">Severity: ${ev.severity || 'minor'} | Delta: ${(ev.delta || 0) > 0 ? '+' : ''}${ev.delta || 0}</div>
             `;
 
             alertsPanel.appendChild(div);
