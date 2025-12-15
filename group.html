@@ -1433,7 +1433,7 @@
 
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
-      const database = firebase.database();
+      window.database = firebase.database();  // Make globally accessible
 
       updateDebugBanner('warn', 'Firebase connected | Loading functions...');
       
@@ -1447,6 +1447,9 @@
       // ==========================================
       // PHASE LOCKING & STABILITY FEEDBACK
       // ==========================================
+
+      // Make database accessible throughout the script
+      const database = window.database;
 
       let currentPhase = 'phase1';
       let currentStability = 100;
@@ -2889,6 +2892,60 @@
       authRole = "student";
       showOnly(elStudent);
       selectGroup(parseInt(groupId, 10));
+    }
+
+    // Helper functions for router
+    function selectLeadership(role) {
+      authRole = role;
+      console.log('Leadership view activated:', role);
+      // Leadership dashboard is already visible via showOnly
+      // Initialize leadership-specific features if needed
+      if (typeof setupEventAlerts === 'function') setupEventAlerts();
+      if (typeof setupGroupCasesMonitor === 'function') setupGroupCasesMonitor();
+      if (typeof setupErrorLog === 'function') setupErrorLog();
+      if (typeof setupDebriefBoard === 'function') setupDebriefBoard(role);
+    }
+
+    function selectGroup(gid) {
+      if (!gid || gid < 1 || gid > 6) {
+        console.error('Invalid group ID:', gid);
+        return;
+      }
+      groupId = gid;
+      authRole = 'student';
+      console.log('Student view activated for group:', gid);
+      // Initialize student view - connect to Firebase for this group
+      const groupRef = database.ref('groups/' + groupId);
+      
+      groupRef.child('stability').on('value', snap => {
+        const val = typeof snap.val() === 'number' ? snap.val() : 100;
+        updateStabilityDisplay(val);
+      });
+
+      // Listen for phase updates
+      groupRef.child('phase').on('value', snap => {
+        currentPhase = snap.val() || 'phase1';
+        const wrapper = document.querySelector('.main-wrapper.group-activity-content');
+        if (wrapper) {
+          wrapper.querySelectorAll('.phase-banner').forEach(el => el.remove());
+          renderPhaseBanner(wrapper, currentPhase);
+        }
+        applyPhaseLocks();
+      });
+
+      // Initial render
+      const wrapper = document.querySelector('.main-wrapper.group-activity-content');
+      if (wrapper) {
+        wrapper.querySelectorAll('.phase-banner').forEach(el => el.remove());
+        renderPhaseBanner(wrapper, currentPhase);
+      }
+      applyPhaseLocks();
+      updateStabilityDisplay(100);
+
+      // Setup Firebase sync for this group
+      if (typeof setupFirebaseSync === 'function') {
+        setupFirebaseSync(groupId);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', bootstrapFromParams);
