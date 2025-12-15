@@ -757,18 +757,7 @@
     <p class="selection-subtitle">Choose to join a student group or take a leadership role</p>
     
     <!-- Continue Prompt (shown when returning user) -->
-    <div id="continuePrompt" style="display:none; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; text-align: center;">
-      <h3 style="color: #fff; margin: 0 0 10px 0; font-size: 20px;">Welcome Back!</h3>
-      <p id="continueMessage" style="color: #e0e0e0; margin: 0 0 15px 0; font-size: 16px;"></p>
-      <div style="display: flex; gap: 15px; justify-content: center;">
-        <button onclick="confirmContinue()" style="background: #00d4ff; color: #0a1128; padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 8px rgba(0,212,255,0.3);">
-          Continue
-        </button>
-        <button onclick="chooseDifferent()" style="background: rgba(255,255,255,0.2); color: #fff; padding: 12px 30px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
-          Choose Different
-        </button>
-      </div>
-    </div>
+    <!-- Continue prompt removed - roles lock on first selection -->
     
     <!-- Leadership Roles Section -->
     <div style="margin-bottom: 40px;" id="roleSelectionOptions">
@@ -3866,17 +3855,8 @@
     };
     
     window.chooseDifferent = function() {
-      console.log('chooseDifferent called - clearing saved data');
-      // Clear saved data
-      try {
-        localStorage.removeItem('pharmBlitzRole');
-        localStorage.removeItem('pharmBlitzGroupId');
-      } catch (e) {}
-      // Hide continue prompt, show selection options
-      document.getElementById('continuePrompt').style.display = 'none';
-      document.getElementById('roleSelectionOptions').style.display = 'block';
-      pendingRole = null;
-      pendingGroup = null;
+      console.log('chooseDifferent disabled - roles are locked after selection');
+      // Role changes disabled
     };
     
     window.returnToHome = function() {
