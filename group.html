@@ -3714,34 +3714,58 @@
         
         // Log appropriate event
         if (action.startsWith('approved')) {
+          const phases = {
+            approved_excellent: { isCorrect: true, severity: 'minor', delta: 15, label: 'Approved – Excellent' },
+            approved: { isCorrect: true, severity: 'minor', delta: 10, label: 'Approved' },
+            approved_caution: { isCorrect: true, severity: 'moderate', delta: 5, label: 'Approved – Caution' }
+          };
+          const meta = phases[action] || { isCorrect: true, severity: 'minor', delta: 0, label: 'Approved' };
           database.ref('events').push({
-            group: groupNumber,
-            type: action === 'approved_excellent' ? 'approved_excellent' : action === 'approved_caution' ? 'approved_caution' : 'approved',
-            message: action === 'approved_excellent' ? 'Charge Nurse: Exceptional reasoning (+15)' : 
-                     action === 'approved_caution' ? 'Charge Nurse: Approved with caution (+5)' :
-                     'Charge Nurse: Approved clinical reasoning (+10)',
+            groupId: groupNumber,
+            phase: 'chargeResponse',
+            isCorrect: meta.isCorrect,
+            severity: meta.severity,
+            delta: meta.delta,
+            explanation: actionMessages[action],
             timestamp: Date.now()
           });
         } else if (action === 'escalated') {
           database.ref('events').push({
-            group: groupNumber,
-            type: 'escalated',
-            message: 'Charge Nurse: Missing components or unsafe reasoning (-15)',
+            groupId: groupNumber,
+            phase: 'chargeResponse',
+            isCorrect: false,
+            severity: 'moderate',
+            delta: -15,
+            explanation: actionMessages[action],
             timestamp: Date.now()
           });
         } else if (action === 'rrt') {
           database.ref('groups/' + groupNumber + '/rrtCalled').set(true);
-          database.ref('rrt/calls').push({
-            group: groupNumber,
-            reason: 'Unsafe clinical judgment - Charge Nurse escalation',
-            calledBy: selectedRole,
-            timestamp: Date.now(),
-            resolved: false
+          // Capture current stability for the call record so RRT can see context
+          database.ref('groups/' + groupNumber + '/stability').once('value').then(stabSnap => {
+            const stability = stabSnap.val() || 0;
+            database.ref('rrt/calls').push({
+              groupId: groupNumber,
+              stability: stability,
+              timestamp: Date.now(),
+              calledBy: selectedRole,
+              // Minimal SBAR stub since this path does not collect one
+              sbar: {
+                situation: 'Charge Nurse escalation without SBAR form',
+                background: '',
+                assessment: '',
+                recommendation: ''
+              },
+              resolved: false
+            });
           });
           database.ref('events').push({
-            group: groupNumber,
-            type: 'rrt_called',
-            message: 'RRT called by Charge Nurse: Dangerous reasoning detected (-25)',
+            groupId: groupNumber,
+            phase: 'chargeResponse',
+            isCorrect: false,
+            severity: 'critical',
+            delta: -25,
+            explanation: actionMessages[action],
             timestamp: Date.now()
           });
         }
@@ -3774,34 +3798,36 @@
       const rrtRef = database.ref('rrt/calls');
       
       rrtRef.on('child_added', snap => {
-        const call = snap.val();
+        const call = snap.val() || {};
+        const gid = call.groupId || call.group;
+        const sbar = call.sbar || {};
         const callDiv = document.createElement('div');
         callDiv.id = 'rrtCall' + snap.key;
         callDiv.style.cssText = 'padding:20px;margin-bottom:12px;background:rgba(255,0,110,0.1);border-radius:12px;border:2px solid #ff006e;animation:pulse 2s infinite;';
         callDiv.innerHTML = `
-          <h4 style="color:#ff006e;margin:0 0 15px 0;">🚨 RRT CALL: Group ${call.groupId}</h4>
+          <h4 style="color:#ff006e;margin:0 0 15px 0;">🚨 RRT CALL: Group ${gid}</h4>
           
           <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:8px;margin-bottom:15px;">
             <h5 style="color:#00ffb3;margin:0 0 10px 0;">SBAR Report from ${call.calledBy || 'Charge Nurse'}</h5>
             
             <div style="margin-bottom:8px;">
               <strong style="color:#00d4ff;">Situation:</strong>
-              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.situation || 'Not provided'}</p>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${sbar.situation || 'Not provided'}</p>
             </div>
             
             <div style="margin-bottom:8px;">
               <strong style="color:#00d4ff;">Background:</strong>
-              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.background || 'Not provided'}</p>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${sbar.background || 'Not provided'}</p>
             </div>
             
             <div style="margin-bottom:8px;">
               <strong style="color:#00d4ff;">Assessment:</strong>
-              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.assessment || 'Not provided'}</p>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${sbar.assessment || 'Not provided'}</p>
             </div>
             
             <div>
               <strong style="color:#00d4ff;">Recommendation:</strong>
-              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${call.sbar.recommendation || 'Not provided'}</p>
+              <p style="margin:4px 0;color:#ccecff;font-size:13px;">${sbar.recommendation || 'Not provided'}</p>
             </div>
           </div>
           
@@ -3813,25 +3839,25 @@
         // Show intervention options
         interventionsSection.style.display = 'block';
         interventionOptions.innerHTML = `
-          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'stabilize', 30)">
+          <div class="role-option" onclick="applyIntervention(${gid}, '${snap.key}', 'stabilize', 30)">
             <div style="font-size:36px;margin-bottom:8px;">💉</div>
             <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Stabilize Patient</div>
             <div style="font-size:12px;color:#b8e0ff;">+30 stability</div>
           </div>
           
-          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'medication', 20)">
+          <div class="role-option" onclick="applyIntervention(${gid}, '${snap.key}', 'medication', 20)">
             <div style="font-size:36px;margin-bottom:8px;">💊</div>
             <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Administer Medication</div>
             <div style="font-size:12px;color:#b8e0ff;">+20 stability</div>
           </div>
           
-          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'oxygen', 15)">
+          <div class="role-option" onclick="applyIntervention(${gid}, '${snap.key}', 'oxygen', 15)">
             <div style="font-size:36px;margin-bottom:8px;">😮‍💨</div>
             <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Oxygen Support</div>
             <div style="font-size:12px;color:#b8e0ff;">+15 stability</div>
           </div>
           
-          <div class="role-option" onclick="applyIntervention(${call.groupId}, '${snap.key}', 'monitoring', 10)">
+          <div class="role-option" onclick="applyIntervention(${gid}, '${snap.key}', 'monitoring', 10)">
             <div style="font-size:36px;margin-bottom:8px;">📊</div>
             <div style="font-size:16px;font-weight:700;color:#00ffb3;margin-bottom:5px;">Enhanced Monitoring</div>
             <div style="font-size:12px;color:#b8e0ff;">+10 stability</div>
