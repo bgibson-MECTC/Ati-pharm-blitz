@@ -3118,6 +3118,18 @@
           statusEl.style.color = '#00ffb3';
           statusEl.textContent = `Group ${groupId} → ${nextPhase.toUpperCase()} applied.`;
         }
+        // Also sync the visible timer to match the selected phase for clarity
+        try {
+          const map = {
+            phase1: { label: 'Warm-Up', minutes: 15 },
+            phase2: { label: 'Expert Huddle', minutes: 20 },
+            phase3: { label: 'Jigsaw', minutes: 25 }
+          };
+          const timerDefaults = map[nextPhase] || { label: 'Activity', minutes: 15 };
+          if (typeof startPhaseTimer === 'function') {
+            startPhaseTimer(timerDefaults.label, timerDefaults.minutes);
+          }
+        } catch (e) { /* no-op */ }
         showFeedbackToast(`Group ${groupId} advanced to ${nextPhase.toUpperCase()}`, 'success');
       }).catch(() => {
         if (statusEl) {
@@ -3143,6 +3155,18 @@
           statusEl.style.color = '#00ffb3';
           statusEl.textContent = `All groups → ${nextPhase.toUpperCase()} applied.`;
         }
+        // Also sync the visible timer for leadership view to the selected phase
+        try {
+          const map = {
+            phase1: { label: 'Warm-Up', minutes: 15 },
+            phase2: { label: 'Expert Huddle', minutes: 20 },
+            phase3: { label: 'Jigsaw', minutes: 25 }
+          };
+          const timerDefaults = map[nextPhase] || { label: 'Activity', minutes: 15 };
+          if (typeof startPhaseTimer === 'function') {
+            startPhaseTimer(timerDefaults.label, timerDefaults.minutes);
+          }
+        } catch (e) { /* no-op */ }
         showFeedbackToast(`All groups set to ${nextPhase.toUpperCase()}`, 'success');
       }).catch(() => {
         if (statusEl) {
