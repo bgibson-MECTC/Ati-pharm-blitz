@@ -2713,10 +2713,13 @@
     }
 
     window.selectGroup = function(groupNumber) {
+      console.log('=== selectGroup START ===');
       console.log('selectGroup called with groupNumber:', groupNumber);
+      console.log('Before assignment - window.currentGroupId:', window.currentGroupId);
       window.currentGroupId = groupNumber;
       window.selectedGroupNumber = groupNumber;
-      console.log('Set window.currentGroupId to:', window.currentGroupId);
+      console.log('After assignment - window.currentGroupId:', window.currentGroupId);
+      console.log('=== selectGroup END ===');
       
       // Reset jigsaw checkboxes flag when switching groups
       jigsawCheckboxesInitialized = false;
@@ -2981,6 +2984,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', bootstrapFromParams);
+
+    // Debug: Check if currentGroupId stays set
+    setInterval(() => {
+      if (window.currentGroupId) {
+        console.log('✓ window.currentGroupId is still:', window.currentGroupId);
+      } else {
+        console.warn('✗ window.currentGroupId is', window.currentGroupId);
+      }
+    }, 3000);
 
     // -----------------------------
     // LEADERSHIP DASHBOARD FUNCTIONS
