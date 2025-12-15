@@ -1438,9 +1438,10 @@
       updateDebugBanner('warn', 'Firebase connected | Loading functions...');
       
       // CRITICAL: Define selection functions FIRST for onclick handlers - make globally accessible
-      window.currentGroupId = null;
-      window.selectedGroupNumber = null;
-      window.selectedRole = null;
+      // DON'T initialize to null - let them be undefined until actually set
+      if (typeof window.currentGroupId === 'undefined') window.currentGroupId = null;
+      if (typeof window.selectedGroupNumber === 'undefined') window.selectedGroupNumber = null;
+      if (typeof window.selectedRole === 'undefined') window.selectedRole = null;
     
     console.log('Functions will be defined later in script...');
 
