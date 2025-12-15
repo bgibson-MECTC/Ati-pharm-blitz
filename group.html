@@ -2848,10 +2848,14 @@
     }
 
     function bootstrapFromParams() {
+      console.log('🔵 BOOTSTRAP START');
       // ===== ROUTER / VIEW GATING (DROP-IN FIX) =====
       const params = new URLSearchParams(window.location.search);
       const role = (params.get("role") || "student").toLowerCase();
       const groupId = params.get("group");
+      
+      console.log('🔵 Router params - role:', role, 'groupId:', groupId);
+      console.log('🔵 window.selectGroup exists?', typeof window.selectGroup);
 
       const elRoleSelect = document.getElementById("groupSelectionScreen");
       const elStudent = document.getElementById("groupActivityContent");
@@ -2917,17 +2921,26 @@
 
       // Student route requires ?group=1–6
       if (!groupId) {
+        console.log('🔴 No groupId in URL - showing role select');
         showOnly(elRoleSelect);
         return;
       }
 
       // Student view
+      console.log('🟢 Student route - groupId:', groupId);
       authRole = "student";
       showOnly(elStudent);
       const parsedGroupId = parseInt(groupId, 10);
-      console.log('Bootstrap calling selectGroup with:', parsedGroupId);
+      console.log('🟢 Bootstrap calling selectGroup with:', parsedGroupId);
+      console.log('🟢 Before calling selectGroup, window.currentGroupId:', window.currentGroupId);
+      
+      if (typeof window.selectGroup !== 'function') {
+        console.error('❌ window.selectGroup is NOT a function!');
+        return;
+      }
+      
       selectGroup(parsedGroupId);
-      console.log('After selectGroup, window.currentGroupId:', window.currentGroupId);
+      console.log('🟢 After selectGroup, window.currentGroupId:', window.currentGroupId);
     }
 
     // Helper functions for router
