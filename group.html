@@ -2688,26 +2688,45 @@
 
       // Show appropriate sections
       if (role === 'rrt') {
+        // RRT view: ONLY show RRT calls and interventions
         document.getElementById('rrtControls').style.display = 'none';
         document.getElementById('rrtCalls').style.display = 'block';
         document.getElementById('debriefBoard').style.display = 'none';
         document.getElementById('errorLogSection').style.display = 'none';
         document.getElementById('groupCasesSection').style.display = 'none';
+        document.getElementById('phaseControlSection').style.display = 'none';
+        document.getElementById('autoAlertsSection').style.display = 'none';
+        // Hide charge nurse messages section
+        const messagesSection = document.querySelector('.section:has(#chargeNurseMessages)');
+        if (messagesSection) messagesSection.style.display = 'none';
+        // Hide all groups monitor for RRT (they only need active calls)
+        const stabilitySection = document.querySelector('.section:has(#allGroupsStability)');
+        if (stabilitySection) stabilitySection.style.display = 'none';
+        
         setupRRTListener();
       } else {
+        // Charge Nurse view: show everything except RRT calls
         document.getElementById('rrtControls').style.display = 'block';
         document.getElementById('rrtCalls').style.display = 'none';
         document.getElementById('debriefBoard').style.display = 'block';
         document.getElementById('errorLogSection').style.display = 'block';
         document.getElementById('groupCasesSection').style.display = 'block';
+        document.getElementById('phaseControlSection').style.display = 'block';
+        document.getElementById('autoAlertsSection').style.display = 'block';
+        // Show charge nurse sections
+        const messagesSection = document.querySelector('.section:has(#chargeNurseMessages)');
+        if (messagesSection) messagesSection.style.display = 'block';
+        const stabilitySection = document.querySelector('.section:has(#allGroupsStability)');
+        if (stabilitySection) stabilitySection.style.display = 'block';
+        
         setupDebriefBoard(role);
       }
 
       // Initialize dashboards
-      setupAllGroupsMonitor(role);
-      setupEventAlerts(role);
-      setupChargeNurseMessages(role); // Add message listener
       if (role !== 'rrt') {
+        setupAllGroupsMonitor(role);
+        setupEventAlerts(role);
+        setupChargeNurseMessages(role);
         setupErrorLog(role);
         setupGroupCasesMonitor(role);
       }
