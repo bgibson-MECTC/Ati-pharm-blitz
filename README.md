@@ -27,3 +27,4 @@ Automated smoke tests for the static pages run with Playwright.
 1. Install deps: `npm install`
 2. (First time) Install browsers: `npx playwright install --with-deps`
 3. Run tests: `npm test`
+
