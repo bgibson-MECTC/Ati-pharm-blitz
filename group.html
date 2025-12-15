@@ -4107,7 +4107,7 @@
           pendingRole = roleParam;
           document.getElementById('continueMessage').textContent = `Continue as ${roleNames[roleParam]}?`;
           document.getElementById('continuePrompt').style.display = 'block';
-          document.getElementById('roleSelectionOptions').style.display = 'none';
+          // Keep role selection visible so users can change their mind
           return;
         }
         
@@ -4122,7 +4122,7 @@
             const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain Management', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
             document.getElementById('continueMessage').textContent = `Continue to Group ${groupNum} (${groupNames[groupNum]})?`;
             document.getElementById('continuePrompt').style.display = 'block';
-            document.getElementById('roleSelectionOptions').style.display = 'none';
+            // Keep role selection visible so users can change their mind
             return;
           }
         }
@@ -4134,7 +4134,7 @@
           pendingRole = savedRole;
           document.getElementById('continueMessage').textContent = `Continue as ${roleNames[savedRole]}?`;
           document.getElementById('continuePrompt').style.display = 'block';
-          document.getElementById('roleSelectionOptions').style.display = 'none';
+          // Keep role selection visible so users can change their mind
           return;
         }
         
@@ -4147,7 +4147,7 @@
             const groupNames = {1: 'Neurological', 2: 'Psychopharmacology', 3: 'Pain Management', 4: 'Inflammation', 5: 'Endocrine', 6: 'Infection'};
             document.getElementById('continueMessage').textContent = `Continue to Group ${groupNum} (${groupNames[groupNum]})?`;
             document.getElementById('continuePrompt').style.display = 'block';
-            document.getElementById('roleSelectionOptions').style.display = 'none';
+            // Keep role selection visible so users can change their mind
             return;
           }
         }
