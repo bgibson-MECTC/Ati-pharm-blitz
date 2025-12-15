@@ -2047,6 +2047,13 @@
     };
 
     function submitFlashcardGuess() {
+      // Access global Firebase database
+      const database = window.database;
+      if (!database) {
+        console.error('Firebase database not initialized');
+        return;
+      }
+      
       const cardInput = document.getElementById('fgCard');
       const systemInput = document.getElementById('fgSystem');
       const actionInput = document.getElementById('fgAction');
