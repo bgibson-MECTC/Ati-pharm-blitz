@@ -2812,34 +2812,83 @@
     }
 
     function bootstrapFromParams() {
-      const requestedRole = getQueryParam('role') || 'student';
-      const urlGroupId = getUrlGroupId();
-      const selection = document.getElementById('groupSelectionScreen');
-      const student = document.getElementById('groupActivityContent');
-      const leader = document.getElementById('leadershipDashboard');
-      const err = document.getElementById('groupErrorScreen');
+      // ===== ROUTER / VIEW GATING (DROP-IN FIX) =====
+      const params = new URLSearchParams(window.location.search);
+      const role = (params.get("role") || "student").toLowerCase();
+      const groupId = params.get("group");
 
-      // Hide everything by default
-      if (selection) selection.style.display = 'none';
-      if (student) student.style.display = 'none';
-      if (leader) leader.style.display = 'none';
-      if (err) err.style.display = 'none';
+      const elRoleSelect = document.getElementById("groupSelectionScreen");
+      const elStudent = document.getElementById("groupActivityContent");
+      const elLeadership = document.getElementById("leadershipDashboard");
+      const elMissingGroup = document.getElementById("groupErrorScreen");
+      const elUnlockModal = document.getElementById("passcodeModal");
 
-      // Leadership roles (charge/rrt) no longer require passcode - show role selection
-      if (requestedRole === 'charge1' || requestedRole === 'charge2' || requestedRole === 'rrt') {
-        authRole = requestedRole;
-        selectLeadership(requestedRole);
+      function showOnly(...els) {
+        [elRoleSelect, elStudent, elLeadership, elMissingGroup].forEach(e => {
+          if (e) e.style.display = "none";
+        });
+        els.forEach(e => {
+          if (e) e.style.display = "block";
+        });
+      }
+
+      function requireLeadershipPasscode(onSuccess) {
+        if (!elUnlockModal) return;
+        elUnlockModal.style.display = "flex";
+
+        const input = document.getElementById("passcodeInput");
+        const btnUnlock = document.getElementById("passcodeConfirm");
+        const btnCancel = document.getElementById("passcodeCancel");
+        const err = document.getElementById("passcodeError");
+        const PASSCODE = "CHAOSQUEEN";
+
+        function cleanup() {
+          btnUnlock?.removeEventListener("click", onUnlock);
+          btnCancel?.removeEventListener("click", onCancel);
+        }
+
+        function onCancel() {
+          cleanup();
+          elUnlockModal.style.display = "none";
+          window.location.href = "group.html";
+        }
+
+        function onUnlock() {
+          const val = (input?.value || "").trim();
+          if (val !== PASSCODE) {
+            if (err) err.style.display = "block";
+            return;
+          }
+          if (err) err.style.display = "none";
+          cleanup();
+          elUnlockModal.style.display = "none";
+          onSuccess();
+        }
+
+        btnUnlock?.addEventListener("click", onUnlock);
+        btnCancel?.addEventListener("click", onCancel);
+      }
+
+      // Leadership routes
+      if (role === "charge" || role === "charge1" || role === "charge2" || role === "rrt") {
+        requireLeadershipPasscode(() => {
+          authRole = role === "charge" ? "charge1" : role;
+          showOnly(elLeadership);
+          selectLeadership(authRole);
+        });
         return;
       }
 
-      // Student default
-      authRole = 'student';
-      if (!urlGroupId) {
-        // Show role selection instead of error
-        if (selection) selection.style.display = 'block';
+      // Student route requires ?group=1–6
+      if (!groupId) {
+        showOnly(elRoleSelect);
         return;
       }
-      selectGroup(urlGroupId);
+
+      // Student view
+      authRole = "student";
+      showOnly(elStudent);
+      selectGroup(parseInt(groupId, 10));
     }
 
     document.addEventListener('DOMContentLoaded', bootstrapFromParams);
