@@ -1437,10 +1437,10 @@
 
       updateDebugBanner('warn', 'Firebase connected | Loading functions...');
       
-      // CRITICAL: Define selection functions FIRST for onclick handlers
-      let currentGroupId = null;
-      let selectedGroupNumber = null;
-    let selectedRole = null;
+      // CRITICAL: Define selection functions FIRST for onclick handlers - make globally accessible
+      window.currentGroupId = null;
+      window.selectedGroupNumber = null;
+      window.selectedRole = null;
     
     console.log('Functions will be defined later in script...');
 
@@ -1755,6 +1755,7 @@
      * })
      */
     function recordDecision(config) {
+      const currentGroupId = window.currentGroupId;
       if (!currentGroupId) {
         const status = document.getElementById('fgStatus') || document.getElementById('groupIdStatus');
         if (status) {
@@ -1765,6 +1766,7 @@
       }
 
       const { phase, itemId, isCorrect, severity, explanation, followUpReason } = config;
+      const database = window.database;
       const groupRef = database.ref('groups/' + currentGroupId);
       const eventsRef = database.ref('events');
 
@@ -2047,8 +2049,10 @@
     };
 
     function submitFlashcardGuess() {
-      // Access global Firebase database
+      // Access global Firebase database and group ID
       const database = window.database;
+      const currentGroupId = window.currentGroupId;
+      
       if (!database) {
         console.error('Firebase database not initialized');
         return;
@@ -2198,6 +2202,8 @@
 
     function setupJigsawCheckboxes() {
       const container = document.getElementById('jigsawCheckboxes');
+      const currentGroupId = window.currentGroupId;
+      const database = window.database;
       if (!container || !currentGroupId) return;
       
       // Prevent duplicate initialization
@@ -2694,8 +2700,8 @@
 
     window.selectGroup = function(groupNumber) {
       console.log('selectGroup called with groupNumber:', groupNumber);
-      currentGroupId = groupNumber;
-      selectedGroupNumber = groupNumber;
+      window.currentGroupId = groupNumber;
+      window.selectedGroupNumber = groupNumber;
       
       // Reset jigsaw checkboxes flag when switching groups
       jigsawCheckboxesInitialized = false;
@@ -3423,6 +3429,8 @@
     }
     
     function showConversationHistory() {
+      const currentGroupId = window.currentGroupId;
+      const database = window.database;
       if (!currentGroupId) return;
       
       const historySection = document.getElementById('conversationHistory');
