@@ -3102,7 +3102,8 @@
 
     // Leadership phase advancement controls
     function setGroupPhase(nextPhase) {
-      if (authRole !== 'charge' && authRole !== 'rrt') {
+      const allowedRoles = ['charge', 'charge1', 'charge2', 'rrt'];
+      if (!allowedRoles.includes(authRole)) {
         showFeedbackToast('Phase control is leadership-only', 'error');
         return;
       }
@@ -3141,7 +3142,8 @@
     }
 
     function setAllGroupsPhase(nextPhase) {
-      if (authRole !== 'charge' && authRole !== 'rrt') {
+      const allowedRoles = ['charge', 'charge1', 'charge2', 'rrt'];
+      if (!allowedRoles.includes(authRole)) {
         showFeedbackToast('Phase control is leadership-only', 'error');
         return;
       }
