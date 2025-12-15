@@ -2931,6 +2931,11 @@
       authRole = "student";
       showOnly(elStudent);
       const parsedGroupId = parseInt(groupId, 10);
+      
+      // DIRECT ASSIGNMENT - set it immediately
+      window.currentGroupId = parsedGroupId;
+      console.log('🟢 DIRECT assignment - window.currentGroupId:', window.currentGroupId);
+      
       console.log('🟢 Bootstrap calling selectGroup with:', parsedGroupId);
       console.log('🟢 Before calling selectGroup, window.currentGroupId:', window.currentGroupId);
       
