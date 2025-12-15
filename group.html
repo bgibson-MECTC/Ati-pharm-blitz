@@ -2053,6 +2053,8 @@
       const database = window.database;
       const currentGroupId = window.currentGroupId;
       
+      console.log('submitFlashcardGuess - database:', !!database, 'currentGroupId:', currentGroupId);
+      
       if (!database) {
         console.error('Firebase database not initialized');
         return;
@@ -2068,6 +2070,7 @@
       statusEl.textContent = '';
 
       if (!currentGroupId) {
+        console.error('currentGroupId is not set!');
         statusEl.style.color = '#ff99c2';
         statusEl.textContent = 'Set your Group # first.';
         submitBtn?.classList.add('error-flash');
@@ -2702,6 +2705,7 @@
       console.log('selectGroup called with groupNumber:', groupNumber);
       window.currentGroupId = groupNumber;
       window.selectedGroupNumber = groupNumber;
+      console.log('Set window.currentGroupId to:', window.currentGroupId);
       
       // Reset jigsaw checkboxes flag when switching groups
       jigsawCheckboxesInitialized = false;
@@ -2904,7 +2908,10 @@
       // Student view
       authRole = "student";
       showOnly(elStudent);
-      selectGroup(parseInt(groupId, 10));
+      const parsedGroupId = parseInt(groupId, 10);
+      console.log('Bootstrap calling selectGroup with:', parsedGroupId);
+      selectGroup(parsedGroupId);
+      console.log('After selectGroup, window.currentGroupId:', window.currentGroupId);
     }
 
     // Helper functions for router
