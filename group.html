@@ -736,7 +736,7 @@
 
     function initializeRole() {
       const roleParam = getQueryParam('role') || 'student';
-      if (roleParam === 'charge' || roleParam === 'rrt') {
+      if (roleParam === 'charge1' || roleParam === 'charge2' || roleParam === 'rrt') {
         authRole = roleParam;
       } else {
         authRole = 'student';
@@ -2639,12 +2639,7 @@
     window.selectLeadership = function(role) {
       console.log('selectLeadership called with role:', role);
       selectedRole = role;
-
-      // Require prior auth; bootstrap flow sets authRole before calling this
-      if (authRole !== 'charge' && authRole !== 'rrt') {
-        showFeedbackToast('Leadership access denied', 'error');
-        return;
-      }
+      authRole = role; // Set auth role for this leadership role
       
       // Store role in localStorage
       try {
@@ -2827,7 +2822,7 @@
       if (err) err.style.display = 'block';
     }
 
-    async function bootstrapFromParams() {
+    function bootstrapFromParams() {
       const requestedRole = getQueryParam('role') || 'student';
       const urlGroupId = getUrlGroupId();
       const selection = document.getElementById('groupSelectionScreen');
@@ -2841,27 +2836,18 @@
       if (leader) leader.style.display = 'none';
       if (err) err.style.display = 'none';
 
-      if (requestedRole === 'charge' || requestedRole === 'rrt') {
-        const ok = await showPasscodeModal(requestedRole);
-        if (!ok) {
-          authRole = 'student';
-          if (!urlGroupId) {
-            showMissingGroupError();
-            return;
-          }
-          selectGroup(urlGroupId);
-          return;
-        }
+      // Leadership roles (charge/rrt) no longer require passcode - show role selection
+      if (requestedRole === 'charge1' || requestedRole === 'charge2' || requestedRole === 'rrt') {
         authRole = requestedRole;
-        const roleKey = requestedRole === 'charge' ? 'charge1' : 'rrt';
-        selectLeadership(roleKey);
+        selectLeadership(requestedRole);
         return;
       }
 
       // Student default
       authRole = 'student';
       if (!urlGroupId) {
-        showMissingGroupError();
+        // Show role selection instead of error
+        if (selection) selection.style.display = 'block';
         return;
       }
       selectGroup(urlGroupId);
